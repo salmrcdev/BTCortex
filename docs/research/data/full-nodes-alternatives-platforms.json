@@ -1,0 +1,1608 @@
+[
+  {
+    "id": "btcd",
+    "name": "btcd",
+    "category": "full-node",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/btcsuite/btcd",
+    "purpose": "Alternative full-node implementation of Bitcoin written in Go: it downloads, validates and relays blocks and transactions, but has no wallet of its own (btcwallet is a separate program).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.27.0 published on 2026-10-21 with a signed manifest of hashes; the repository is not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.27.0",
+      "date": "2026-10-21",
+      "source": "https://github.com/btcsuite/btcd/releases/tag/v0.27.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64",
+        "x86"
+      ],
+      "windowsDistribution": "ZIP archives btcd-windows-amd64-v0.27.0.zip and btcd-windows-386-v0.27.0.zip, listed in manifest-v0.27.0.txt with its detached signature manifest-v0.27.0.txt.sig",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "json-rpc",
+        "description": "JSON-RPC over HTTPS: TLS is on by default with a certificate btcd generates in %LOCALAPPDATA%\\Btcd. Ports by network: 8334 mainnet, 18334 testnet3 and regtest, 48334 testnet4, 38332 signet, 18556 simnet. The project describes the API as fully compatible with the original bitcoind/bitcoin-qt; it has no wallet methods.",
+        "authentication": "rpcuser and rpcpass for full access; rpclimituser and rpclimitpass for a limited user.",
+        "documentation": "https://github.com/btcsuite/btcd/blob/master/docs/json_rpc_api.md"
+      },
+      {
+        "type": "websocket",
+        "description": "Websocket endpoint wss://host:8334/ws (mainnet) for the same methods and for notifications.",
+        "authentication": "The RPC credentials.",
+        "documentation": "https://github.com/btcsuite/btcd/blob/master/docs/json_rpc_api.md"
+      },
+      {
+        "type": "p2p",
+        "description": "Bitcoin peer-to-peer protocol. The sample configuration advises against setting a listening port, because options such as testnet change the default.",
+        "authentication": null,
+        "documentation": "https://github.com/btcsuite/btcd/blob/master/sample-btcd.conf"
+      },
+      {
+        "type": "cli",
+        "description": "btcctl, the RPC command-line client.",
+        "authentication": "The RPC credentials.",
+        "documentation": null
+      }
+    ],
+    "cli": "btcd (the node) and btcctl (the RPC client); options include txindex, addrindex, rpclisten and notls (accepted only while the RPC server listens on localhost).",
+    "remoteManagement": "Through its JSON-RPC and websocket API, over TLS by default; the RPC server listens only on localhost unless rpclisten says otherwise.",
+    "nodeCompatibility": "Its own implementation of the consensus rules, not a build of Bitcoin Core. It has no wallet, and it is not the bitcoind that BTCortex's node features, Electrum servers and wallet connections were tested with. LND can use it as its chain back end.",
+    "dependencies": [],
+    "networking": "RPC on port 8334 on mainnet, listening on localhost only by default, over TLS unless notls is set; P2P on the network’s usual port.",
+    "storage": "Not measured here.",
+    "resources": "Not measured here.",
+    "security": "Release archives are listed in a manifest of hashes with a detached signature; BTCortex has not identified or pinned the signing key. Its consensus code is independent of Bitcoin Core, so a difference between the two could split it from the rest of the network.",
+    "licence": "ISC",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Install the official Windows archive after checking the signed manifest, and manage the process as for Bitcoin Knots (not built)",
+      "Call its JSON-RPC over TLS with the certificate it generates (not built)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "fully-managed",
+      "remote-managed"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Official Windows archives with a signed manifest make a managed installation possible, but BTCortex's node features assume Bitcoin Core's RPC, wallets and ZMQ, which btcd does not provide in the same form."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "btcwallet, the wallet that pairs with btcd, was not researched.",
+    "sources": [
+      {
+        "title": "btcd README",
+        "url": "https://github.com/btcsuite/btcd/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release v0.27.0",
+        "url": "https://github.com/btcsuite/btcd/releases/tag/v0.27.0",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "btcd JSON-RPC API",
+        "url": "https://github.com/btcsuite/btcd/blob/master/docs/json_rpc_api.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "params.go (RPC ports)",
+        "url": "https://github.com/btcsuite/btcd/blob/master/params.go",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "sample-btcd.conf",
+        "url": "https://github.com/btcsuite/btcd/blob/master/sample-btcd.conf",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The key that signs manifest-v0.27.0.txt was not identified.",
+      "How far its RPC matches what BTCortex expects of Bitcoin Core was not tested.",
+      "Pruning support, disk and memory needs were not checked.",
+      "Container images and running under WSL2 were not checked."
+    ]
+  },
+  {
+    "id": "utreexod",
+    "name": "utreexod",
+    "category": "full-node",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/utreexo/utreexod",
+    "purpose": "Full-node implementation of Bitcoin with support for Utreexo accumulators, so that a node can validate the chain without keeping the whole UTXO set; bridge nodes keep the entire Merkle forest and attach proofs to new blocks for the others.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.6.0 published on 2026-06-23; the README says the project is under active development and in a beta state.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.6.0",
+      "date": "2026-06-23",
+      "source": "https://github.com/utreexo/utreexod/releases/tag/v0.6.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64"
+      ],
+      "windowsDistribution": "ZIP archive utreexod-windows-amd64-20260623-01.zip",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "utreexoctl, its RPC client, including commands for the optional built-in BDK wallet.",
+        "authentication": null,
+        "documentation": "https://github.com/utreexo/utreexod/blob/main/README.md"
+      },
+      {
+        "type": "p2p",
+        "description": "Bitcoin peer-to-peer protocol; Utreexo nodes need bridge nodes to supply proofs, because miners publish blocks without them.",
+        "authentication": null,
+        "documentation": "https://github.com/utreexo/utreexod/blob/main/README.md"
+      }
+    ],
+    "cli": "utreexod and utreexoctl; the optional wallet is built on BDK and needs a Rust toolchain to compile.",
+    "remoteManagement": null,
+    "nodeCompatibility": "A separate implementation, not Bitcoin Core. The README advises against using it on mainnet for more than negligible amounts.",
+    "dependencies": [],
+    "networking": "Not stated in the README.",
+    "storage": "The README promises extremely low disk I/O compared with a traditional node, so that it will not wear out microSD cards; sizes are not stated.",
+    "resources": "Not stated.",
+    "security": "Beta software that its own README does not recommend on mainnet beyond negligible amounts; the Utreexo BIPs are still a work in progress, so proofs and messages may change.",
+    "licence": "ISC",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "There is a Windows archive, but the project itself calls the software beta and not ready for mainnet funds."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "utreexod README",
+        "url": "https://github.com/utreexo/utreexod/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release v0.6.0",
+        "url": "https://github.com/utreexo/utreexod/releases/tag/v0.6.0",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Default ports and how far the RPC matches btcd or Bitcoin Core are not stated in the README and were not checked.",
+      "Whether the Windows archive comes with signed checksums was not checked.",
+      "Disk, memory and bandwidth needs were not measured."
+    ]
+  },
+  {
+    "id": "floresta",
+    "name": "Floresta",
+    "category": "full-node",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/getfloresta/Floresta",
+    "purpose": "Lightweight, fully validating node written in Rust that uses Utreexo to cut resource needs. It runs stand-alone as florestad, with a watch-only wallet and an Electrum server, or embedded as a library.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.9.1 published on 2026-04-27; the project moved from github.com/vinteumorg to github.com/getfloresta.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.9.1",
+      "date": "2026-04-27",
+      "source": "https://github.com/getfloresta/Floresta/releases/tag/v0.9.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "No release binaries: build from source following the Unix or macOS instructions; Nix; Docker Compose with the image dlsz/floresta from the repository’s Docker guide."
+    },
+    "interfaces": [
+      {
+        "type": "electrum-protocol",
+        "description": "Built-in Electrum server for the wallets florestad watches; the guide connects wallets to 127.0.0.1:50001 over TCP, and the Docker guide maps port 50001 for it.",
+        "authentication": null,
+        "documentation": "https://github.com/getfloresta/Floresta/blob/master/doc/run.md"
+      },
+      {
+        "type": "json-rpc",
+        "description": "JSON-RPC (port 8332 in the Docker guide), with methods such as loaddescriptor and rescanblockchain.",
+        "authentication": null,
+        "documentation": "https://github.com/getfloresta/Floresta/tree/master/doc/rpc"
+      },
+      {
+        "type": "library-api",
+        "description": "Its Rust crates can be embedded in other programs.",
+        "authentication": null,
+        "documentation": "https://github.com/getfloresta/Floresta/blob/master/README.md"
+      },
+      {
+        "type": "p2p",
+        "description": "Bitcoin peer-to-peer protocol.",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": "florestad, configured with a TOML file (contrib/config.toml.sample) or command-line options; assume-utreexo is on by default and --no-assume-utreexo turns it off.",
+    "remoteManagement": "Through its JSON-RPC.",
+    "nodeCompatibility": "Its own validating node, not a client of Bitcoin Core. Wallets are given to it as SLIP-132 xpubs or output descriptors, in the configuration file, on the command line or later with loaddescriptor followed by rescanblockchain, and its Electrum server answers for those wallets.",
+    "dependencies": [],
+    "networking": "Electrum on port 50001 and RPC on 8332 in the Docker guide; the P2P port is not stated.",
+    "storage": "The guide’s example keeps data in ~/.floresta; sizes are not stated.",
+    "resources": "Not stated.",
+    "security": "The guide warns that self-signed TLS certificates on the Electrum server leave wallets open to man-in-the-middle attacks. The Utreexo BIPs are a work in progress and changes are expected.",
+    "licence": "MIT OR Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Add its Electrum server as an Electrum server on another computer (it answers only for the wallets it watches)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "connected-application",
+      "managed-wsl2",
+      "managed-docker"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No Windows binaries or Windows build guide, and its Electrum server answers only for the wallets it watches, so it cannot answer BTCortex's look-ups for other addresses."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Floresta README",
+        "url": "https://github.com/getfloresta/Floresta/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Running Floresta",
+        "url": "https://github.com/getfloresta/Floresta/blob/master/doc/run.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Floresta with Docker",
+        "url": "https://github.com/getfloresta/Floresta/blob/master/doc/docker.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release v0.9.1",
+        "url": "https://github.com/getfloresta/Floresta/releases/tag/v0.9.1",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Building on Windows was not tried; the repository documents Unix and macOS builds only.",
+      "The P2P port, RPC authentication and what assume-utreexo trusts were not examined.",
+      "Who publishes the Docker image dlsz/floresta was not checked; the repository’s own Docker guide uses it.",
+      "Disk and memory needs were not measured."
+    ]
+  },
+  {
+    "id": "libbitcoin",
+    "name": "libbitcoin (libbitcoin-server)",
+    "category": "full-node",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/libbitcoin/libbitcoin-server",
+    "purpose": "Bitcoin full node and query server built on the libbitcoin C++ libraries.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The latest release is v3.8.0 from 2023-08-18, without binaries; the repository was pushed on 2026-10-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.8.0",
+      "date": "2023-08-18",
+      "source": "https://github.com/libbitcoin/libbitcoin-server/releases/tag/v3.8.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "A separate implementation; its query interfaces were not examined.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Not examined. With no release since 2023, anything current would have to be built from unreleased source.",
+    "licence": "AGPL-3.0-or-later",
+    "licenceNotes": "COPYING adds a permission under section 7 of the AGPL: other code linked or combined with it is not for that reason alone subject to the AGPL’s requirements.",
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No release since 2023 and no binaries; its interfaces were not examined."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "libbitcoin-server repository",
+        "url": "https://github.com/libbitcoin/libbitcoin-server",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release v3.8.0",
+        "url": "https://github.com/libbitcoin/libbitcoin-server/releases/tag/v3.8.0",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "COPYING",
+        "url": "https://github.com/libbitcoin/libbitcoin-server/blob/master/COPYING",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Windows support, interfaces, ports and resource needs were not examined.",
+      "Whether a new major release is being prepared was not checked."
+    ]
+  },
+  {
+    "id": "bcoin",
+    "name": "bcoin",
+    "category": "full-node",
+    "catalogueEligible": true,
+    "website": "https://bcoin.io/",
+    "repository": "https://github.com/bcoin-org/bcoin",
+    "purpose": "Full-node implementation and library of Bitcoin in JavaScript, for Node.js and browsers.",
+    "maintenance": {
+      "status": "stale",
+      "evidence": "The latest release is v2.2.0 from 2021-11-12; the repository was last pushed on 2024-02-12.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.2.0",
+      "date": "2021-11-12",
+      "source": "https://github.com/bcoin-org/bcoin/releases/tag/v2.2.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Node.js and browsers, according to its description."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "JavaScript library for Node.js and browsers.",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "A separate implementation, not Bitcoin Core.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "No release since 2021 and no change since February 2024, so it should not be relied on to follow the network; BTCortex does not offer it.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Unmaintained since 2024 at the latest."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "bcoin repository",
+        "url": "https://github.com/bcoin-org/bcoin",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release v2.2.0",
+        "url": "https://github.com/bcoin-org/bcoin/releases/tag/v2.2.0",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LICENSE",
+        "url": "https://github.com/bcoin-org/bcoin/blob/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Windows support and the state of its dependencies were not examined."
+    ]
+  },
+  {
+    "id": "gocoin",
+    "name": "Gocoin",
+    "category": "full-node",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/piotrnar/gocoin",
+    "purpose": "Bitcoin implementation written in Go: a peer-to-peer node (the client) and a separate wallet designed to be used offline, plus the balio tool.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Gocoin 1.11.0 published on 2025-11-15; the repository was pushed on 2026-10-21.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.11.0",
+      "date": "2025-11-15",
+      "source": "https://github.com/piotrnar/gocoin/releases/tag/1.11.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "ZIP archive gocoin-1.11.0-win.zip with the client, wallet and balio binaries",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS and FreeBSD; older binaries on SourceForge."
+    },
+    "interfaces": [
+      {
+        "type": "p2p",
+        "description": "Bitcoin peer-to-peer protocol (the client).",
+        "authentication": null,
+        "documentation": "https://github.com/piotrnar/gocoin/blob/master/README.md"
+      },
+      {
+        "type": "cli",
+        "description": "The wallet, an application separate from the client and designed to be used offline.",
+        "authentication": null,
+        "documentation": "https://github.com/piotrnar/gocoin/blob/master/README.md"
+      }
+    ],
+    "cli": "client, wallet and balio.",
+    "remoteManagement": null,
+    "nodeCompatibility": "A separate implementation, not Bitcoin Core; the README compares its synchronisation speed with Bitcoin Core 30.2.",
+    "dependencies": [],
+    "networking": null,
+    "storage": "Needs a file system that supports files larger than 4 GB.",
+    "resources": "The README asks for at least 32 GB of RAM for the client.",
+    "security": "Its author does not merge pull requests, so as to keep full control of the licensing; its consensus code is independent of Bitcoin Core.",
+    "licence": "LicenseRef-Gocoin-Non-Commercial",
+    "licenceNotes": "LICENSE (Copyright (c) 2013-2026 Piotr Narewski) is headed NON-COMMERCIAL USE. It is not an open-source licence: BTCortex must not redistribute Gocoin and may only point to its official releases.",
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only",
+      "external-launcher"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "There are official Windows binaries, but the 32 GB memory requirement, the non-commercial licence and interfaces unlike Bitcoin Core's make it a poor fit for BTCortex's node features."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Gocoin README",
+        "url": "https://github.com/piotrnar/gocoin/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Gocoin LICENSE",
+        "url": "https://github.com/piotrnar/gocoin/blob/master/LICENSE",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Gocoin 1.11.0",
+        "url": "https://github.com/piotrnar/gocoin/releases/tag/1.11.0",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The architecture of the Windows archive and whether releases are signed were not checked.",
+      "Its ports and its web interface were not examined."
+    ]
+  },
+  {
+    "id": "umbrel",
+    "name": "umbrelOS",
+    "category": "node-platform",
+    "catalogueEligible": true,
+    "website": "https://umbrel.com",
+    "repository": "https://github.com/getumbrel/umbrel",
+    "purpose": "Home-server operating system with an app store of self-hosted software, including Bitcoin and Lightning nodes, Electrum servers and block explorers.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "umbrelOS 2.0.0 published on 2026-09-22; the repository is not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.0.0",
+      "date": "2026-09-22",
+      "source": "https://github.com/getumbrel/umbrel/releases/tag/2.0.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "no",
+      "docker": "no",
+      "other": "Umbrel Home and Umbrel Pro; most 64-bit x86 mini PCs, laptops, desktops, NAS boxes and servers (umbrelos-amd64-usb-installer.iso, umbrelos-amd64.img.xz); Raspberry Pi 5 booting from NVMe or USB (umbrelos-pi.img.zip); virtual machines with EFI boot such as Proxmox, VirtualBox and VMware. It cannot be installed on top of an existing Linux distribution. Releases come with SHA256SUMS and an OpenTimestamps proof."
+    },
+    "interfaces": [
+      {
+        "type": "gui",
+        "description": "Web interface on the local network for apps, settings and updates.",
+        "authentication": null,
+        "documentation": "https://github.com/getumbrel/umbrel/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Through its own web interface. The services of its apps (a Bitcoin node’s RPC, an Electrum server, a block explorer, LND) can be reached from other computers as each app allows.",
+    "nodeCompatibility": "Its app store packages upstream programs, such as electrs and mempool (see those entries).",
+    "dependencies": [],
+    "networking": "Runs on the local network; how each app is exposed was not examined.",
+    "storage": "Depends on the apps installed; not measured here.",
+    "resources": "Not stated in the README.",
+    "security": "umbrelOS installs and updates its apps itself. BTCortex reaches only the services an app exposes, with that service's own credentials, and never the platform's login.",
+    "licence": "PolyForm-Noncommercial-1.0.0",
+    "licenceNotes": "Non-commercial use only; commercial use, such as selling plug-and-play home servers, needs an agreement with Umbrel. Not an OSI-approved open-source licence.",
+    "integrationMechanisms": [
+      "Connect to the Bitcoin node, Electrum server, block explorer and LND its apps expose, as with any other computer (Remote infrastructure)",
+      "Open its web interface in the browser"
+    ],
+    "supportLevels": [
+      "connected-application",
+      "external-launcher"
+    ],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Nothing to install on Windows: BTCortex's remote connections (node RPC, Electrum, explorer, LND) work with the apps' services; BTCortex does not use the platform's own interfaces."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "umbrelOS README",
+        "url": "https://github.com/getumbrel/umbrel/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "umbrelOS 2.0.0",
+        "url": "https://github.com/getumbrel/umbrel/releases/tag/2.0.0",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "umbrelOS licence",
+        "url": "https://github.com/getumbrel/umbrel/blob/master/LICENSE.md",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Running umbrelOS in a virtual machine on a Windows computer was not tried.",
+      "The addresses and ports at which its apps expose their services were not examined here.",
+      "Hardware requirements were not checked."
+    ]
+  },
+  {
+    "id": "start9",
+    "name": "StartOS",
+    "category": "node-platform",
+    "catalogueEligible": true,
+    "website": "https://start9.com",
+    "repository": "https://github.com/Start9Labs/start-technologies",
+    "purpose": "Start9’s server operating system for self-hosted services, with a marketplace of packaged services that includes Bitcoin and Lightning software.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "StartOS v0.4.0.1 published on 2026-07-27; its monorepo (StartOS, StartWRT, StartTunnel, the SDK, CLI and registry) was pushed on 2026-10-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.4.0.1",
+      "date": "2026-07-27",
+      "source": "https://github.com/Start9Labs/start-technologies/releases/tag/start-os/v0.4.0.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "no",
+      "docker": "no",
+      "other": "Installation images for x86_64, aarch64 and riscv64, and a Raspberry Pi image, with signatures (signatures.tar.gz)."
+    },
+    "interfaces": [
+      {
+        "type": "gui",
+        "description": "Web interface for services, backups and settings.",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": "The monorepo includes a CLI and an SDK (not examined).",
+    "remoteManagement": "Through its own web interface; the services of its packages can be reached from other computers as each package allows.",
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Backups made with earlier versions cannot be restored on 0.4.0. BTCortex reaches only the services a package exposes, with that service's own credentials.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Connect to the Bitcoin node, Electrum server, block explorer and LND its packages expose, as with any other computer (Remote infrastructure)",
+      "Open its web interface in the browser"
+    ],
+    "supportLevels": [
+      "connected-application",
+      "external-launcher"
+    ],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "high",
+      "notes": "BTCortex's remote connections work with the packages' services; BTCortex does not use the platform's own interfaces."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "start-technologies repository",
+        "url": "https://github.com/Start9Labs/start-technologies",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "StartOS v0.4.0.1",
+        "url": "https://github.com/Start9Labs/start-technologies/releases/tag/start-os/v0.4.0.1",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Which Bitcoin and Lightning packages its marketplace offers was not checked.",
+      "How StartOS exposes a Bitcoin node’s RPC, an Electrum server or LND to other computers (addresses, certificates, Tor) was not examined.",
+      "Hardware requirements were not checked."
+    ]
+  },
+  {
+    "id": "mynode",
+    "name": "myNode",
+    "category": "node-platform",
+    "catalogueEligible": true,
+    "website": "https://mynodebtc.com/",
+    "repository": "https://github.com/mynodebtc/mynode",
+    "purpose": "Bitcoin and Lightning node distribution that pairs open-source node software with its own interface and management, in a free Community Edition and paid Premium editions.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.3.50 released on 2026-10-15 according to its CHANGELOG (no GitHub releases are published); the repository was pushed on 2026-10-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.3.50",
+      "date": "2026-10-15",
+      "source": "https://github.com/mynodebtc/mynode/blob/master/CHANGELOG"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "no",
+      "docker": "no",
+      "other": "Devices such as a PC or a Raspberry Pi, and the Model Two hardware with Premium software; downloads from mynodebtc.com."
+    },
+    "interfaces": [
+      {
+        "type": "gui",
+        "description": "Web interface for the node, its apps and settings.",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Through its own web interface.",
+    "nodeCompatibility": "v0.3.50 ships LND 0.21.4, Lightning Terminal 0.17.6, Alby Hub 1.24.1 and LNDg 1.11.1 among its apps.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "v0.3.50 adds optional automatic upgrades and asks for the password before sensitive actions. Premium+ includes support, a remote channel backup and a watchtower.",
+    "licence": "LicenseRef-myNode",
+    "licenceNotes": "LICENSE.md is the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International licence with an added section 9 that forbids distributing modifications to the licensing, product key or premium features.",
+    "integrationMechanisms": [
+      "Connect to the Bitcoin node, Electrum server and LND it exposes, as with any other computer (Remote infrastructure)",
+      "Open its web interface in the browser"
+    ],
+    "supportLevels": [
+      "connected-application",
+      "external-launcher"
+    ],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "high",
+      "notes": "BTCortex's remote connections work with the services it exposes; BTCortex does not use myNode's own interfaces."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "myNode repository",
+        "url": "https://github.com/mynodebtc/mynode",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "myNode CHANGELOG",
+        "url": "https://github.com/mynodebtc/mynode/blob/master/CHANGELOG",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "myNode LICENSE.md",
+        "url": "https://github.com/mynodebtc/mynode/blob/master/LICENSE.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "myNode website",
+        "url": "https://mynodebtc.com/",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Supported hardware beyond a PC, a Raspberry Pi and the Model Two, and the image formats, were not checked.",
+      "The Bitcoin Core version it ships and how its services are exposed to other computers were not examined."
+    ]
+  },
+  {
+    "id": "raspiblitz",
+    "name": "RaspiBlitz",
+    "category": "node-platform",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/raspiblitz/raspiblitz",
+    "purpose": "Bitcoin and Lightning node distribution for the Raspberry Pi 4 and 5, with an optional display.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v1.12.1 published on 2026-03-03; the repository was pushed on 2026-09-05.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.12.1",
+      "date": "2026-03-03",
+      "source": "https://github.com/raspiblitz/raspiblitz/releases/tag/v1.12.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "no",
+      "docker": "no",
+      "other": "SD-card images for the Raspberry Pi 4 and 5, in fat and min variants, offered among others as torrents."
+    },
+    "interfaces": [
+      {
+        "type": "gui",
+        "description": "A web interface and an API, developed in separate repositories.",
+        "authentication": null,
+        "documentation": "https://github.com/raspiblitz/raspiblitz/blob/dev/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Through its web interface and API (not examined).",
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "BTCortex reaches only the services it exposes, with each service's own credentials.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Connect to the Bitcoin node, Electrum server and LND it exposes, as with any other computer (Remote infrastructure)"
+    ],
+    "supportLevels": [
+      "connected-application",
+      "external-launcher"
+    ],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "high",
+      "notes": "BTCortex's remote connections work with the services it exposes; BTCortex does not use its web interface or API."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "RaspiBlitz README",
+        "url": "https://github.com/raspiblitz/raspiblitz/blob/dev/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "RaspiBlitz v1.12.1",
+        "url": "https://github.com/raspiblitz/raspiblitz/releases/tag/v1.12.1",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Which Bitcoin, Lightning and Electrum server implementations it installs was not checked on 2026-10-23.",
+      "Its administration over SSH and its web interface were not examined."
+    ]
+  },
+  {
+    "id": "nix-bitcoin",
+    "name": "nix-bitcoin",
+    "category": "node-platform",
+    "catalogueEligible": true,
+    "website": "https://nixbitcoin.org",
+    "repository": "https://github.com/fort-nix/nix-bitcoin",
+    "purpose": "Collection of Nix packages and NixOS modules for installing full-featured Bitcoin nodes, with a focus on security.",
+    "maintenance": {
+      "status": "discontinued",
+      "evidence": "v0.0.139, published on 2026-08-13, is described as “the final release of nix-bitcoin”, without a reason or a successor; the repository was last pushed on 2026-09-21.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.0.139",
+      "date": "2026-08-13",
+      "source": "https://github.com/fort-nix/nix-bitcoin/releases/tag/v0.0.139"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "no",
+      "other": "NixOS."
+    },
+    "interfaces": [
+      {
+        "type": "file",
+        "description": "Declarative NixOS configuration of the node and its services.",
+        "authentication": null,
+        "documentation": "https://github.com/fort-nix/nix-bitcoin"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Its final release updated bitcoind to 31.1.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "No further releases are planned, so its packages receive no more security updates after v0.0.139; nodes built with it need another way to stay up to date.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Connect to the services of an existing installation, as with any other computer (Remote infrastructure)"
+    ],
+    "supportLevels": [
+      "connected-application"
+    ],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Existing installations can be connected like any other computer, but the project has ended."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "nix-bitcoin repository",
+        "url": "https://github.com/fort-nix/nix-bitcoin",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "nix-bitcoin v0.0.139",
+        "url": "https://github.com/fort-nix/nix-bitcoin/releases/tag/v0.0.139",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Why the project ended, and whether a successor is planned, is not stated."
+    ]
+  },
+  {
+    "id": "raspibolt",
+    "name": "RaspiBolt",
+    "category": "node-platform",
+    "catalogueEligible": true,
+    "website": "https://raspibolt.org/",
+    "repository": "https://github.com/raspibolt/raspibolt",
+    "purpose": "Guide to building a Bitcoin full node by hand on a Raspberry Pi with a 2 TB SSD: Bitcoin Core, an Electrum server, a block explorer, a Lightning node with web and mobile management, and Tailscale for remote access.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The website shows RaspiBolt v4, updated in August 2026; the repository was pushed on 2026-10-21.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "no",
+      "docker": "no",
+      "other": "A Raspberry Pi set up by hand; the guide uses standard Debian Linux commands, so it also works on other hardware and cloud servers."
+    },
+    "interfaces": [],
+    "cli": null,
+    "remoteManagement": "Over Tailscale, which the guide sets up.",
+    "nodeCompatibility": "The node it builds runs Bitcoin Core.",
+    "dependencies": [],
+    "networking": null,
+    "storage": "A 2 TB SSD.",
+    "resources": null,
+    "security": "The user installs and updates every program by hand. BTCortex reaches only the services the node exposes, with each service's own credentials.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Connect to the Bitcoin node, Electrum server, explorer and Lightning node it builds, as with any other computer (Remote infrastructure)"
+    ],
+    "supportLevels": [
+      "connected-application"
+    ],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "high",
+      "notes": "The node it builds exposes standard services that BTCortex's remote connections can use."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "RaspiBolt",
+        "url": "https://raspibolt.org/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "RaspiBolt repository",
+        "url": "https://github.com/raspibolt/raspibolt",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Which Electrum server, explorer and Lightning implementation the guide installs is not named on its front page."
+    ]
+  },
+  {
+    "id": "minibolt",
+    "name": "MiniBolt",
+    "category": "node-platform",
+    "catalogueEligible": true,
+    "website": "https://minibolt.info/",
+    "repository": "https://github.com/minibolt-guide/minibolt",
+    "purpose": "Step-by-step guide to building a Bitcoin and Lightning node on a personal computer: a validating full node, an Electrum server, a web block explorer and a Lightning node with web and mobile management, reachable through Tor and WireGuard.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The repository was pushed on 2026-08-10.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "no",
+      "docker": "no",
+      "other": "A personal computer set up by hand; standard Debian-based Linux commands, so most hardware platforms work."
+    },
+    "interfaces": [],
+    "cli": null,
+    "remoteManagement": "Through Tor and a WireGuard VPN, which the guide sets up.",
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "The user installs and updates every program by hand. BTCortex reaches only the services the node exposes, with each service's own credentials.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Connect to the Bitcoin node, Electrum server, explorer and Lightning node it builds, as with any other computer (Remote infrastructure)"
+    ],
+    "supportLevels": [
+      "connected-application"
+    ],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "high",
+      "notes": "The node it builds exposes standard services that BTCortex's remote connections can use."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "The project also runs free public services (Electrum servers, a block explorer, a Nostr relay, a keyserver and a mempool visualiser).",
+    "sources": [
+      {
+        "title": "MiniBolt repository",
+        "url": "https://github.com/minibolt-guide/minibolt",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Which implementations the guide installs is not named in the repository description.",
+      "The website could not be read on 2026-10-23 (HTTP 403 to the research client)."
+    ]
+  },
+  {
+    "id": "parmanode",
+    "name": "Parmanode",
+    "category": "node-platform",
+    "catalogueEligible": true,
+    "website": "https://parman.org/diy",
+    "repository": "https://github.com/ArmanTheParman/Parmanode",
+    "purpose": "Automated installation of a Bitcoin node and related software on desktop computers.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The repository was pushed on 2026-10-19; no GitHub releases are published.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Not examined.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Connect to the services of an installation on another computer, as with any other computer (Remote infrastructure)"
+    ],
+    "supportLevels": [
+      "connected-application",
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Its documentation moved to parman.org and was not examined, so what it installs and on which systems is unknown."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Parmanode repository",
+        "url": "https://github.com/ArmanTheParman/Parmanode",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Supported operating systems and the software it installs were not checked."
+    ]
+  },
+  {
+    "id": "prometheus",
+    "name": "Prometheus",
+    "category": "monitoring",
+    "catalogueEligible": true,
+    "website": "https://prometheus.io/",
+    "repository": "https://github.com/prometheus/prometheus",
+    "purpose": "Monitoring system and time-series database that collects metrics from HTTP endpoints and answers queries over them.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v3.15.1 published on 2026-10-21; the repository was pushed on 2026-10-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.15.1",
+      "date": "2026-10-21",
+      "source": "https://github.com/prometheus/prometheus/releases/tag/v3.15.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64",
+        "x86",
+        "arm64"
+      ],
+      "windowsDistribution": "ZIP and tar.gz archives for windows-amd64, windows-386 and windows-arm64",
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Precompiled binaries for other systems; Docker images on Quay.io and Docker Hub (prom/prometheus)."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web interface and HTTP API on port 9090, with a status page at / and the expression browser at /query.",
+        "authentication": null,
+        "documentation": "https://prometheus.io/docs/prometheus/latest/getting_started/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Its HTTP API.",
+    "nodeCompatibility": "No Bitcoin support of its own: node metrics come from an exporter such as bitcoin-prometheus-exporter or from peer-observer’s metrics tool.",
+    "dependencies": [],
+    "networking": "Listens on port 9090 by default.",
+    "storage": "Its own time-series database on local disk; the size depends on retention and the number of series.",
+    "resources": null,
+    "security": "Keep its web interface and API on this computer or behind an authenticating proxy; its own access control was not examined.",
+    "licence": "Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Install the official Windows archive and run it as a managed process (not built)",
+      "Publish BTCortex's own metrics in Prometheus' format for it to collect (not built)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "fully-managed",
+      "connected-application"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Official Windows archives for x64, x86 and ARM64 make a managed installation feasible, but BTCortex already keeps its own monitoring history and alerts; Prometheus matters to users who run a monitoring stack of their own."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Getting started",
+        "url": "https://prometheus.io/docs/prometheus/latest/getting_started/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Installation",
+        "url": "https://prometheus.io/docs/prometheus/latest/installation/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release v3.15.1",
+        "url": "https://github.com/prometheus/prometheus/releases/tag/v3.15.1",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Whether release archives are signed was not checked.",
+      "Running it as a Windows service was not examined."
+    ]
+  },
+  {
+    "id": "grafana",
+    "name": "Grafana",
+    "category": "monitoring",
+    "catalogueEligible": true,
+    "website": "https://grafana.com/",
+    "repository": "https://github.com/grafana/grafana",
+    "purpose": "Dashboards and visualisation for data sources such as Prometheus.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v13.2.4 published on 2026-10-13.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "13.2.4",
+      "date": "2026-10-13",
+      "source": "https://github.com/grafana/grafana/releases/tag/v13.2.4"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "Windows installer or standalone ZIP, in the Enterprise edition (recommended) or the Open Source edition, chosen on the download page; running it as a Windows service needs the third-party NSSM.",
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Docker images grafana/grafana (Open Source) and grafana/grafana-enterprise."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web interface on port 3000 (http://localhost:3000/).",
+        "authentication": "User accounts; the Windows guide does not state the default login.",
+        "documentation": "https://grafana.com/docs/grafana/latest/setup-grafana/installation/windows/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Its web interface.",
+    "nodeCompatibility": "No Bitcoin support of its own; it shows what its data sources hold.",
+    "dependencies": [
+      {
+        "ids": [
+          "prometheus"
+        ],
+        "relationship": "optional",
+        "notes": "The usual data source for node metrics."
+      }
+    ],
+    "networking": "Listens on port 3000 by default.",
+    "storage": null,
+    "resources": null,
+    "security": "It stores the credentials of its data sources; keep it on this computer or behind TLS and authentication.",
+    "licence": "AGPL-3.0",
+    "licenceNotes": "The repository’s LICENSE is the AGPL v3 (the Open Source edition); the Enterprise edition, which the download page recommends, is offered by Grafana Labs on its own terms (not examined).",
+    "integrationMechanisms": [
+      "Open the user’s own Grafana in the browser (not built)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "external-launcher",
+      "fully-managed"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "It installs natively on Windows, but it only adds value on top of a metrics store such as Prometheus, which BTCortex does not run."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Install Grafana on Windows",
+        "url": "https://grafana.com/docs/grafana/latest/setup-grafana/installation/windows/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Run Grafana Docker image",
+        "url": "https://grafana.com/docs/grafana/latest/setup-grafana/installation/docker/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release v13.2.4",
+        "url": "https://github.com/grafana/grafana/releases/tag/v13.2.4",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Grafana LICENSE",
+        "url": "https://github.com/grafana/grafana/blob/main/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The architectures of the Windows downloads were not checked.",
+      "Its HTTP API and default login were not examined."
+    ]
+  },
+  {
+    "id": "bitcoin-prometheus-exporter",
+    "name": "Bitcoin Prometheus Exporter",
+    "category": "monitoring",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/jvstein/bitcoin-prometheus-exporter",
+    "purpose": "Prometheus exporter written in Python that reads a Bitcoin Core node over RPC and publishes its state as metrics.",
+    "maintenance": {
+      "status": "maintenance-only",
+      "evidence": "v0.9.0 published on 2025-09-24; the repository was last pushed on 2025-10-27.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.9.0",
+      "date": "2025-09-24",
+      "source": "https://github.com/jvstein/bitcoin-prometheus-exporter/releases/tag/v0.9.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Python; Docker image jvstein/bitcoin-prometheus-exporter (v0.9.0)."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Prometheus metrics endpoint; the README’s Docker example publishes port 9332.",
+        "authentication": null,
+        "documentation": "https://github.com/jvstein/bitcoin-prometheus-exporter/blob/main/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Reads Bitcoin Core over RPC, configured with BITCOIN_RPC_HOST, BITCOIN_RPC_USER and BITCOIN_RPC_PASSWORD.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core",
+          "bitcoin-knots"
+        ],
+        "relationship": "requires",
+        "notes": "A node with Bitcoin Core's RPC."
+      },
+      {
+        "ids": [
+          "prometheus"
+        ],
+        "relationship": "optional",
+        "notes": "Collects and stores the metrics it publishes."
+      }
+    ],
+    "networking": "Serves metrics over HTTP (port 9332 in the README’s example) and connects to the node’s RPC port.",
+    "storage": null,
+    "resources": null,
+    "security": "It needs RPC credentials for the node; an RPC user limited with rpcwhitelist to the read-only calls it makes keeps it from doing anything else.",
+    "licence": "BSD-3-Clause",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No Windows instructions, and BTCortex's built-in monitoring already reads the same node state."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "bitcoin-prometheus-exporter README",
+        "url": "https://github.com/jvstein/bitcoin-prometheus-exporter/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release v0.9.0",
+        "url": "https://github.com/jvstein/bitcoin-prometheus-exporter/releases/tag/v0.9.0",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The default metrics port is not stated; 9332 comes from the README’s Docker example.",
+      "Running the Python script on Windows was not tried, and the metrics it publishes were not listed here."
+    ]
+  },
+  {
+    "id": "peer-observer",
+    "name": "peer-observer",
+    "category": "monitoring",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/peer-observer/peer-observer",
+    "purpose": "Monitors the Bitcoin peer-to-peer network for anomalies and attacks with passive, well-behaving Bitcoin Core honeynodes, collecting events through tracepoints, RPC, P2P connections, logs and IPC.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The repository was pushed on 2026-10-23; no releases are published.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Extractors and tools exchange protobuf messages through a NATS publish-subscribe server.",
+        "authentication": null,
+        "documentation": "https://github.com/peer-observer/peer-observer/blob/master/README.md"
+      },
+      {
+        "type": "websocket",
+        "description": "The websocket tool publishes events as JSON.",
+        "authentication": null,
+        "documentation": "https://github.com/peer-observer/peer-observer/blob/master/README.md"
+      },
+      {
+        "type": "http",
+        "description": "The metrics tool produces Prometheus metrics from the events.",
+        "authentication": null,
+        "documentation": "https://github.com/peer-observer/peer-observer/blob/master/README.md"
+      }
+    ],
+    "cli": "Extractors (ebpf, rpc, p2p, log and the experimental ipc) and tools (logger, metrics, websocket, connectivity-check and the experimental archive).",
+    "remoteManagement": null,
+    "nodeCompatibility": "Bitcoin Core: the ebpf-extractor uses its tracepoints, the rpc-extractor polls its RPC, the log-extractor parses debug.log and the ipc-extractor talks to a bitcoin-node binary over a UNIX socket (-ipcbind). A few not-yet-merged Bitcoin Core patches are required at the moment.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "requires",
+        "notes": "The honeynodes it observes, with some unmerged patches."
+      },
+      {
+        "ids": [
+          "prometheus"
+        ],
+        "relationship": "optional",
+        "notes": "For the metrics tool."
+      }
+    ],
+    "networking": "Extractors and tools talk through a NATS server; the p2p-extractor accepts an inbound connection from the node.",
+    "storage": null,
+    "resources": null,
+    "security": "Hooking the tracepoints needs elevated privileges. Public access to its results is limited so as not to leak the honeynodes’ IP addresses; it is designed for dedicated honeynodes, not for a user’s everyday node.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Its own README calls the set-up non-trivial and the documentation sparse, and it needs a patched Bitcoin Core and kernel tracing: research tooling for the network rather than something BTCortex runs for a user."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "A public instance is at public.peer.observer (not examined).",
+    "sources": [
+      {
+        "title": "peer-observer README",
+        "url": "https://github.com/peer-observer/peer-observer/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "peer-observer releases",
+        "url": "https://github.com/peer-observer/peer-observer/releases",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Supported operating systems are not stated; its eBPF extractor relies on libbpf-rs, which targets Linux.",
+      "The public instance was not examined."
+    ]
+  },
+  {
+    "id": "fork-observer",
+    "name": "fork-observer",
+    "category": "monitoring",
+    "catalogueEligible": true,
+    "website": "https://fork.observer/",
+    "repository": "https://github.com/0xB10C/fork-observer",
+    "purpose": "Shows chain forks on the Bitcoin network: it follows chain tips and stale blocks across one or more nodes, with an activity log, a countdown to a block height and a replay of past events.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The repository was pushed on 2026-10-10; no releases are published.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web interface and HTTP API at the configured address (127.0.0.1:2323 in config.toml.example); other fork-observer instances can import its data.",
+        "authentication": null,
+        "documentation": "https://github.com/0xB10C/fork-observer/blob/main/README.md"
+      }
+    ],
+    "cli": "Configured in config.toml ([[networks]] and [[networks.nodes]] tables; see config.toml.example).",
+    "remoteManagement": null,
+    "nodeCompatibility": "Bitcoin Core over RPC (getchaintips, getblockhash and getblockheader; optionally getnetworkinfo, getblock to identify miners, and waitfornewblock) and over REST for batches of headers (use_rest = false turns this off). btcd, Esplora, mempool.space, block-dn, Electrum and other fork-observer instances are also supported; Esplora reports only the active tip.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core",
+          "bitcoin-knots",
+          "btcd"
+        ],
+        "relationship": "requires",
+        "notes": "At least one node to observe; Esplora back ends report only the active tip, never stale blocks."
+      }
+    ],
+    "networking": "Serves its web interface at the configured address and connects to each node's RPC and REST ports.",
+    "storage": "A database directory (database_path in its configuration).",
+    "resources": null,
+    "security": "The README recommends a dedicated RPC user restricted with an RPC whitelist rather than cookie authentication.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No releases or Windows instructions; it is built to watch many nodes at once rather than one user’s node."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "fork-observer README",
+        "url": "https://github.com/0xB10C/fork-observer/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "config.toml.example",
+        "url": "https://github.com/0xB10C/fork-observer/blob/main/config.toml.example",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "fork-observer releases",
+        "url": "https://github.com/0xB10C/fork-observer/releases",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Building and running it on Windows was not tried, and container images were not checked."
+    ]
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "name": "@btcortex/integration-i2p",
+  "version": "0.1.0",
+  "private": true,
+  "description": "I2P: finding an I2P router on this computer by its SAM bridge and its console, without changing anything.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

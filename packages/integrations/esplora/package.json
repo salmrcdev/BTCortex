@@ -1,0 +1,14 @@
+{
+  "name": "@btcortex/integration-esplora",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A read-only client for the Esplora REST API that mempool and Esplora explorers serve: the chain tip and block hashes, to tell which chain an explorer follows.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

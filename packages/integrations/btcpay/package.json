@@ -1,0 +1,18 @@
+{
+  "name": "@btcortex/integration-btcpay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BTCPay Server: a read-only client for its Greenfield API, authenticated with an API key the user creates.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@btcortex/contracts": "0.1.0",
+    "zod": "^4.6.7"
+  }
+}

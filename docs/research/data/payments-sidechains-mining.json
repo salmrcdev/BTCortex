@@ -1,0 +1,1269 @@
+[
+  {
+    "id": "btcpay-server",
+    "name": "BTCPay Server",
+    "category": "payment-processor",
+    "catalogueEligible": true,
+    "website": "https://btcpayserver.org/",
+    "repository": "https://github.com/btcpayserver/btcpayserver",
+    "purpose": "Self-hosted, open-source Bitcoin payment processor: stores, invoices, point of sale, payment requests and pull payments, paid on chain or over Lightning straight into the merchant's own wallet, with the Greenfield REST API for integrations.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v2.4.5 published on 2026-10-06; repository pushed on 2026-10-23 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.4.5",
+      "date": "2026-10-06",
+      "source": "https://github.com/btcpayserver/btcpayserver/releases/tag/v2.4.5"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Linux through btcpayserver-docker (btcpay-setup.sh installs Docker and Docker Compose when needed), one-click hosting such as LunaNode, cloud and VPS providers (not OpenVZ) and hardware builds. Manual installation and building without Docker are rated very hard and for development; the deployment guide does not mention Windows."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "Greenfield API v1 under /api/v1: GET /api/v1/health without authentication ({synchronized}); GET /api/v1/server/info with any key (version, onion, supportedPaymentMethods, fullySynched, syncStatus[] with paymentMethodId, chainHeight, syncHeight, available); GET /api/v1/stores and /api/v1/stores/{storeId} (btcpay.store.canviewstoresettings); GET /api/v1/stores/{storeId}/invoices with take, skip, status, startDate and endDate (btcpay.store.canviewinvoices; status is New, Processing, Settled, Expired or Invalid, amounts are decimal strings, times Unix seconds); GET /api/v1/stores/{storeId}/payment-methods (btcpay.store.canviewstoresettings; ids such as BTC-CHAIN, BTC-LN and BTC-LNURL); GET /api/v1/stores/{storeId}/payment-methods/{paymentMethodId}/wallet (btcpay.store.canviewwallet: balance, confirmedBalance, unconfirmedBalance); GET /api/v1/stores/{storeId}/lightning/{cryptoCode}/info (btcpay.store.canuselightningnode).",
+        "authentication": "API key sent as Authorization: token {key}, or HTTP Basic where the user allows it. Keys carry chosen permissions, never more than the user's own, optionally limited to one store (permission:storeId); /api-keys/authorize opens a form in BTCPay that creates a key with the permissions named in the link.",
+        "documentation": "https://docs.btcpayserver.org/API/Greenfield/v1/"
+      },
+      {
+        "type": "http",
+        "description": "Store webhooks: invoice and payout events posted to a URL the merchant sets, signed in the BTCPay-Sig header as sha256=HMAC256(secret, body).",
+        "authentication": "HMAC signature with the webhook's secret.",
+        "documentation": "https://docs.btcpayserver.org/API/Greenfield/v1/"
+      },
+      {
+        "type": "gui",
+        "description": "Web interface for stores, invoices, wallets, apps and server administration, served by the deployment's reverse proxy.",
+        "authentication": "User accounts.",
+        "documentation": "https://docs.btcpayserver.org/"
+      }
+    ],
+    "cli": "The Docker deployment installs command-line utilities with btcpay-setup.sh -i; btcpay-backup.sh (as root, stops the stack while archiving; BTCPAY_BACKUP_PASSPHRASE encrypts the archive) and btcpay-restore.sh restore a deployment.",
+    "remoteManagement": "The Greenfield API over HTTPS with API keys and the web interface; the Docker deployment itself is administered on its host, usually over SSH, with its scripts.",
+    "nodeCompatibility": "Uses NBXplorer as its chain indexer over a Bitcoin full node (Bitcoin Core in the Docker deployment); syncStatus reports each chain's indexer height. Lightning through a node the store connects to (the Docker deployment offers LND, Core Lightning or Eclair).",
+    "dependencies": [
+      {
+        "ids": [
+          "nbxplorer"
+        ],
+        "relationship": "requires",
+        "notes": "Its chain indexer; part of every deployment."
+      },
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "requires",
+        "notes": "Through NBXplorer."
+      },
+      {
+        "ids": [
+          "lnd",
+          "core-lightning"
+        ],
+        "relationship": "optional",
+        "notes": "For Lightning payments; the Docker deployment can also run Eclair."
+      },
+      {
+        "ids": [
+          "tor"
+        ],
+        "relationship": "optional",
+        "notes": "The server can be reached through an onion service, which server info reports."
+      }
+    ],
+    "networking": "The Docker deployment serves the web interface and API behind its reverse proxy on ports 80 and 443, which must be reachable from the internet for its automatic HTTPS certificate; webhooks go out to the merchant's URLs.",
+    "storage": "Docker volumes for BTCPay, NBXplorer, the node and the databases (PostgreSQL is part of the standard stack); the install example uses the opt-save-storage-xs fragment for a pruned node. Sizes not measured here.",
+    "resources": "Not measured here.",
+    "security": "An API key acts with the permissions it was given, limited by its user's rights, so a read-only monitor needs only btcpay.store.canviewstoresettings, btcpay.store.canviewinvoices and, for balances, btcpay.store.canviewwallet; btcpay.store.canuselightningnode lets a key use the store's Lightning node, including paying with it. Backups made by btcpay-backup.sh contain secrets and, with Lightning, the wallet and channel.backup: old channel state is dangerous and restoring the archive alone does not recover channels.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Call the Greenfield API with an API key the user creates with read-only permissions",
+      "Open /api-keys/authorize with exactly those permissions so the key is created in BTCPay itself",
+      "Watch /api/v1/health and server info for availability and synchronisation"
+    ],
+    "supportLevels": [
+      "connected-application",
+      "remote-managed",
+      "managed-docker"
+    ],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Connecting to an existing installation is straightforward and needs no software on Windows; deploying one needs Docker on Linux or a hosting provider, which BTCortex does not set up."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": "Other entries of the payments, sidechains and mining scope are still to be researched.",
+    "sources": [
+      {
+        "title": "BTCPay Greenfield API v1 (OpenAPI document)",
+        "url": "https://docs.btcpayserver.org/API/Greenfield/v1/swagger.json",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "BTCPay Server deployment",
+        "url": "https://docs.btcpayserver.org/Deployment/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "btcpayserver-docker README",
+        "url": "https://github.com/btcpayserver/btcpayserver-docker/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Back up and restore the Docker deployment",
+        "url": "https://docs.btcpayserver.org/Docker/backup-restore/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release v2.4.5",
+        "url": "https://github.com/btcpayserver/btcpayserver/releases/tag/v2.4.5",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Running btcpayserver-docker under WSL2 or Docker Desktop on Windows is not documented and was not tried.",
+      "Disk and memory needs of a deployment were not measured."
+    ]
+  },
+  {
+    "id": "cashu-nutshell",
+    "name": "Nutshell (Cashu)",
+    "category": "ecash",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/cashubtc/nutshell",
+    "purpose": "Chaumian ecash wallet and mint for Bitcoin Lightning based on the Cashu protocol: the reference Python implementation, with a command-line wallet and a mint backed by a Lightning node.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Version 0.21.0 uploaded to PyPI on 2026-09-16.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.21.0",
+      "date": "2026-09-16",
+      "source": "https://pypi.org/project/cashu/0.21.0/"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "Python package (pip install cashu); the README gives Windows commands for a Python 3.12 virtual environment",
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Python 3.10 or later on PyPI (the README recommends 3.12, since 3.13 and 3.14 fail to build coincurve); Docker image cashubtc/nutshell:0.21.0."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "The mint’s Cashu API; the Docker example listens on port 3338 (MINT_LISTEN_PORT).",
+        "authentication": null,
+        "documentation": "https://github.com/cashubtc/nutshell/blob/main/README.md"
+      },
+      {
+        "type": "cli",
+        "description": "The cashu wallet command.",
+        "authentication": null,
+        "documentation": "https://github.com/cashubtc/nutshell/blob/main/README.md"
+      }
+    ],
+    "cli": "cashu (wallet) and the mint server.",
+    "remoteManagement": null,
+    "nodeCompatibility": "The mint needs a Lightning back end chosen with MINT_BACKEND_BOLT11_SAT, such as LND or Core Lightning; FakeWallet serves tests without one.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd",
+          "core-lightning"
+        ],
+        "relationship": "requires",
+        "notes": "For a mint (FakeWallet only for tests)."
+      }
+    ],
+    "networking": "The mint serves HTTP (port 3338 in the Docker example).",
+    "storage": null,
+    "resources": null,
+    "security": "A mint holds the bitcoin behind its tokens, so its users trust it with their funds; running one means holding other people’s money. The public test mint is for demonstration only and its satoshis are not real.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Running a mint makes the user custodian of other people’s funds, which is outside what BTCortex sets up."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Nutshell README",
+        "url": "https://github.com/cashubtc/nutshell/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "cashu on PyPI",
+        "url": "https://pypi.org/pypi/cashu/json",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Running the mint or wallet on Windows was not tried."
+    ]
+  },
+  {
+    "id": "cdk-mintd",
+    "name": "CDK mint (cdk-mintd)",
+    "category": "ecash",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/cashubtc/cdk",
+    "purpose": "Cashu mint from the Cashu Development Kit, a collection of Rust crates for Cashu wallets and mints, with Lightning back ends for LND, Core Lightning and LDK Node.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "cdk-mintd 0.18.2 published on crates.io on 2026-10-14.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.18.2",
+      "date": "2026-10-14",
+      "source": "https://crates.io/crates/cdk-mintd/0.18.2"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Rust crate cdk-mintd on crates.io."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "The mint’s Cashu API.",
+        "authentication": null,
+        "documentation": "https://github.com/cashubtc/cdk/blob/main/README.md"
+      }
+    ],
+    "cli": "cdk-mintd.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Lightning back ends cdk-lnd, cdk-cln and cdk-ldk-node; cdk-fake-wallet fills quotes automatically for tests; LNbits only through an external payment processor (cdk-payment-processor).",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd",
+          "core-lightning",
+          "ldk-node"
+        ],
+        "relationship": "requires",
+        "notes": "A Lightning back end for the mint."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Its README says the project is in early development but works with real sats, so only amounts one does not mind losing should be used; a mint holds its users’ funds.",
+    "licence": "MIT OR Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Early-stage custodial software for its users."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "CDK README",
+        "url": "https://github.com/cashubtc/cdk/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "cdk-mintd on crates.io",
+        "url": "https://crates.io/crates/cdk-mintd",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Windows support, ports and container images were not checked."
+    ]
+  },
+  {
+    "id": "fedimint",
+    "name": "Fedimint",
+    "category": "ecash",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/fedimint/fedimint",
+    "purpose": "Module-based system for building federated applications, shipping Bitcoin, Lightning and Chaumian ecash modules: a federation of servers (fedimintd) holds funds together and issues ecash, with Lightning gateways (gatewayd).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.12.2 and v0.11.4 published on 2026-10-06; v0.13.0-beta.1 (a pre-release) on 2026-10-09.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.12.2",
+      "date": "2026-10-06",
+      "source": "https://github.com/fedimint/fedimint/releases/tag/v0.12.2"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux x86_64 binaries, .deb and .rpm packages (fedimintd, gatewayd, fedimint-cli, gateway-cli, fedimint-dbtool, fedimint-recoverytool, devimint) and macOS aarch64 archives."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "fedimint-cli and gateway-cli.",
+        "authentication": null,
+        "documentation": "https://github.com/fedimint/fedimint/blob/master/README.md"
+      }
+    ],
+    "cli": "fedimintd (guardian server), gatewayd (Lightning gateway), fedimint-cli, gateway-cli, fedimint-dbtool, fedimint-recoverytool.",
+    "remoteManagement": null,
+    "nodeCompatibility": "The Bitcoin module follows the chain (how guardians connect to a node was not examined); gateways connect the federation to Lightning.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "The federation’s servers hold the funds together (the README links to its dealer-free distributed key generation); users trust the federation, not a single mint.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No Windows builds, and running a guardian means holding funds with others."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Client applications listed in the README include Fedi, Ecash App, Conduit Wallet, Harbor Wallet and Vipr Wallet.",
+    "sources": [
+      {
+        "title": "Fedimint README",
+        "url": "https://github.com/fedimint/fedimint/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Fedimint v0.12.2",
+        "url": "https://github.com/fedimint/fedimint/releases/tag/v0.12.2",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Fedimint releases feed",
+        "url": "https://github.com/fedimint/fedimint/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "How guardians connect to their Bitcoin node, and the ports used, were not examined."
+    ]
+  },
+  {
+    "id": "elements",
+    "name": "Elements",
+    "category": "sidechain",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/ElementsProject/elements",
+    "purpose": "Open-source, sidechain-capable blockchain platform derived from Bitcoin; elementsd -chain=liquidv1 runs a node of the Liquid Network.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "elements-23.3.4 published on 2026-09-09; release candidates elements-23.4.0rc3 (2026-07-06) and elements-29.4.1rc1 (2026-08-12) are in testing.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "23.3.4",
+      "date": "2026-09-09",
+      "source": "https://github.com/ElementsProject/elements/releases/tag/elements-23.3.4"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64"
+      ],
+      "windowsDistribution": "elements-23.3.4-win64.zip and elements-23.3.4-win64-setup-unsigned.exe, with SHA256SUMS and its signatures (SHA256SUMS.asc)",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux (x86_64, aarch64, arm, powerpc64, riscv64) and macOS archives."
+    },
+    "interfaces": [
+      {
+        "type": "json-rpc",
+        "description": "Bitcoin Core-style JSON-RPC with Elements’ additions (assets, peg-ins).",
+        "authentication": "As for Bitcoin Core.",
+        "documentation": "https://github.com/ElementsProject/elements/blob/master/README.md"
+      }
+    ],
+    "cli": "elementsd and elements-cli.",
+    "remoteManagement": "Through its JSON-RPC.",
+    "nodeCompatibility": "A Liquid node validates peg-ins against a Bitcoin node (not examined here). PeerSwap’s L-BTC swaps need an Elements back end that follows the post-ELIP 203 chain tip.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "optional",
+        "notes": "For validating peg-ins (not examined)."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "The Windows installer of 23.3.4 is published as unsigned; the archives are covered by SHA256SUMS and its signatures.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only",
+      "fully-managed"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Windows archives with signed checksums make a managed Liquid node possible, but BTCortex has no Liquid features that would use it."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Elements README",
+        "url": "https://github.com/ElementsProject/elements/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Elements 23.3.4",
+        "url": "https://github.com/ElementsProject/elements/releases/tag/elements-23.3.4",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Elements releases feed",
+        "url": "https://github.com/ElementsProject/elements/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Who signs SHA256SUMS.asc was not identified.",
+      "Peg-in validation settings, disk and memory needs of a Liquid node were not examined.",
+      "What ELIP 203 changed (mentioned in PeerSwap’s README) was not examined."
+    ]
+  },
+  {
+    "id": "sideswap",
+    "name": "SideSwap",
+    "category": "sidechain",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/sideswap-io/sideswapclient",
+    "purpose": "Cross-platform, non-custodial wallet and atomic-swap marketplace for the Liquid Network: trades between Liquid assets (L-BTC, USDt, EURx, AMP tokens) and peg-in and peg-out bridging.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "SideSwap 1.9.2 published on 2026-09-23; 1.9.1 on 2026-08-24.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.9.2",
+      "date": "2026-09-23",
+      "source": "https://github.com/sideswap-io/sideswapclient/releases/tag/v1.9.2"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "SideSwapSetup.exe, with SHA256SUMS.asc",
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Android (APKs, also for F-Droid), Linux AppImage, macOS, iOS."
+    },
+    "interfaces": [
+      {
+        "type": "gui",
+        "description": "Desktop and mobile application.",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Liquid wallet; it does not use the user’s Bitcoin node (not examined further).",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Users keep their keys; Liquid’s Confidential Transactions hide amounts and asset types on chain.",
+    "licence": "GPL-3.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Launch the user’s own installation (not built)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "external-launcher"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "A native Windows application, but outside BTCortex’s Bitcoin-node features."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "SideSwap client README",
+        "url": "https://github.com/sideswap-io/sideswapclient/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "SideSwap releases",
+        "url": "https://github.com/sideswap-io/sideswapclient/releases",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The architecture of the Windows installer and its signing were not checked."
+    ]
+  },
+  {
+    "id": "aqua-wallet",
+    "name": "AQUA",
+    "category": "mobile-wallet",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/AquaWallet/aqua-wallet",
+    "purpose": "Free, open-source wallet for iOS and Android, from JAN3.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.5.4 published on 2026-10-01 (an Android APK, aqua-0.5.4-273.apk).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.5.4",
+      "date": "2026-10-01",
+      "source": "https://github.com/AquaWallet/aqua-wallet/releases/tag/v0.5.4"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "iOS and Android."
+    },
+    "interfaces": [
+      {
+        "type": "gui",
+        "description": "Mobile application.",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Not examined.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A phone wallet with nothing for BTCortex to connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "AQUA README",
+        "url": "https://github.com/AquaWallet/aqua-wallet/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "AQUA LICENSE",
+        "url": "https://github.com/AquaWallet/aqua-wallet/blob/main/LICENSE",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "AQUA releases feed",
+        "url": "https://github.com/AquaWallet/aqua-wallet/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Which networks it supports and whether it can use the user’s own node were not checked; its README says only that it is a free, open-source wallet for iOS and Android."
+    ]
+  },
+  {
+    "id": "alby-js-sdk",
+    "name": "Alby JS SDK",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/getAlby/js-sdk",
+    "purpose": "JavaScript SDK for Nostr Wallet Connect (NIP-47) and the Alby API.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v8.1.1 published on 2026-10-21.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "8.1.1",
+      "date": "2026-10-21",
+      "source": "https://github.com/getAlby/js-sdk/releases/tag/v8.1.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "npm package @getalby/sdk (Node.js 22 or later)."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "NWC client and wallet-service helpers.",
+        "authentication": "A nostr+walletconnect:// connection string with its secret.",
+        "documentation": "https://github.com/getAlby/js-sdk"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Talks to any NWC wallet service, such as Alby Hub.",
+    "dependencies": [],
+    "networking": "Nostr relays.",
+    "storage": null,
+    "resources": null,
+    "security": "An NWC connection string carries a secret that lets its holder use the wallet within the permissions granted.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for wallet applications; BTCortex does not offer NWC."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Alby Hub, the main NWC wallet service, is recorded as alby-hub; the protocol is recorded as nip-47.",
+    "sources": [
+      {
+        "title": "@getalby/sdk on npm",
+        "url": "https://registry.npmjs.org/@getalby/sdk/latest",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "js-sdk v8.1.1",
+        "url": "https://github.com/getAlby/js-sdk/releases/tag/v8.1.1",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "stratum-v2-reference-implementation",
+    "name": "Stratum V2 Reference Implementation (SRI)",
+    "category": "mining",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/stratum-mining/sv2-apps",
+    "purpose": "Reference implementation of the Stratum V2 mining protocol: protocol crates (stratum) and applications (sv2-apps) — a pool server, the job declarator server and client that let miners build their own block templates, and a translator proxy for SV1 miners.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "sv2-apps v0.8.0 and the stratum crates v1.12.0 published on 2026-09-17.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "sv2-apps 0.8.0",
+      "date": "2026-09-17",
+      "source": "https://github.com/stratum-mining/sv2-apps/releases/tag/v0.8.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "miner-apps and pool-apps archives for Linux (x86_64 and aarch64, musl) and macOS (x86_64 and aarch64)."
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Stratum V2 (and SV1 through the translator proxy) towards miners and pools; Template Distribution from Bitcoin Core’s IPC interface.",
+        "authentication": null,
+        "documentation": "https://github.com/stratum-mining/sv2-apps/blob/main/README.md"
+      }
+    ],
+    "cli": "pool, jd-server, jd-client and translator applications.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Its bitcoin-core-sv2 crate translates Bitcoin Core’s IPC interface into Stratum V2 Template Distribution; Bitcoin Core’s Windows builds have no IPC interface (no bitcoin-node.exe; see bitcoin-core).",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "requires",
+        "notes": "Built with the IPC interface, which Windows builds lack."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Application crates in alpha, according to both READMEs.",
+    "licence": "MIT OR Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "none",
+      "notes": "Alpha software that needs Bitcoin Core’s IPC interface, which Bitcoin Core does not build for Windows."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "sv2-apps README",
+        "url": "https://github.com/stratum-mining/sv2-apps/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "stratum README",
+        "url": "https://github.com/stratum-mining/stratum/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "sv2-apps releases feed",
+        "url": "https://github.com/stratum-mining/sv2-apps/releases.atom",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "stratum releases feed",
+        "url": "https://github.com/stratum-mining/stratum/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Ports and configuration of the applications were not examined."
+    ]
+  },
+  {
+    "id": "datum-gateway",
+    "name": "DATUM Gateway",
+    "category": "mining",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/OCEAN-xyz/datum_gateway",
+    "purpose": "Mining gateway that lets miners mine with block templates made by their own Bitcoin node, speaking Stratum v1 to mining hardware; used with the OCEAN pool.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.5.1beta and v0.5.0beta published on 2026-10-19; the README says the gateway remains in public beta.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.5.1beta",
+      "date": "2026-10-19",
+      "source": "https://github.com/OCEAN-xyz/datum_gateway/releases/tag/v0.5.1beta"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "OCEAN’s Debian packages for Debian Trixie on amd64 (with Bitcoin Core), Debian’s own package, a DATUM box installer image, source builds and Docker, according to the README."
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Stratum v1 towards mining hardware; RPC with getblocktemplate towards the node.",
+        "authentication": "The node’s RPC credentials.",
+        "documentation": "https://github.com/OCEAN-xyz/datum_gateway/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Needs a valid Bitcoin node with RPC and getblocktemplate; Bitcoin Core is the recommended node. Its README says Bitcoin Knots versions after 29.3.knots20260507 are no longer compatible and would earn no mining rewards.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "requires",
+        "notes": "RPC with getblocktemplate; the recommended node."
+      },
+      {
+        "ids": [
+          "bitcoin-knots"
+        ],
+        "relationship": "conflicts",
+        "notes": "Knots after 29.3.knots20260507 (the releases that follow another chain) are no longer compatible."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Public beta. The README warns to check which network a fork mines, and how work is rewarded, before pointing hashpower at it.",
+    "licence": "MIT",
+    "licenceNotes": "Copyright Bitcoin Ocean, LLC, Jason Hughes and contributors.",
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No Windows build; mining set-ups are outside BTCortex’s scope today."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "DATUM Gateway README",
+        "url": "https://github.com/OCEAN-xyz/datum_gateway/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "DATUM Gateway LICENSE",
+        "url": "https://github.com/OCEAN-xyz/datum_gateway/blob/master/LICENSE",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "DATUM Gateway releases feed",
+        "url": "https://github.com/OCEAN-xyz/datum_gateway/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Its Stratum port, node settings (blocknotify) and build dependencies are in INSTALL.md, which was not read."
+    ]
+  },
+  {
+    "id": "public-pool",
+    "name": "Public Pool",
+    "category": "mining",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/benjamin-wilson/public-pool",
+    "purpose": "Bitcoin Stratum mining server written in TypeScript with NestJS, run against the user’s own node.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "No releases are published; the releases feed was updated on 2026-10-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "compose-only",
+      "other": "Built and run with Docker or Docker Compose from the repository (Compose binds the Stratum ports to 127.0.0.1)."
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Stratum on ports 3333 and 3334.",
+        "authentication": null,
+        "documentation": "https://github.com/benjamin-wilson/public-pool/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Connects to the node’s RPC; with Docker, the README adds rpcallowip=172.16.0.0/12 to bitcoin.conf.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "requires",
+        "notes": "Over RPC."
+      }
+    ],
+    "networking": "Stratum on 3333 and 3334.",
+    "storage": null,
+    "resources": null,
+    "security": "Opening the node’s RPC to Docker’s network range lets containers reach it.",
+    "licence": null,
+    "licenceNotes": "No licence is stated in the README and no LICENSE file was found.",
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Docker-only set-up and no stated licence."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Public Pool README",
+        "url": "https://github.com/benjamin-wilson/public-pool/blob/master/README.md",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Whether it is meant for solo mining is not stated in the README.",
+      "Its licence is unknown."
+    ]
+  },
+  {
+    "id": "ckpool",
+    "name": "ckpool",
+    "category": "mining",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://bitbucket.org/ckolivas/ckpool",
+    "purpose": "Low-overhead, massively scalable mining pool server in C for Linux, which also works as a proxy, passthrough, node, redirector or solo pool (BTCSOLO mode).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The Bitbucket repository was updated on 2026-10-14; it publishes no releases.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Built from source on Linux."
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Stratum towards miners.",
+        "authentication": null,
+        "documentation": "https://bitbucket.org/ckolivas/ckpool/src/master/README.md"
+      }
+    ],
+    "cli": "ckpool, with -B for BTCSOLO mode.",
+    "remoteManagement": null,
+    "nodeCompatibility": "At least one bitcoind with server, rpcuser and rpcpassword set; ZMQ block notifications need the node’s -zmqpubhashblock.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "requires",
+        "notes": "RPC, optionally ZMQ."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Its README asks operators to keep the default 0.5% development contribution on blocks found in pool mode.",
+    "licence": "GPL-3.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Linux only."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "ckpool README",
+        "url": "https://bitbucket.org/ckolivas/ckpool/src/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "ckpool COPYING",
+        "url": "https://bitbucket.org/ckolivas/ckpool/src/master/COPYING",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "ckpool repository (Bitbucket API)",
+        "url": "https://api.bitbucket.org/2.0/repositories/ckolivas/ckpool",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Ports were not examined."
+    ]
+  },
+  {
+    "id": "braiins-os",
+    "name": "Braiins OS",
+    "category": "mining",
+    "catalogueEligible": true,
+    "website": "https://braiins.com/os",
+    "repository": null,
+    "purpose": "Custom firmware for Bitcoin ASICs (Bitmain Antminer models) with autotuning, Stratum V2 support and gRPC APIs; Braiins Toolbox manages many miners from a desktop application.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The product page lists current models such as the S21 series and T21.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Firmware for Antminer S21, S21 Pro, S21+, T21, S19 series, S17 and S9 variants."
+    },
+    "interfaces": [
+      {
+        "type": "grpc",
+        "description": "gRPC-based APIs for monitoring systems.",
+        "authentication": null,
+        "documentation": "https://braiins.com/os"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Its gRPC APIs and Braiins Toolbox.",
+    "nodeCompatibility": "Mines for a pool; Stratum V2, with a V2-to-V1 translation proxy for pools that only speak V1.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "It directs a 2–2.5% development fee of the hashrate (depending on the model) to Braiins’ pool.",
+    "licence": "LicenseRef-Braiins-OS",
+    "licenceNotes": "A licence agreement that allows use with the development fee (braiins.com/os/plus/license); not open source as far as the page states.",
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "ASIC firmware, outside what BTCortex manages."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Braiins OS",
+        "url": "https://braiins.com/os",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Its version history, whether Braiins Toolbox runs on Windows, and its API documentation were not examined."
+    ]
+  },
+  {
+    "id": "bitaxe-axeos",
+    "name": "ESP-Miner (AxeOS)",
+    "category": "mining",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/bitaxeorg/ESP-Miner",
+    "purpose": "Open-source ESP32 firmware for the Bitaxe open-hardware miner, with the AxeOS web interface and a REST API on the device.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v2.15.4 published on 2026-10-21; v2.15.3 on 2026-09-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.15.4",
+      "date": "2026-10-21",
+      "source": "https://github.com/bitaxeorg/ESP-Miner/releases/tag/v2.15.4"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Firmware for Bitaxe boards with the ESP32-S3-WROOM-1 N16R8 module (factory images per board version, and esp-miner.bin); flashed with bitaxetool."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "AxeOS web interface at the device’s address on the local network (http://bitaxe with mDNS) and its REST API, for example GET /api/system/info and PATCH /api/system.",
+        "authentication": null,
+        "documentation": "https://github.com/bitaxeorg/ESP-Miner/blob/master/readme.md"
+      }
+    ],
+    "cli": "bitaxetool flashes the firmware and its configuration.",
+    "remoteManagement": "The device’s REST API on the local network.",
+    "nodeCompatibility": "Mines for the Stratum pool configured on the device, such as a pool run on the user’s node.",
+    "dependencies": [],
+    "networking": "Local network only.",
+    "storage": null,
+    "resources": null,
+    "security": "The README’s API examples use no authentication, so anyone on the local network may be able to read and change the device’s settings.",
+    "licence": "GPL-3.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Read hashrate, temperature and pool state from /api/system/info for monitoring (not built)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "connected-application"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "A read-only REST API on the local network would let BTCortex show a home miner, but mining is outside its features today."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "ESP-Miner README",
+        "url": "https://github.com/bitaxeorg/ESP-Miner/blob/master/readme.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "ESP-Miner v2.15.4",
+        "url": "https://github.com/bitaxeorg/ESP-Miner/releases/tag/v2.15.4",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "ESP-Miner LICENSE",
+        "url": "https://github.com/bitaxeorg/ESP-Miner/blob/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Whether the API can require authentication was not checked."
+    ]
+  },
+  {
+    "id": "cgminer",
+    "name": "cgminer",
+    "category": "mining",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/ckolivas/cgminer",
+    "purpose": "Long-standing ASIC and FPGA miner software in C.",
+    "maintenance": {
+      "status": "stale",
+      "evidence": "The latest tag is v4.11.1 from 2018-08-16.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "4.11.1",
+      "date": "2018-08-16",
+      "source": "https://github.com/ckolivas/cgminer/releases/tag/v4.11.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [],
+    "cli": "cgminer.",
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "No release since 2018.",
+    "licence": "GPL-3.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "none",
+      "notes": "Unmaintained since 2018."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "cgminer tags",
+        "url": "https://github.com/ckolivas/cgminer/tags",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "cgminer COPYING",
+        "url": "https://github.com/ckolivas/cgminer/blob/master/COPYING",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Its API and Windows support were not examined."
+    ]
+  }
+]

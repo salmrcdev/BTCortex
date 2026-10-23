@@ -1,0 +1,322 @@
+[
+  {
+    "id": "tor-control-spec",
+    "kind": "specification",
+    "number": null,
+    "title": "Tor control protocol (control-spec)",
+    "status": "Living specification in the torspec repository (protocol version 1; replaces the deprecated version 0)",
+    "summary": "Line-based protocol on tor's ControlPort with SMTP-style reply codes (250 OK, 251, 451, 5xx errors such as 514 authentication required and 515 bad authentication, 650 asynchronous events). Defines authentication (NULL, HASHEDPASSWORD, COOKIE, SAFECOOKIE through PROTOCOLINFO, AUTHCHALLENGE and AUTHENTICATE; COOKIE is deprecated), configuration commands (SETCONF, GETCONF, RESETCONF, SAVECONF, LOADCONF), GETINFO keys (version, status/bootstrap-phase, status/circuit-established, status/enough-dir-info, network-liveness, net/listeners/socks, onions/current, onions/detached, status/version/current, process/pid), SETEVENTS with STATUS_CLIENT (BOOTSTRAP PROGRESS/TAG/SUMMARY/WARNING/RECOMMENDATION, CIRCUIT_ESTABLISHED, DANGEROUS_SOCKS), STATUS_GENERAL (CLOCK_SKEW, DANGEROUS_VERSION), HS_DESC and NETWORK_LIVENESS events, ADD_ONION/DEL_ONION (v3 keys ED25519-V3, Detach, ClientAuthV3, MaxStreams, PoWDefensesEnabled since 0.4.9.2-alpha), SIGNAL (RELOAD, SHUTDOWN, HALT, NEWNYM, DORMANT, ACTIVE, ...), TAKEOWNERSHIP and the controller-only options __OwningControllerProcess, __OwningControllerFD and __DisableSignalHandlers. Bootstrap phases are listed with tags from 'starting' (0) to 'done' (100); only those two are guaranteed to stay.",
+    "relevance": "BTCortex's Tor adapter uses it for SAFECOOKIE authentication, bootstrap monitoring, health checks, onion-service creation and display, graceful shutdown and ownership of the tor process. Bitcoin Core's torcontrol uses PROTOCOLINFO, SAFECOOKIE or HASHEDPASSWORD, GETINFO net/listeners/socks and ADD_ONION for its automatic onion service. Arti does not implement this protocol.",
+    "implementedIn": [
+      "tor (C tor; reference implementation, 0.4.9.14 current)",
+      "bitcoin-core (torcontrol client: SAFECOOKIE, HASHEDPASSWORD, ADD_ONION)",
+      "tor-browser (tor-launcher controller with cookie authentication and __OwningControllerProcess)"
+    ],
+    "sources": [
+      { "title": "Tor control protocol specification", "url": "https://spec.torproject.org/control-spec/", "accessed": "2026-10-21" },
+      { "title": "control-spec: commands", "url": "https://spec.torproject.org/control-spec/commands.html", "accessed": "2026-10-21" },
+      { "title": "control-spec: replies and events", "url": "https://spec.torproject.org/control-spec/replies.html", "accessed": "2026-10-21" },
+      { "title": "control-spec: implementation notes (authentication, controller options, bootstrap phases)", "url": "https://spec.torproject.org/control-spec/implementation-notes.html", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 src/torcontrol.cpp", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/torcontrol.cpp", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "tor-rend-spec-v3",
+    "kind": "specification",
+    "number": null,
+    "title": "Tor Rendezvous Specification - Version 3 (onion services v3)",
+    "status": "Living specification in the torspec repository (formerly proposal 224); v2 onion services were removed from tor in 0.4.6",
+    "summary": "Specifies v3 onion services: ed25519 identity keys and 56-character .onion addresses, key blinding, descriptors and their encryption, hidden service directories, introduction and rendezvous protocols, restricted discovery (called client authorisation in C tor, with x25519 keys in authorized_clients/*.auth on the service and *.auth_private files in ClientOnionAuthDir on the client), and the HiddenServiceDir layout (the spec names hostname and the private key; C tor writes hostname, hs_ed25519_secret_key and hs_ed25519_public_key).",
+    "relevance": "Basis for every onion endpoint BTCortex creates or connects to: Bitcoin Core's P2P onion service, Electrum server onion endpoints for remote wallets, Lightning and web UIs, and client authorisation for private remote access. Bitcoin Core only supports v3 addresses since 22.0 (relayed as BIP 155 addrv2 entries, recorded in standards-full-nodes-core).",
+    "implementedIn": [
+      "tor (service and client; v3 only since 0.4.6)",
+      "arti (client; service hosting documented as experimental at 2.7.0)",
+      "bitcoin-core >= 22.0 (v3 addresses only)"
+    ],
+    "sources": [
+      { "title": "Tor Rendezvous Specification - Version 3", "url": "https://spec.torproject.org/rend-spec/", "accessed": "2026-10-21" },
+      { "title": "rend-spec: hidden service directory format (Appendix F)", "url": "https://spec.torproject.org/rend-spec/fs-contents.html", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 doc/tor.md (compatibility section)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/tor.md", "accessed": "2026-10-21" },
+      { "title": "tor source: hs_service.c (key file names)", "url": "https://gitlab.torproject.org/tpo/core/tor/-/blob/tor-0.4.9.14/src/feature/hs/hs_service.c", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "tor-hspow-spec",
+    "kind": "specification",
+    "number": null,
+    "title": "Proof of Work for onion service introduction (hspow-spec)",
+    "status": "Living specification in the torspec repository (originally proposal 327)",
+    "summary": "Client puzzle carried in the onion-service descriptor (scheme v1: Equi-X and Blake2b): under attack, introduction requests are prioritised by the effort the client spent; the service adjusts a suggested effort and disables the puzzle when not overloaded.",
+    "relevance": "Denial-of-service protection for BTCortex-hosted onion services: torrc HiddenServicePoWDefensesEnabled 1 (with HiddenServicePoWQueueRate and HiddenServicePoWQueueBurst) or ADD_ONION PoWDefensesEnabled=1. Bitcoin Core 32.0 enables the defences for its automatic onion service (per the full-nodes-core research).",
+    "implementedIn": [
+      "tor (HiddenServicePoWDefensesEnabled; ADD_ONION PoW parameters since 0.4.9.2-alpha)",
+      "arti (equix and hashx crates)",
+      "bitcoin-core >= 32.0 (enabled for its automatic onion service)"
+    ],
+    "sources": [
+      { "title": "Proof of Work for onion service introduction", "url": "https://spec.torproject.org/hspow-spec/", "accessed": "2026-10-21" },
+      { "title": "tor manual: HiddenServicePoWDefensesEnabled", "url": "https://gitlab.torproject.org/tpo/core/tor/-/raw/tor-0.4.9.14/doc/man/tor.1.txt", "accessed": "2026-10-21" },
+      { "title": "control-spec: ADD_ONION", "url": "https://spec.torproject.org/control-spec/commands.html", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "tor-socks-extensions",
+    "kind": "specification",
+    "number": null,
+    "title": "Tor's extensions to the SOCKS protocol",
+    "status": "Living specification in the torspec repository",
+    "summary": "Tor's additions to SOCKS4a/5: RESOLVE and RESOLVE_PTR commands, extended error codes for onion-service connection failures, tolerance of username/password messages and the interpretation of SOCKS5 usernames beginning with the magic '<torS0X>' for stream-isolation and RPC parameters.",
+    "relevance": "Defines how BTCortex and its managed applications isolate streams (different SOCKS credentials or SocksPorts give different circuits; Bitcoin Core's proxyrandomize relies on IsolateSOCKSAuth), how remote DNS resolution avoids local DNS leaks, and how onion connection failures are reported.",
+    "implementedIn": [
+      "tor",
+      "arti (Compatibility.md lists support for the SOCKS extensions)"
+    ],
+    "sources": [
+      { "title": "Tor's extensions to the SOCKS protocol", "url": "https://spec.torproject.org/socks-extensions.html", "accessed": "2026-10-21" },
+      { "title": "Arti doc/Compatibility.md", "url": "https://gitlab.torproject.org/tpo/core/arti/-/blob/main/doc/Compatibility.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "tor-pt-spec",
+    "kind": "specification",
+    "number": null,
+    "title": "Pluggable Transport Specification (Version 1)",
+    "status": "Living specification in the torspec repository",
+    "summary": "Interface between tor and pluggable-transport child processes (environment variables, SOCKS-based client interface, managed proxy lifecycle) used by transports such as obfs4, Snowflake, WebTunnel, meek and Conjure.",
+    "relevance": "Governs how tor launches lyrebird.exe and conjure-client.exe from ClientTransportPlugin lines when BTCortex configures bridges for censored networks.",
+    "implementedIn": [
+      "tor (ClientTransportPlugin)",
+      "lyrebird",
+      "conjure"
+    ],
+    "sources": [
+      { "title": "Pluggable Transport Specification (Version 1)", "url": "https://spec.torproject.org/pt-spec/", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0077",
+    "kind": "BIP",
+    "number": "77",
+    "title": "Async Payjoin",
+    "status": "Draft",
+    "summary": "Payjoin version 2: sender and receiver exchange the Original PSBT and Payjoin proposal asynchronously through an untrusted Payjoin Directory that stores encrypted messages, with Oblivious HTTP (RFC 9458) relays hiding the client's IP address from the directory, so neither party needs to be online at the same time or run a public server. BIP version 0.2.0; requires BIPs 21, 78, 173 and 174.",
+    "relevance": "Lets wallets used with BTCortex-managed nodes receive Payjoin without exposing a server. BTCortex should configure and document it, not operate directories or relays.",
+    "implementedIn": [
+      "payjoin-dev-kit (payjoin 1.2.0)",
+      "payjoin-cli 1.0.0 (v2 by default, backwards compatible with v1)",
+      "payjoin-mailroom 0.1.3 (directory and OHTTP relay)"
+    ],
+    "sources": [
+      { "title": "BIP 77: Async Payjoin", "url": "https://github.com/bitcoin/bips/blob/master/bip-0077.md", "accessed": "2026-10-21" },
+      { "title": "rust-payjoin README", "url": "https://github.com/payjoin/rust-payjoin", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0078",
+    "kind": "BIP",
+    "number": "78",
+    "title": "A Simple Payjoin Proposal",
+    "status": "Deployed",
+    "summary": "Payjoin version 1: the sender posts an Original PSBT to the receiver's HTTPS (or onion) endpoint advertised in a BIP 21 'pj=' parameter; the receiver adds inputs and returns a Payjoin proposal that the sender checks and signs, breaking the common-input-ownership heuristic. Replaces BIP 79.",
+    "relevance": "Supported by merchant software (BTCPay Server) and several wallets that BTCortex configures; a receiver needs a reachable endpoint, which an onion service can provide without inbound ports.",
+    "implementedIn": [
+      "btcpay-server (send and receive, per the Bitcoin Wiki adoption page)",
+      "payjoin-dev-kit",
+      "payjoin-cli 1.0.0",
+      "sparrow (send, per the Bitcoin Wiki adoption page)",
+      "wasabi-wallet (send, per the Bitcoin Wiki adoption page)"
+    ],
+    "sources": [
+      { "title": "BIP 78: A Simple Payjoin Proposal", "url": "https://github.com/bitcoin/bips/blob/master/bip-0078.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Wiki: PayJoin adoption (secondary)", "url": "https://en.bitcoin.it/wiki/PayJoin_adoption", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0079",
+    "kind": "BIP",
+    "number": "79",
+    "title": "Bustapay :: a practical coinjoin protocol",
+    "status": "Closed",
+    "summary": "Earlier two-party payment CoinJoin protocol, replaced by BIP 78.",
+    "relevance": "Historical only; BTCortex should not offer it.",
+    "implementedIn": [],
+    "sources": [
+      { "title": "BIP 79: Bustapay", "url": "https://github.com/bitcoin/bips/blob/master/bip-0079.mediawiki", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0352",
+    "kind": "BIP",
+    "number": "352",
+    "title": "Silent Payments",
+    "status": "Complete",
+    "summary": "Static, reusable payment addresses (sp1...) for which the sender derives a unique Taproot output from the receiver's scan and spend keys and the sum of the transaction's input public keys, so no interaction or on-chain notification is needed. Receivers must examine every eligible Taproot transaction, which needs full blocks plus the spent outputs or a precomputed tweak index. BIP version 1.1.1; requires BIPs 340, 341 and 350.",
+    "relevance": "Receiving to silent-payment wallets (for example in Sparrow) needs an indexing server: frigate (remote scanning with ephemeral keys, requires txindex) or a tweak server such as blindbit-oracle. Neither works with a pruned node, so BTCortex must gate the feature on an unpruned node.",
+    "implementedIn": [
+      "frigate 1.6.1 (silent-payments Electrum server)",
+      "blindbit-oracle (tweak index server)",
+      "sparrow (silent-payment wallets through an SP-capable Electrum server, per the wallets research)",
+      "bitbox02 >= 9.21.0 (sending to silent-payment addresses, per the wallets research)"
+    ],
+    "sources": [
+      { "title": "BIP 352: Silent Payments", "url": "https://github.com/bitcoin/bips/blob/master/bip-0352.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Frigate README", "url": "https://github.com/sparrowwallet/frigate", "accessed": "2026-10-21" },
+      { "title": "BIP352 Silent Payments Index Server Specification (WIP)", "url": "https://github.com/silent-payments/BIP0352-index-server-specification", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0374",
+    "kind": "BIP",
+    "number": "374",
+    "title": "Discrete Log Equality Proofs",
+    "status": "Draft",
+    "summary": "Standard for 64-byte zero-knowledge discrete-logarithm-equality (DLEQ) proofs over an elliptic curve: for A = a·G and C = a·B the prover shows knowledge of a without revealing it, which is useful to prove an ECDH result correct. BIP version 0.3.0.",
+    "relevance": "Prerequisite of BIP 375 for silent-payment sending from PSBT-based (hardware) signers; relevant to BTCortex only through the wallets it configures.",
+    "implementedIn": [],
+    "sources": [
+      { "title": "BIP 374: Discrete Log Equality Proofs", "url": "https://github.com/bitcoin/bips/blob/master/bip-0374.mediawiki", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0375",
+    "kind": "BIP",
+    "number": "375",
+    "title": "Sending Silent Payments with PSBTs",
+    "status": "Draft",
+    "summary": "Additional fields and updated role responsibilities for BIP 370 PSBTv2 that add support for sending to silent payments, with per-input or global ECDH shares for each scan key accompanied by BIP 374 DLEQ proofs. BIP version 0.1.2; requires BIPs 352, 370 and 374.",
+    "relevance": "Determines whether hardware-wallet workflows coordinated through BTCortex-configured wallets can send to silent-payment addresses safely.",
+    "implementedIn": [],
+    "sources": [
+      { "title": "BIP 375: Sending Silent Payments with PSBTs", "url": "https://github.com/bitcoin/bips/blob/master/bip-0375.mediawiki", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0392",
+    "kind": "BIP",
+    "number": "392",
+    "title": "Silent Payment Output Script Descriptors",
+    "status": "Draft",
+    "summary": "Specifies sp() output script descriptors, which take silent-payment key material and describe the P2TR outputs obtained when combined with sender input public keys as defined in BIP 352. Assigned 2026-02-06; author Craig Raw; requires BIPs 341, 350, 352 and 380.",
+    "relevance": "Future watch-only import of silent-payment wallets between Sparrow, index servers and BTCortex's wallet-integration screens.",
+    "implementedIn": [],
+    "sources": [
+      { "title": "BIP 392: Silent Payment Output Script Descriptors", "url": "https://github.com/bitcoin/bips/blob/master/bip-0392.mediawiki", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0047",
+    "kind": "BIP",
+    "number": "47",
+    "title": "Reusable Payment Codes for Hierarchical Deterministic Wallets",
+    "status": "Deployed",
+    "summary": "Reusable payment codes (PayNyms) using an on-chain notification transaction to establish a shared secret from which per-payment addresses are derived. The BIP says versions 3 and later are specified outside the BIP process (Open Bitcoin Privacy Project RFC repository).",
+    "relevance": "Older reusable-address scheme used by Samourai-derived wallets and others; silent payments (BIP 352) avoid the notification transaction. Listed for completeness of the privacy standards landscape.",
+    "implementedIn": [],
+    "sources": [
+      { "title": "BIP 47: Reusable Payment Codes", "url": "https://github.com/bitcoin/bips/blob/master/bip-0047.mediawiki", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "i2p-sam-v3",
+    "kind": "specification",
+    "number": "3.3",
+    "title": "SAM V3 (Simple Anonymous Messaging) Specification",
+    "status": "Stable; page updated 2026-07, accurate for API 0.9.70",
+    "summary": "Text protocol on a router's SAM bridge (usually 127.0.0.1:7656) for non-Java applications: HELLO VERSION negotiation, DEST GENERATE (SIGNATURE_TYPE=7, Ed25519), NAMING LOOKUP, SESSION CREATE (STREAM, DATAGRAM, RAW; i2cp options such as i2cp.leaseSetEncType), STREAM CONNECT/ACCEPT/FORWARD, datagrams and, in 3.3, PRIMARY sessions with subsessions. 3.1 added the signature-type option; 3.2 added FROM_PORT/TO_PORT. The page notes that i2pd did not support most 3.2/3.3 features; i2pd 3.0.0 (2026-10-20) announces full SAM 3.3.",
+    "relevance": "Bitcoin Core's -i2psam speaks SAM 3.1 (hence I2P port 0 for Bitcoin peers). BTCortex uses a SAM HELLO handshake as the health check for a managed i2pd before enabling i2psam.",
+    "implementedIn": [
+      "i2pd (SAM bridge enabled by default; full 3.3 announced in 3.0.0)",
+      "i2p (Java router; SAM bridge off by default)",
+      "bitcoin-core >= 22.0 (SAM 3.1 client)"
+    ],
+    "sources": [
+      { "title": "I2P: SAM V3", "url": "https://i2p.net/en/docs/api/samv3/", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 doc/i2p.md", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/i2p.md", "accessed": "2026-10-21" },
+      { "title": "i2pd release 3.0.0", "url": "https://github.com/PurpleI2P/i2pd/releases/tag/3.0.0", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "i2pcontrol-api",
+    "kind": "specification",
+    "number": null,
+    "title": "I2PControl API",
+    "status": "Stable (bundled with the Java router since 0.9.39; implemented by i2pd, disabled there by default)",
+    "summary": "JSON-RPC 2.0 over HTTPS (default 127.0.0.1:7650) for monitoring and controlling an I2P router: Authenticate (password, factory default 'itoopie') returning a token, then RouterInfo, GetRate, RouterManager (Shutdown, ShutdownGraceful, Restart, RestartGraceful, Reseed, FindUpdates, Update), NetworkSetting, AdvancedSettings, Echo and I2PControl (its own settings); i2pd adds LocalDestinationInfo.",
+    "relevance": "Lets BTCortex check a managed i2pd's status and stop it cleanly on Windows, where the release build is a tray application without a console stop command.",
+    "implementedIn": [
+      "i2p (Java router)",
+      "i2pd (i2pcontrol.enabled=false by default)"
+    ],
+    "sources": [
+      { "title": "I2P: I2PControl API", "url": "https://i2p.net/en/docs/api/i2pcontrol/", "accessed": "2026-10-21" },
+      { "title": "i2pd documentation: I2PControl", "url": "https://github.com/PurpleI2P/i2pd_docs_en/blob/master/docs/devs/api/I2PControl.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "rfc-9458",
+    "kind": "other",
+    "number": "9458",
+    "title": "Oblivious HTTP",
+    "status": "Proposed Standard (RFC, January 2024)",
+    "summary": "Encapsulates HTTP requests so that a relay sees the client's address but not the request, while the gateway or target sees the request but not the client's address, provided relay and gateway do not collude.",
+    "relevance": "Transport privacy layer of BIP 77 Async Payjoin (OHTTP relays in front of the Payjoin Directory).",
+    "implementedIn": [
+      "payjoin-dev-kit",
+      "payjoin-mailroom 0.1.3 (OHTTP relay and gateway combined with the directory)"
+    ],
+    "sources": [
+      { "title": "RFC 9458: Oblivious HTTP", "url": "https://www.rfc-editor.org/rfc/rfc9458", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "rfc-1928",
+    "kind": "other",
+    "number": "1928",
+    "title": "SOCKS Protocol Version 5",
+    "status": "Proposed Standard (RFC, March 1996)",
+    "summary": "SOCKS5 proxy protocol: method negotiation, CONNECT/BIND/UDP ASSOCIATE requests and address types (IPv4, domain name, IPv6). Sending domain names rather than locally resolved addresses keeps DNS resolution at the proxy.",
+    "relevance": "Interface between Tor's SocksPort and every BTCortex-managed application (Bitcoin Core -proxy, Fulcrum tor_proxy, Electrum, Sparrow, LND and Core Lightning). Applications must pass hostnames to the proxy (remote DNS) to avoid DNS leaks.",
+    "implementedIn": [
+      "tor",
+      "arti",
+      "bitcoin-core (-proxy, -onion)",
+      "i2pd (SOCKS proxy into I2P)"
+    ],
+    "sources": [
+      { "title": "RFC 1928: SOCKS Protocol Version 5", "url": "https://www.rfc-editor.org/rfc/rfc1928", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "rfc-1929",
+    "kind": "other",
+    "number": "1929",
+    "title": "Username/Password Authentication for SOCKS V5",
+    "status": "Proposed Standard (RFC, March 1996)",
+    "summary": "Sub-negotiation for SOCKS5 username and password authentication.",
+    "relevance": "Tor reuses SOCKS5 username/password for stream isolation (IsolateSOCKSAuth) rather than access control; Bitcoin Core's proxyrandomize sends random credentials per connection, and BTCortex can give each managed application distinct credentials.",
+    "implementedIn": [
+      "tor (stream isolation)",
+      "bitcoin-core (proxyrandomize)"
+    ],
+    "sources": [
+      { "title": "RFC 1929: Username/Password Authentication for SOCKS V5", "url": "https://www.rfc-editor.org/rfc/rfc1929", "accessed": "2026-10-21" },
+      { "title": "Tor's extensions to the SOCKS protocol", "url": "https://spec.torproject.org/socks-extensions.html", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip352-index-server-spec",
+    "kind": "specification",
+    "number": null,
+    "title": "BIP352 Silent Payments Index Server Specification",
+    "status": "Work in progress (community specification; last commit 2026-05-11)",
+    "summary": "Describes service roles and stacks for silent-payment indexing (for example a Remote Scanner with ephemeral client keys, and tweak servers for light clients), self-hosted versus hosted models and the API requirements of each; lists BlindBit Oracle, Cake Wallet's esplora fork and Frigate as existing implementations.",
+    "relevance": "Frames the privacy trade-off BTCortex must explain: a remote scanner receives the scan key, a tweak server does not; self-hosting removes the third party.",
+    "implementedIn": [
+      "frigate (Remote Scanner, ephemeral)",
+      "blindbit-oracle (tweak server)"
+    ],
+    "sources": [
+      { "title": "BIP352 Silent Payments Index Server Specification (WIP)", "url": "https://github.com/silent-payments/BIP0352-index-server-specification", "accessed": "2026-10-21" }
+    ]
+  }
+]

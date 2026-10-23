@@ -1,0 +1,416 @@
+[
+  {
+    "id": "bip-0009",
+    "kind": "BIP",
+    "number": "9",
+    "title": "Version bits with timeout and delay",
+    "status": "Deployed",
+    "summary": "Mechanism for deploying soft forks in parallel through block-header version bits, with a start time, timeout and signalling threshold evaluated per 2016-block retarget period.",
+    "relevance": "Drives the soft-fork section of the node dashboard (getdeploymentinfo, getblocktemplate rules/vbavailable/vbrequired) and the unknown-deployment warnings Bitcoin Core raises. Bitcoin Knots implemented BIP110 as a modified BIP9 deployment on bit 4, so BTCortex must show which deployments a node actually enforces.",
+    "implementedIn": [
+      "bitcoin-core >= 0.12.1",
+      "bitcoin-knots (modified BIP9 temporary deployment for BIP110 from 29.3.knots20260508)"
+    ],
+    "sources": [
+      { "title": "BIP 9", "url": "https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0022",
+    "kind": "BIP",
+    "number": "22",
+    "title": "getblocktemplate - Fundamentals",
+    "status": "Deployed",
+    "summary": "Defines the getblocktemplate JSON-RPC protocol through which mining software obtains a block template (transactions, coinbase value, target, rules) from a full node and submits solved blocks.",
+    "relevance": "Mining and block-template views of the RPC workbench and any pool or solo-mining integration that talks to a managed node. Since 29.0 the curtime and mintime fields account for the BIP94 timewarp rule on all networks, so clients must use them rather than the local clock.",
+    "implementedIn": ["bitcoin-core >= 0.7.0", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 22", "url": "https://github.com/bitcoin/bips/blob/master/bip-0022.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 29.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0023",
+    "kind": "BIP",
+    "number": "23",
+    "title": "getblocktemplate - Pooled Mining",
+    "status": "Deployed",
+    "summary": "Extensions to getblocktemplate for pooled mining, including long polling, block proposals and mutable template fields.",
+    "relevance": "Long-polling and block-proposal behaviour used by mining tools connected to a managed node; relevant to BTCortex mining diagnostics.",
+    "implementedIn": ["bitcoin-core >= 0.10.0 (long polling and block proposals)", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 23", "url": "https://github.com/bitcoin/bips/blob/master/bip-0023.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0037",
+    "kind": "BIP",
+    "number": "37",
+    "title": "Connection Bloom filtering",
+    "status": "Deployed",
+    "summary": "P2P messages (filterload, filteradd, filterclear, merkleblock) that let light clients ask full nodes for transactions matching a Bloom filter.",
+    "relevance": "Exposed as the -peerbloomfilters option (default 0 since 0.19.0) and the bloomfilter whitelist permission. The configuration editor should flag enabling it as a privacy and denial-of-service trade-off.",
+    "implementedIn": ["bitcoin-core >= 0.8.0 (disabled by default since 0.19.0)", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 37", "url": "https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0054",
+    "kind": "BIP",
+    "number": "54",
+    "title": "Consensus Cleanup",
+    "status": "Complete",
+    "summary": "Proposed soft fork fixing the timewarp vulnerability, worst-case block validation time (legacy signature-operation limits), 64-byte transactions and duplicate coinbase transactions.",
+    "relevance": "Not active on mainnet. Bitcoin Core 29.1/30.0 made transactions with more than 2500 potentially executed legacy signature operations non-standard to prepare for a possible deployment, and Knots exposes the same limit as -maxtxlegacysigops; policy explanations and soft-fork monitoring in BTCortex should reference it.",
+    "implementedIn": [
+      "bitcoin-core >= 29.1 (policy limit of 2500 legacy sigops only; no consensus deployment)",
+      "bitcoin-knots (-maxtxlegacysigops, default 2500)"
+    ],
+    "sources": [
+      { "title": "BIP 54", "url": "https://github.com/bitcoin/bips/blob/master/bip-0054.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 30.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-30.0.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0094",
+    "kind": "BIP",
+    "number": "94",
+    "title": "Testnet 4",
+    "status": "Deployed",
+    "summary": "Specifies testnet4, a replacement for testnet3 with a new genesis block, a fixed 20-minute minimum-difficulty exception and a timewarp-attack mitigation.",
+    "relevance": "Testnet4 environment manager and network profiles: -testnet4 or -chain=testnet4, configuration section [testnet4], data subdirectory testnet4, P2P port 48333 and RPC port 48332. Testnet3 is deprecated since 28.0 but still supported in 31.1.",
+    "implementedIn": [
+      "bitcoin-core >= 28.0",
+      "bitcoin-knots (testnet4 hard-forked to BLAKE2b proof of work at height 150308 from 29.4.1.knots20260508)"
+    ],
+    "sources": [
+      { "title": "BIP 94", "url": "https://github.com/bitcoin/bips/blob/master/bip-0094.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 28.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-28.0.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Knots chainparams (v29.4.2.knots20260508)", "url": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/src/kernel/chainparams.cpp", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0110",
+    "kind": "BIP",
+    "number": "110",
+    "title": "Reduced Data Temporary Softfork",
+    "status": "Closed",
+    "summary": "Proposed one-year consensus restrictions on data-carrying constructs: scriptPubKeys over 34 bytes (OP_RETURN allowed up to 83 bytes), pushes and script-argument witness items over 256 bytes, spending undefined witness versions, Taproot annexes, control blocks over 257 bytes, OP_SUCCESS opcodes and OP_IF/OP_NOTIF in Tapscript, with pre-activation UTXOs exempt. Deployed on version bit 4 with a 55% threshold and mandatory signalling.",
+    "relevance": "Explains the 2026 split between Bitcoin Knots and Bitcoin Core. Enforcing nodes rejected non-signalling blocks from height 961632 (2026-08-08); Knots 29.4.1.knots20260508 and later activate the rules together with a BLAKE2b proof-of-work hard fork at height 961640. BTCortex must detect which rules a node enforces, label the chain it follows and warn before connecting other services. Bitcoin Core does not implement it.",
+    "implementedIn": [
+      "bitcoin-knots >= 29.3.knots20260508 (explicit consent required up to 29.4.knots20260508; unconditional from 29.4.1.knots20260508)"
+    ],
+    "sources": [
+      { "title": "BIP 110", "url": "https://github.com/bitcoin/bips/blob/master/bip-0110.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Knots v29.3.knots20260508 release", "url": "https://github.com/bitcoinknots/bitcoin/releases/tag/v29.3.knots20260508", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Knots v29.4.1.knots20260508 release", "url": "https://github.com/bitcoinknots/bitcoin/releases/tag/v29.4.1.knots20260508", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Optech Newsletter #418", "url": "https://bitcoinops.org/en/newsletters/2026/08/14/", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0111",
+    "kind": "BIP",
+    "number": "111",
+    "title": "NODE_BLOOM service bit",
+    "status": "Deployed",
+    "summary": "Service bit that signals support for BIP37 Bloom filtering, so nodes that disable it can be identified and peers that use filters without it can be disconnected.",
+    "relevance": "Peer service flags shown in the peer monitor (servicesnames) and tied to the -peerbloomfilters option.",
+    "implementedIn": ["bitcoin-core >= 0.13.0", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 111", "url": "https://github.com/bitcoin/bips/blob/master/bip-0111.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0125",
+    "kind": "BIP",
+    "number": "125",
+    "title": "Opt-in Full Replace-by-Fee Signaling",
+    "status": "Deployed",
+    "summary": "Defines nSequence-based signalling that a transaction may be replaced and the conditions a replacement must meet.",
+    "relevance": "Mempool replacement analysis and wallet fee bumping. Bitcoin Core treats all transactions as replaceable since 28.0 (full RBF default) and removed -mempoolfullrbf in 29.0; 31.0 replaced the BIP125 rules with feerate-diagram checks (cluster mempool); 32.0 hides the bip125-replaceable fields unless -deprecatedrpc=bip125 and deprecates -walletrbf. Knots keeps -mempoolreplacement (default fee,-optin) and -mempoolfullrbf.",
+    "implementedIn": [
+      "bitcoin-core >= 0.12.0 (opt-in); full RBF by default >= 28.0",
+      "bitcoin-knots (-mempoolreplacement)"
+    ],
+    "sources": [
+      { "title": "BIP 125", "url": "https://github.com/bitcoin/bips/blob/master/bip-0125.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 29.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-31.0.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0141",
+    "kind": "BIP",
+    "number": "141",
+    "title": "Segregated Witness (Consensus layer)",
+    "status": "Deployed",
+    "summary": "Moves signature data into a separate witness structure, introduces block weight (4 000 000 weight units maximum) and virtual size, and defines witness programs.",
+    "relevance": "Weight and virtual-size accounting in the explorer, mempool and fee tools, and the -blockmaxweight/-blockreservedweight options. 32.0 reports vsize_bip141 (raw BIP141 size) alongside vsize_adjusted (sigop-adjusted policy size).",
+    "implementedIn": ["bitcoin-core >= 0.13.1 (buried since 0.19.0)", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 141", "url": "https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki", "accessed": "2026-10-21" },
+      { "title": "32.0 release notes draft", "url": "https://github.com/bitcoin-core/bitcoin-devwiki/wiki/32.0-Release-Notes-Draft", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0152",
+    "kind": "BIP",
+    "number": "152",
+    "title": "Compact Block Relay",
+    "status": "Deployed",
+    "summary": "Relays new blocks as short transaction IDs so peers can reconstruct them from their mempools, with high-bandwidth and low-bandwidth modes.",
+    "relevance": "Block-propagation diagnostics in the peer monitor (getpeerinfo bip152_hb_to and bip152_hb_from) and the -blockreconstructionextratxn option; poor mempool coverage (for example -blocksonly) degrades reconstruction.",
+    "implementedIn": ["bitcoin-core >= 0.13.0", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 152", "url": "https://github.com/bitcoin/bips/blob/master/bip-0152.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0155",
+    "kind": "BIP",
+    "number": "155",
+    "title": "addrv2 message",
+    "status": "Deployed",
+    "summary": "Address-relay message supporting variable-length network addresses such as Tor v3, I2P and CJDNS.",
+    "relevance": "Needed for onion, I2P and CJDNS peers; the peer monitor and getnodeaddresses network filters (ipv4, ipv6, onion, i2p, cjdns) depend on it.",
+    "implementedIn": ["bitcoin-core >= 0.21.0", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 155", "url": "https://github.com/bitcoin/bips/blob/master/bip-0155.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0157",
+    "kind": "BIP",
+    "number": "157",
+    "title": "Client Side Block Filtering",
+    "status": "Deployed",
+    "summary": "P2P protocol (getcfilters, getcfheaders, getcfcheckpt) through which light clients download compact block filters from full nodes, signalled by the NODE_COMPACT_FILTERS service bit.",
+    "relevance": "Configuration option -peerblockfilters (requires -blockfilterindex=basic) to serve light clients such as Neutrino-based wallets from a managed node; exposure should be an explicit choice.",
+    "implementedIn": ["bitcoin-core >= 0.21.0 (serving filters to peers)", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 157", "url": "https://github.com/bitcoin/bips/blob/master/bip-0157.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core init.cpp (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/init.cpp", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0158",
+    "kind": "BIP",
+    "number": "158",
+    "title": "Compact Block Filters for Light Clients",
+    "status": "Deployed",
+    "summary": "Defines the basic block filter (Golomb-coded set of scriptPubKeys spent and created in a block) and filter headers.",
+    "relevance": "-blockfilterindex=basic enables getblockfilter, the REST blockfilter endpoints and fast wallet rescans via scanblocks; the index is compatible with pruning (it holds prune locks until indexed). Sparrow recommends it for faster rescans with Bitcoin Core 25 or later.",
+    "implementedIn": ["bitcoin-core >= 0.19.0 (index)", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 158", "url": "https://github.com/bitcoin/bips/blob/master/bip-0158.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core blockfilterindex.h (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/index/blockfilterindex.h", "accessed": "2026-10-21" },
+      { "title": "Sparrow: Connect to a node", "url": "https://sparrowwallet.com/docs/connect-node.html", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0159",
+    "kind": "BIP",
+    "number": "159",
+    "title": "NODE_NETWORK_LIMITED service bit",
+    "status": "Deployed",
+    "summary": "Service bit for pruned nodes that can serve at least the last 288 blocks.",
+    "relevance": "Pruned node profiles (the default for constrained Windows machines) advertise NODE_NETWORK_LIMITED instead of NODE_NETWORK; peers and the peer monitor should reflect that such nodes cannot serve historical blocks.",
+    "implementedIn": ["bitcoin-core >= 0.16.0 (signalled); >= 0.17.0 (connects to such peers)", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 159", "url": "https://github.com/bitcoin/bips/blob/master/bip-0159.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0323",
+    "kind": "BIP",
+    "number": "323",
+    "title": "24 nVersion bits for general purpose use",
+    "status": "Draft",
+    "summary": "Reserves 24 block-header version bits for general-purpose use (for example by mining hardware) rather than soft-fork signalling.",
+    "relevance": "From 32.0 (per the release-notes draft) Bitcoin Core ignores bits 5 to 28 for soft-fork signalling and no longer warns about unknown deployments when they are set, which changes the warnings BTCortex surfaces.",
+    "implementedIn": ["bitcoin-core >= 32.0 (per the release-notes draft; not yet released on 2026-10-21)"],
+    "sources": [
+      { "title": "BIP 323", "url": "https://github.com/bitcoin/bips/blob/master/bip-0323.mediawiki", "accessed": "2026-10-21" },
+      { "title": "32.0 release notes draft", "url": "https://github.com/bitcoin-core/bitcoin-devwiki/wiki/32.0-Release-Notes-Draft", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0324",
+    "kind": "BIP",
+    "number": "324",
+    "title": "Version 2 P2P Encrypted Transport Protocol",
+    "status": "Deployed",
+    "summary": "Opportunistically encrypted, pseudorandom-looking P2P transport using ElligatorSwift key exchange, with session IDs for optional authentication and the NODE_P2P_V2 service bit; replaces BIP151.",
+    "relevance": "Peer monitor shows transport_protocol_type and session_id from getpeerinfo; -v2transport (default 1 since 27.0). The 31.0 private-broadcast IP leak was triggered by the v2-to-v1 fallback, so the transport matters for privacy diagnostics.",
+    "implementedIn": ["bitcoin-core >= 26.0 (off by default); default on >= 27.0", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 324", "url": "https://github.com/bitcoin/bips/blob/master/bip-0324.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" },
+      { "title": "Private Broadcast May Reveal Sender IP Address in Bitcoin Core 31.0", "url": "https://bitcoincore.org/en/2026/06/06/privatebroadcast-ip-leak/", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0325",
+    "kind": "BIP",
+    "number": "325",
+    "title": "Signet",
+    "status": "Complete",
+    "summary": "Test network where blocks must additionally satisfy a signature challenge script, giving a predictable, centrally signed chain; custom signets use a different challenge.",
+    "relevance": "Signet environment manager and custom signets (-signet, -signetchallenge, -signetseednode; getblockchaininfo returns signet_challenge). All signets use the signet/ data subdirectory, so each custom signet needs its own data directory. Ports 38333 and 38332.",
+    "implementedIn": ["bitcoin-core >= 0.21.0", "bitcoin-knots (adds -signetblocktime for custom signets)"],
+    "sources": [
+      { "title": "BIP 325", "url": "https://github.com/bitcoin/bips/blob/master/bip-0325.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core chainparamsbase.cpp (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/chainparamsbase.cpp", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0330",
+    "kind": "BIP",
+    "number": "330",
+    "title": "Transaction announcements reconciliation",
+    "status": "Draft",
+    "summary": "Erlay: set reconciliation of transaction announcements between peers to reduce relay bandwidth.",
+    "relevance": "Present in Bitcoin Core only as the debug-only -txreconciliation option (default 0); the configuration editor should mark it experimental and hidden.",
+    "implementedIn": ["bitcoin-core (partial, debug-only -txreconciliation, off by default in 31.1)"],
+    "sources": [
+      { "title": "BIP 330", "url": "https://github.com/bitcoin/bips/blob/master/bip-0330.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core net_processing.h (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/net_processing.h", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0331",
+    "kind": "BIP",
+    "number": "331",
+    "title": "Ancestor Package Relay",
+    "status": "Draft",
+    "summary": "P2P messages for relaying a transaction together with its unconfirmed ancestors as a package.",
+    "relevance": "Not implemented as P2P messages in Bitcoin Core; Core instead performs opportunistic one-parent-one-child (1p1c) package relay over the existing protocol (28.0+, extended in 30.0 and 31.0) and accepts packages through the submitpackage RPC. BTCortex's package-relay explanations must not claim BIP331 support.",
+    "implementedIn": [],
+    "sources": [
+      { "title": "BIP 331", "url": "https://github.com/bitcoin/bips/blob/master/bip-0331.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 28.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-28.0.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0339",
+    "kind": "BIP",
+    "number": "339",
+    "title": "WTXID-based transaction relay",
+    "status": "Deployed",
+    "summary": "Announces and requests transactions by witness transaction ID to avoid repeatedly downloading malleated witnesses.",
+    "relevance": "Transaction-relay diagnostics and mempool inspection; wtxid appears in mempool RPC output and ZMQ consumers must not confuse txid and wtxid.",
+    "implementedIn": ["bitcoin-core >= 0.21.0", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 339", "url": "https://github.com/bitcoin/bips/blob/master/bip-0339.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0340",
+    "kind": "BIP",
+    "number": "340",
+    "title": "Schnorr Signatures for secp256k1",
+    "status": "Deployed",
+    "summary": "Schnorr signature scheme over secp256k1 with 32-byte x-only public keys and 64-byte signatures.",
+    "relevance": "Script analysis, transaction decoding and Taproot tooling in the developer toolkit; MuSig2 (BIP327) support in Core 30.0/31.0 builds on it.",
+    "implementedIn": ["bitcoin-core >= 0.21.0 (validation); always active >= 24.0", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 340", "url": "https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0341",
+    "kind": "BIP",
+    "number": "341",
+    "title": "Taproot: SegWit version 1 spending rules",
+    "status": "Deployed",
+    "summary": "SegWit version 1 outputs (P2TR) with key-path and script-path spending through a Merkle tree of scripts, new signature hashing and the annex.",
+    "relevance": "Transaction decoder, descriptor and script tools; getdeploymentinfo no longer lists taproot in 32.0 (use script_flags). On Knots' chain BIP110 temporarily invalidates the annex and control blocks over 257 bytes for new outputs.",
+    "implementedIn": ["bitcoin-core >= 0.21.1 (mainnet activation); always active >= 24.0", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 341", "url": "https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki", "accessed": "2026-10-21" },
+      { "title": "32.0 release notes draft", "url": "https://github.com/bitcoin-core/bitcoin-devwiki/wiki/32.0-Release-Notes-Draft", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0342",
+    "kind": "BIP",
+    "number": "342",
+    "title": "Validation of Taproot Scripts",
+    "status": "Deployed",
+    "summary": "Tapscript: script semantics for Taproot leaves, including OP_CHECKSIGADD, OP_SUCCESS upgrade opcodes and revised resource limits.",
+    "relevance": "Script analysis and Miniscript tooling; Knots' BIP110 rules restrict OP_SUCCESS and OP_IF/OP_NOTIF in new Tapscript spends on its chain, which wallet tooling must account for when targeting a Knots node.",
+    "implementedIn": ["bitcoin-core >= 0.21.1 (mainnet activation); always active >= 24.0", "bitcoin-knots"],
+    "sources": [
+      { "title": "BIP 342", "url": "https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki", "accessed": "2026-10-21" },
+      { "title": "BIP 110", "url": "https://github.com/bitcoin/bips/blob/master/bip-0110.mediawiki", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0431",
+    "kind": "BIP",
+    "number": "431",
+    "title": "Topology Restrictions for Pinning",
+    "status": "Draft",
+    "summary": "Topologically Restricted Until Confirmation (TRUC) policy for nVersion=3 transactions: at most one unconfirmed parent and one child, a 10 000 vB size limit, sibling eviction and zero-fee parents in packages.",
+    "relevance": "Mempool policy explanations, package and CPFP analysis, and Lightning anchor-channel compatibility. Core relays TRUC since 28.0 and its wallet can create and spend TRUC transactions since 30.0 (version parameter on createrawtransaction, createpsbt, send, sendall, walletcreatefundedpsbt). Knots' -mempooltruc defaults to 'accept', i.e. it does not enforce TRUC limits by default.",
+    "implementedIn": ["bitcoin-core >= 28.0 (relay policy); wallet support >= 30.0", "bitcoin-knots (-mempooltruc=reject|accept|enforce, default accept)"],
+    "sources": [
+      { "title": "BIP 431", "url": "https://github.com/bitcoin/bips/blob/master/bip-0431.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 28.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-28.0.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Knots example bitcoin.conf (v29.4.2.knots20260508)", "url": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/share/examples/bitcoin.conf", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "bip-0433",
+    "kind": "BIP",
+    "number": "433",
+    "title": "Pay to Anchor (P2A)",
+    "status": "Draft",
+    "summary": "Standard keyless anchor output (witness v1, 2-byte program 0x4e73) that anyone can spend with an empty witness, used for fee bumping by child-pays-for-parent.",
+    "relevance": "Ephemeral-anchor and CPFP analysis in the mempool tools. Spending P2A is standard in Core since 28.0 and ephemeral dust (one dust output in a zero-fee transaction that must be spent in the same package) since 29.0. Knots controls it with -permitbareanchor and -permitephemeral.",
+    "implementedIn": ["bitcoin-core >= 28.0 (spending standard); ephemeral dust >= 29.0", "bitcoin-knots (-permitephemeral default anchor,-send,-dust)"],
+    "sources": [
+      { "title": "BIP 433", "url": "https://github.com/bitcoin/bips/blob/master/bip-0433.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 29.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "json-rpc-2-0",
+    "kind": "specification",
+    "number": null,
+    "title": "JSON-RPC 2.0 Specification",
+    "status": "Published (origin 2010-03-26, updated 2013-01-04)",
+    "summary": "Stateless, transport-agnostic remote procedure call protocol encoded in JSON: request and response objects, error objects with reserved codes (-32700 to -32600 range), notifications without id and batch arrays.",
+    "relevance": "Bitcoin Core 28.0+ answers strictly per JSON-RPC 2.0 when a request carries \"jsonrpc\": \"2.0\" (HTTP 200 for RPC errors, HTTP 204 for notifications) and keeps legacy 1.1 behaviour otherwise (HTTP 400/404/500 on errors). BTCortex's RPC client should always send 2.0 requests and must handle Core's documented deviation of returning an empty array for an empty batch.",
+    "implementedIn": ["bitcoin-core >= 28.0", "bitcoin-knots >= 28.1.knots20250305"],
+    "sources": [
+      { "title": "JSON-RPC 2.0 Specification", "url": "https://www.jsonrpc.org/specification", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core doc/JSON-RPC-interface.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/JSON-RPC-interface.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core httprpc.cpp (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/httprpc.cpp", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "openrpc",
+    "kind": "specification",
+    "number": null,
+    "title": "OpenRPC Specification",
+    "status": "Published (version 1.4.x)",
+    "summary": "Language-agnostic interface description for JSON-RPC 2.0 APIs, including method, parameter and result schemas and the rpc.discover service-discovery method.",
+    "relevance": "Bitcoin Core 32.0 (release-notes draft) adds getopenrpcinfo and rpc.discover returning an OpenRPC 1.4.1 document of the node's RPCs; BTCortex can build its version-aware RPC catalogue and typed forms from it, falling back to parsing help output for older versions.",
+    "implementedIn": ["bitcoin-core >= 32.0 (per the release-notes draft; not yet released on 2026-10-21)"],
+    "sources": [
+      { "title": "OpenRPC Specification", "url": "https://spec.open-rpc.org/", "accessed": "2026-10-21" },
+      { "title": "32.0 release notes draft", "url": "https://github.com/bitcoin-core/bitcoin-devwiki/wiki/32.0-Release-Notes-Draft", "accessed": "2026-10-21" }
+    ]
+  }
+]

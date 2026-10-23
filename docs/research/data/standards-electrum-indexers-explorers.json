@@ -1,0 +1,124 @@
+[
+  {
+    "id": "electrum-protocol",
+    "kind": "specification",
+    "number": null,
+    "title": "Electrum Protocol",
+    "status": "Living specification maintained in spesmilo/electrum-protocol; latest protocol version 1.7 (merged 2026-07-01). Versions in use: 1.4, 1.4.2, 1.6 and 1.7; 1.5 was skipped for Bitcoin.",
+    "summary": "Client-server JSON-RPC protocol for light wallets. Messages are newline-delimited JSON-RPC over TCP or TLS (WebSocket messages are framed instead, without newlines); JSON-RPC 2.0 is encouraged and batch requests are allowed. Wallets identify outputs by script hash (SHA-256 of the scriptPubKey, byte-reversed hex). server.version negotiates the version; from 1.6 it must be the first message and servers must ignore extra arguments. Core methods: server.version, server.features (genesis_hash, protocol_min, protocol_max, hosts, server_version; 'pruning' is the per-address history limit, unrelated to bitcoind pruning), server.ping, server.banner, server.peers.subscribe, blockchain.headers.subscribe, blockchain.block.header(s) with optional cp_height merkle proofs, blockchain.estimatefee, blockchain.transaction.get/get_merkle/id_from_pos/broadcast, and mempool.get_fee_histogram. Version history: 1.4 removed deserialised headers and added cp_height and id_from_pos. 1.4.2 added blockchain.scripthash.unsubscribe. 1.6 mandated canonical mempool ordering for script-hash status, returned headers as a list, and added a mode argument to estimatefee, blockchain.transaction.broadcast_package (submitpackage) and mempool.get_info; it removed blockchain.relayfee. 1.7 replaced blockchain.scripthash.* with blockchain.scriptpubkey.* (dict results, notifications after reorgs) and added blockchain.outpoint.subscribe/get_status/unsubscribe, blockchain.transaction.testmempoolaccept and mempool.recent; server.ping may also be an unsolicited notification, and hash_function was removed from server.features. The specification also discusses traffic-analysis countermeasures (padding, batching, TLS record padding).",
+    "relevance": "BTCortex's Electrum-server health checks and compatibility diagnostics (spec section 7) use it: connect, server.version with a [min, max] range, server.features to compare genesis_hash with the managed node, then blockchain.headers.subscribe to compare the tip height with bitcoind getblockcount. Address lookups in BTCortex's native explorer (spec section 12) are only offered when an Electrum server is connected. Version support differs: Electrum 4.8.2 negotiates 1.4-1.6, Sparrow offers 1.3-1.4.2, electrs supports only 1.4, Fulcrum 1.4-1.6 and ElectrumX 2.0 1.4-1.7. BTCortex's own client should implement 1.4 with optional 1.6 features and must not assume 1.7 methods.",
+    "implementedIn": [
+      "electrumx >= 2.0.0 (1.4 to 1.7)",
+      "electrumx 1.19.0 to 1.20.0 (1.4 to 1.6)",
+      "fulcrum >= 2.1.0 (1.4 to 1.6; BTC additions blockchain.scripthash.get_status from 2.1.1)",
+      "electrs 0.12.0 (1.4 only)",
+      "blockstream-electrs (1.4)",
+      "mempool-electrs 3.3.0 (1.4)",
+      "electrum-personal-server 0.2.4 (1.1 to 1.4; incompatible with Bitcoin Core 30 and later)",
+      "electrum 4.7.0 to 4.8.2 (client, 1.4 to 1.6)",
+      "sparrow (client; server.version offers 1.3 and 1.4.2)",
+      "frigate (silent-payments extension; 1.6 requires Bitcoin Core 28 or later)"
+    ],
+    "sources": [
+      { "title": "spesmilo/electrum-protocol README", "url": "https://github.com/spesmilo/electrum-protocol", "accessed": "2026-10-21" },
+      { "title": "Electrum protocol: protocol changes", "url": "https://github.com/spesmilo/electrum-protocol/blob/master/docs/protocol-changes.rst", "accessed": "2026-10-21" },
+      { "title": "Electrum protocol: basics", "url": "https://github.com/spesmilo/electrum-protocol/blob/master/docs/protocol-basics.rst", "accessed": "2026-10-21" },
+      { "title": "Electrum protocol: methods", "url": "https://github.com/spesmilo/electrum-protocol/blob/master/docs/protocol-methods.rst", "accessed": "2026-10-21" },
+      { "title": "electrum-protocol commit feed (1.7 merge 2026-07-01)", "url": "https://github.com/spesmilo/electrum-protocol/commits.atom", "accessed": "2026-10-21" },
+      { "title": "Electrum version.py (client protocol range)", "url": "https://github.com/spesmilo/electrum/blob/master/electrum/version.py", "accessed": "2026-10-21" },
+      { "title": "Electrum RELEASE-NOTES", "url": "https://github.com/spesmilo/electrum/blob/master/RELEASE-NOTES", "accessed": "2026-10-21" },
+      { "title": "Sparrow ElectrumServer.java (SUPPORTED_VERSIONS)", "url": "https://github.com/sparrowwallet/sparrow/blob/master/src/main/java/com/sparrowwallet/sparrow/net/ElectrumServer.java", "accessed": "2026-10-21" },
+      { "title": "ElectrumX changelog", "url": "https://github.com/spesmilo/electrumx/blob/master/docs/changelog.rst", "accessed": "2026-10-21" },
+      { "title": "Fulcrum src/ServerMisc.h", "url": "https://github.com/cculianu/Fulcrum/blob/master/src/ServerMisc.h", "accessed": "2026-10-21" },
+      { "title": "electrs src/electrum.rs", "url": "https://github.com/romanz/electrs/blob/master/src/electrum.rs", "accessed": "2026-10-21" },
+      { "title": "Frigate README", "url": "https://github.com/sparrowwallet/frigate/blob/master/README.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "electrum-cash-protocol",
+    "kind": "specification",
+    "number": null,
+    "title": "Electrum Cash Protocol",
+    "status": "Living specification (cculianu/electrum-cash-protocol); latest documented version 1.6.0",
+    "summary": "Fork of the Electrum protocol documentation maintained by Fulcrum's author for Bitcoin Cash, Bitcoin and Litecoin servers. Versions 1.4.1 to 1.4.5 and 1.5.0 to 1.5.3 add Bitcoin Cash features (CashTokens token filters and token data, RPA reusable-address methods) and methods to get the latest header and tip height and to unsubscribe from headers. 1.6.0 adopts the Bitcoin-side 1.6 changes from spesmilo/electrum-protocol: canonical mempool ordering, an estimatefee mode argument, headers returned as arrays, broadcast_package, and mempool.get_info replacing blockchain.relayfee.",
+    "relevance": "Fulcrum documents its protocol here rather than in spesmilo/electrum-protocol, so BTCortex's compatibility checks for Fulcrum must treat Electrum Cash 1.6 as equivalent to Electrum 1.6 for Bitcoin and must not expect BCH-only methods (RPA, tokens) on a BTC server.",
+    "implementedIn": [
+      "fulcrum >= 2.1.0 (Electrum Cash protocol 1.6)"
+    ],
+    "sources": [
+      { "title": "Electrum Cash protocol changes", "url": "https://electrum-cash-protocol.readthedocs.io/en/latest/protocol-changes.html", "accessed": "2026-10-21" },
+      { "title": "Fulcrum releases feed (2.1.0 notes)", "url": "https://github.com/cculianu/Fulcrum/releases.atom", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "esplora-http-api",
+    "kind": "specification",
+    "number": null,
+    "title": "Esplora HTTP API",
+    "status": "Maintained API reference (Blockstream/esplora API.md)",
+    "summary": "JSON-over-REST API with amounts in satoshis: GET /tx/:txid (plus /status, /hex, /raw, /merkleblock-proof, /merkle-proof, /outspend/:vout, /outspends), POST /tx and POST /txs/package; GET /address/:address and /scripthash/:hash with /txs, /txs/chain[/:last_seen_txid], /txs/mempool and /utxo; GET /address-prefix/:prefix; GET /block/:hash (plus /header, /status, /txs[/:start_index], /txids, /txid/:index, /raw), /block-height/:height, /blocks[/:start_height], /blocks/tip/height and /blocks/tip/hash; GET /mempool, /mempool/txids, /mempool/recent; GET /fee-estimates; optional GET /block-template; Elements asset endpoints. Defines the transaction and block JSON formats.",
+    "relevance": "A single Esplora client in BTCortex can read self-hosted esplora-electrs or mempool/electrs back ends, the mempool back end's Esplora-style paths, and, after explicit opt-in and with external labelling, blockstream.info and mempool.space. Script-hash endpoints allow address lookups without revealing addresses in URL form, but still reveal the script to the provider.",
+    "implementedIn": [
+      "blockstream-electrs (default 127.0.0.1:3000)",
+      "mempool-electrs 3.3.0 (Esplora-style, with extensions)",
+      "esplora (front-end consumer)",
+      "blockstream-info-api (public instance)",
+      "mempool (Esplora-style paths in its own back end; full compatibility not verified)"
+    ],
+    "sources": [
+      { "title": "Esplora HTTP API", "url": "https://github.com/Blockstream/esplora/blob/master/API.md", "accessed": "2026-10-21" },
+      { "title": "Blockstream/electrs README (HTTP API options)", "url": "https://github.com/Blockstream/electrs/blob/new-index/README.md", "accessed": "2026-10-21" },
+      { "title": "mempool/electrs README", "url": "https://github.com/mempool/electrs/blob/mempool/README.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "mempool-api",
+    "kind": "specification",
+    "number": null,
+    "title": "Mempool REST and WebSocket API",
+    "status": "Maintained API reference (mempool.space/docs/api, generated from the mempool repository)",
+    "summary": "REST API under /api and /api/v1 (general and difficulty adjustment, prices, addresses, assets, blocks, mining pools and hashrate, fees such as /api/v1/fees/recommended and /api/v1/fees/mempool-blocks, mempool, transactions, Lightning statistics and nodes, accelerator) plus a WebSocket service at /api/v1/ws for live blocks, projected mempool blocks, statistics and address or transaction tracking. The mempool.space instance enforces rate limits (HTTP 429, possible bans) without publishing the numbers. Self-hosted instances expose the same API on the back end (port 8999).",
+    "relevance": "Lets BTCortex reuse one client for a self-hosted mempool instance and, as a labelled external provider, mempool.space fee estimates. Mempool's fee recommendation algorithm (median feerates of projected blocks) differs from Bitcoin Core's estimatesmartfee and must be presented as a separate source.",
+    "implementedIn": [
+      "mempool 3.3.1 (self-hosted back end)",
+      "mempool-space-api (public instance)"
+    ],
+    "sources": [
+      { "title": "mempool API docs data", "url": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs-data.ts", "accessed": "2026-10-21" },
+      { "title": "mempool API docs component (rate limits, fee algorithm)", "url": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs.component.html", "accessed": "2026-10-21" },
+      { "title": "mempool API docs component (WebSocket URL)", "url": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs.component.ts", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "blockbook-api",
+    "kind": "specification",
+    "number": null,
+    "title": "Blockbook API (OpenAPI)",
+    "status": "Maintained; canonical description is openapi.yaml in the repository; API v1 is legacy and not extended",
+    "summary": "Blockbook's REST API v2 (with legacy v1 kept for Bitcoin-type compatibility) and WebSocket request/response envelope, documented as an OpenAPI specification served by every public Blockbook server at /openapi.yaml with a read-only Swagger UI at /api-docs/ (for example http://localhost:9130/api-docs/ for Bitcoin).",
+    "relevance": "Needed only if BTCortex connects to a user's existing Blockbook (for example one used with Trezor Suite). The OpenAPI file allows generated, typed clients.",
+    "implementedIn": [
+      "blockbook >= 0.6.0"
+    ],
+    "sources": [
+      { "title": "Blockbook API docs", "url": "https://github.com/trezor/blockbook/blob/master/docs/api.md", "accessed": "2026-10-21" }
+    ]
+  },
+  {
+    "id": "nbxplorer-api",
+    "kind": "specification",
+    "number": null,
+    "title": "NBXplorer REST API",
+    "status": "Maintained (API integrator guide plus a published REST reference)",
+    "summary": "REST API (default 127.0.0.1:24444, paths under /v1/cryptos/<code>/) for tracking derivation schemes (including wallet policies, BIP388), groups and standalone addresses (ADDRESS:<address>), getting unused addresses, balances, UTXOs and transactions, creating PSBTs, broadcasting and fee estimates, plus events by polling, long polling or WebSocket. HTTP Basic authentication with a credential from the .cookie file regenerated at each start.",
+    "relevance": "The integration surface between NBXplorer and BTCPay Server, and the way BTCortex can health-check an NBXplorer instance it manages for the btcpay-server profile.",
+    "implementedIn": [
+      "nbxplorer 2.6.19",
+      "btcpay-server (consumer)"
+    ],
+    "sources": [
+      { "title": "NBXplorer API integrator guide", "url": "https://github.com/btcpayserver/NBXplorer/blob/master/docs/API.md", "accessed": "2026-10-21" },
+      { "title": "NBXplorer README", "url": "https://github.com/btcpayserver/NBXplorer/blob/master/README.md", "accessed": "2026-10-21" }
+    ]
+  }
+]

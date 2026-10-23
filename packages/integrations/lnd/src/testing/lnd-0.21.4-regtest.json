@@ -1,0 +1,796 @@
+{
+  "_note": "Answers of LND 0.21.4-beta on regtest (three throwaway nodes, alice -> bob -> carol), captured on 2026-10-23 for tests. The nodes and their keys no longer exist.",
+  "state": {
+    "state": "SERVER_ACTIVE"
+  },
+  "getinfo": {
+    "version": "0.21.4-beta commit=v0.21.4-beta",
+    "commit_hash": "390b2d2b7bdcc335c183962e483f5daeceb8f0e7",
+    "identity_pubkey": "028289594c3877c139ddd5bcba4de51a5c788b45e67f1f2e2ad2662b2511c9e8d3",
+    "alias": "alice",
+    "color": "#3399ff",
+    "num_pending_channels": 1,
+    "num_active_channels": 1,
+    "num_inactive_channels": 0,
+    "num_peers": 2,
+    "block_height": 125,
+    "block_hash": "62f5a35412a649dddfa5763881a6e9c034979fb030f8d9c3da143c7991ecaf90",
+    "best_header_timestamp": "1792734046",
+    "synced_to_chain": true,
+    "synced_to_graph": true,
+    "testnet": false,
+    "chains": [
+      {
+        "chain": "bitcoin",
+        "network": "regtest"
+      }
+    ],
+    "uris": [],
+    "features": {
+      "0": {
+        "name": "data-loss-protect",
+        "is_required": true,
+        "is_known": true
+      },
+      "5": {
+        "name": "upfront-shutdown-script",
+        "is_required": false,
+        "is_known": true
+      },
+      "7": {
+        "name": "gossip-queries",
+        "is_required": false,
+        "is_known": true
+      },
+      "8": {
+        "name": "tlv-onion",
+        "is_required": true,
+        "is_known": true
+      },
+      "12": {
+        "name": "static-remote-key",
+        "is_required": true,
+        "is_known": true
+      },
+      "14": {
+        "name": "payment-addr",
+        "is_required": true,
+        "is_known": true
+      },
+      "17": {
+        "name": "multi-path-payments",
+        "is_required": false,
+        "is_known": true
+      },
+      "23": {
+        "name": "anchors-zero-fee-htlc-tx",
+        "is_required": false,
+        "is_known": true
+      },
+      "25": {
+        "name": "route-blinding",
+        "is_required": false,
+        "is_known": true
+      },
+      "27": {
+        "name": "shutdown-any-segwit",
+        "is_required": false,
+        "is_known": true
+      },
+      "30": {
+        "name": "amp",
+        "is_required": true,
+        "is_known": true
+      },
+      "31": {
+        "name": "amp",
+        "is_required": false,
+        "is_known": true
+      },
+      "35": {
+        "name": "quiescence",
+        "is_required": false,
+        "is_known": true
+      },
+      "39": {
+        "name": "onion-messages",
+        "is_required": false,
+        "is_known": true
+      },
+      "44": {
+        "name": "explicit-commitment-type",
+        "is_required": true,
+        "is_known": true
+      },
+      "261": {
+        "name": "accountable-x",
+        "is_required": false,
+        "is_known": true
+      },
+      "2023": {
+        "name": "script-enforced-lease",
+        "is_required": false,
+        "is_known": true
+      }
+    },
+    "require_htlc_interceptor": false,
+    "store_final_htlc_resolutions": false,
+    "wallet_synced": true,
+    "graph_cache_status": "GRAPH_CACHE_STATUS_LOADED"
+  },
+  "walletBalance": {
+    "total_balance": "98999671",
+    "confirmed_balance": "98999671",
+    "unconfirmed_balance": "0",
+    "locked_balance": "0",
+    "reserved_balance_anchor_chan": "20000",
+    "account_balance": {
+      "default": {
+        "confirmed_balance": "98999671",
+        "unconfirmed_balance": "0"
+      }
+    }
+  },
+  "channelBalance": {
+    "balance": "976528",
+    "pending_open_balance": "0",
+    "local_balance": {
+      "sat": "976528",
+      "msat": "976528975"
+    },
+    "remote_balance": {
+      "sat": "20001",
+      "msat": "20001025"
+    },
+    "unsettled_local_balance": {
+      "sat": "0",
+      "msat": "0"
+    },
+    "unsettled_remote_balance": {
+      "sat": "0",
+      "msat": "0"
+    },
+    "pending_open_local_balance": {
+      "sat": "0",
+      "msat": "0"
+    },
+    "pending_open_remote_balance": {
+      "sat": "296530",
+      "msat": "296530000"
+    },
+    "custom_channel_data": "AQABAA=="
+  },
+  "channels": {
+    "channels": [
+      {
+        "active": true,
+        "remote_pubkey": "028289594c3877c139ddd5bcba4de51a5c788b45e67f1f2e2ad2662b2511c9e8d3",
+        "channel_point": "4f4151c31136d6d31ead8c31f1bbf31ca118c752cd570a11a506e55e4adee93b:0",
+        "chan_id": "125344325632000",
+        "capacity": "1000000",
+        "local_balance": "20001",
+        "remote_balance": "976528",
+        "commit_fee": "2811",
+        "commit_weight": "1116",
+        "fee_per_kw": "2500",
+        "unsettled_balance": "0",
+        "total_satoshis_sent": "5000",
+        "total_satoshis_received": "25001",
+        "num_updates": "4",
+        "pending_htlcs": [],
+        "csv_delay": 144,
+        "private": false,
+        "initiator": false,
+        "chan_status_flags": "ChanStatusDefault",
+        "local_chan_reserve_sat": "10000",
+        "remote_chan_reserve_sat": "10000",
+        "static_remote_key": false,
+        "commitment_type": "ANCHORS",
+        "lifetime": "7",
+        "uptime": "7",
+        "close_address": "",
+        "push_amount_sat": "0",
+        "thaw_height": 0,
+        "local_constraints": {
+          "csv_delay": 144,
+          "chan_reserve_sat": "10000",
+          "dust_limit_sat": "354",
+          "max_pending_amt_msat": "990000000",
+          "min_htlc_msat": "1",
+          "max_accepted_htlcs": 483
+        },
+        "remote_constraints": {
+          "csv_delay": 144,
+          "chan_reserve_sat": "10000",
+          "dust_limit_sat": "354",
+          "max_pending_amt_msat": "990000000",
+          "min_htlc_msat": "1",
+          "max_accepted_htlcs": 483
+        },
+        "alias_scids": [],
+        "zero_conf": false,
+        "zero_conf_confirmed_scid": "0",
+        "peer_alias": "",
+        "peer_scid_alias": "0",
+        "memo": "",
+        "custom_channel_data": ""
+      },
+      {
+        "active": true,
+        "remote_pubkey": "02bef60534d3f98d8a15b462234292e8cabdb3c538d928ccceab00e05ed7bb87f7",
+        "channel_point": "f4bf3665f99846373fdc393da1972997ff61b496da9b704da4a60f80dfdd40c6:0",
+        "chan_id": "125344325697536",
+        "capacity": "800000",
+        "local_balance": "671530",
+        "remote_balance": "125000",
+        "commit_fee": "2810",
+        "commit_weight": "1116",
+        "fee_per_kw": "2500",
+        "unsettled_balance": "0",
+        "total_satoshis_sent": "25000",
+        "total_satoshis_received": "0",
+        "num_updates": "2",
+        "pending_htlcs": [],
+        "csv_delay": 144,
+        "private": false,
+        "initiator": true,
+        "chan_status_flags": "ChanStatusDefault",
+        "local_chan_reserve_sat": "8000",
+        "remote_chan_reserve_sat": "8000",
+        "static_remote_key": false,
+        "commitment_type": "ANCHORS",
+        "lifetime": "7",
+        "uptime": "7",
+        "close_address": "",
+        "push_amount_sat": "100000",
+        "thaw_height": 0,
+        "local_constraints": {
+          "csv_delay": 144,
+          "chan_reserve_sat": "8000",
+          "dust_limit_sat": "354",
+          "max_pending_amt_msat": "792000000",
+          "min_htlc_msat": "1",
+          "max_accepted_htlcs": 483
+        },
+        "remote_constraints": {
+          "csv_delay": 144,
+          "chan_reserve_sat": "8000",
+          "dust_limit_sat": "354",
+          "max_pending_amt_msat": "792000000",
+          "min_htlc_msat": "1",
+          "max_accepted_htlcs": 483
+        },
+        "alias_scids": [],
+        "zero_conf": false,
+        "zero_conf_confirmed_scid": "0",
+        "peer_alias": "",
+        "peer_scid_alias": "0",
+        "memo": "",
+        "custom_channel_data": ""
+      }
+    ]
+  },
+  "pendingChannels": {
+    "total_limbo_balance": "0",
+    "pending_open_channels": [
+      {
+        "channel": {
+          "remote_node_pub": "02bef60534d3f98d8a15b462234292e8cabdb3c538d928ccceab00e05ed7bb87f7",
+          "channel_point": "5e285c744305c1e5e4c618cdfa6df30f2f119615723ff34b26c0f30869e06cae:0",
+          "capacity": "300000",
+          "local_balance": "0",
+          "remote_balance": "296530",
+          "local_chan_reserve_sat": "3000",
+          "remote_chan_reserve_sat": "3000",
+          "initiator": "INITIATOR_REMOTE",
+          "commitment_type": "ANCHORS",
+          "num_forwarding_packages": "0",
+          "chan_status_flags": "",
+          "private": false,
+          "memo": "",
+          "custom_channel_data": ""
+        },
+        "commit_fee": "2810",
+        "commit_weight": "772",
+        "fee_per_kw": "2500",
+        "funding_expiry_blocks": 2016,
+        "confirmations_until_active": 1,
+        "confirmation_height": 0
+      }
+    ],
+    "pending_closing_channels": [],
+    "pending_force_closing_channels": [],
+    "waiting_close_channels": []
+  },
+  "closedChannels": {
+    "channels": []
+  },
+  "peers": {
+    "peers": [
+      {
+        "pub_key": "028289594c3877c139ddd5bcba4de51a5c788b45e67f1f2e2ad2662b2511c9e8d3",
+        "address": "127.0.0.1:61588",
+        "bytes_sent": "5809",
+        "bytes_recv": "4789",
+        "sat_sent": "5000",
+        "sat_recv": "25001",
+        "inbound": true,
+        "ping_time": "-1",
+        "sync_type": "ACTIVE_SYNC",
+        "features": {
+          "0": {
+            "name": "data-loss-protect",
+            "is_required": true,
+            "is_known": true
+          },
+          "5": {
+            "name": "upfront-shutdown-script",
+            "is_required": false,
+            "is_known": true
+          },
+          "7": {
+            "name": "gossip-queries",
+            "is_required": false,
+            "is_known": true
+          },
+          "8": {
+            "name": "tlv-onion",
+            "is_required": true,
+            "is_known": true
+          },
+          "12": {
+            "name": "static-remote-key",
+            "is_required": true,
+            "is_known": true
+          },
+          "14": {
+            "name": "payment-addr",
+            "is_required": true,
+            "is_known": true
+          },
+          "17": {
+            "name": "multi-path-payments",
+            "is_required": false,
+            "is_known": true
+          },
+          "23": {
+            "name": "anchors-zero-fee-htlc-tx",
+            "is_required": false,
+            "is_known": true
+          },
+          "25": {
+            "name": "route-blinding",
+            "is_required": false,
+            "is_known": true
+          },
+          "27": {
+            "name": "shutdown-any-segwit",
+            "is_required": false,
+            "is_known": true
+          },
+          "31": {
+            "name": "amp",
+            "is_required": false,
+            "is_known": true
+          },
+          "35": {
+            "name": "quiescence",
+            "is_required": false,
+            "is_known": true
+          },
+          "39": {
+            "name": "onion-messages",
+            "is_required": false,
+            "is_known": true
+          },
+          "44": {
+            "name": "explicit-commitment-type",
+            "is_required": true,
+            "is_known": true
+          },
+          "2023": {
+            "name": "script-enforced-lease",
+            "is_required": false,
+            "is_known": true
+          }
+        },
+        "errors": [],
+        "flap_count": 1,
+        "last_flap_ns": "1792734033086880500",
+        "last_ping_payload": ""
+      },
+      {
+        "pub_key": "02bef60534d3f98d8a15b462234292e8cabdb3c538d928ccceab00e05ed7bb87f7",
+        "address": "127.0.0.1:60480",
+        "bytes_sent": "5311",
+        "bytes_recv": "3134",
+        "sat_sent": "25000",
+        "sat_recv": "0",
+        "inbound": false,
+        "ping_time": "-1",
+        "sync_type": "ACTIVE_SYNC",
+        "features": {
+          "0": {
+            "name": "data-loss-protect",
+            "is_required": true,
+            "is_known": true
+          },
+          "5": {
+            "name": "upfront-shutdown-script",
+            "is_required": false,
+            "is_known": true
+          },
+          "7": {
+            "name": "gossip-queries",
+            "is_required": false,
+            "is_known": true
+          },
+          "8": {
+            "name": "tlv-onion",
+            "is_required": true,
+            "is_known": true
+          },
+          "12": {
+            "name": "static-remote-key",
+            "is_required": true,
+            "is_known": true
+          },
+          "14": {
+            "name": "payment-addr",
+            "is_required": true,
+            "is_known": true
+          },
+          "17": {
+            "name": "multi-path-payments",
+            "is_required": false,
+            "is_known": true
+          },
+          "23": {
+            "name": "anchors-zero-fee-htlc-tx",
+            "is_required": false,
+            "is_known": true
+          },
+          "25": {
+            "name": "route-blinding",
+            "is_required": false,
+            "is_known": true
+          },
+          "27": {
+            "name": "shutdown-any-segwit",
+            "is_required": false,
+            "is_known": true
+          },
+          "31": {
+            "name": "amp",
+            "is_required": false,
+            "is_known": true
+          },
+          "35": {
+            "name": "quiescence",
+            "is_required": false,
+            "is_known": true
+          },
+          "39": {
+            "name": "onion-messages",
+            "is_required": false,
+            "is_known": true
+          },
+          "44": {
+            "name": "explicit-commitment-type",
+            "is_required": true,
+            "is_known": true
+          },
+          "2023": {
+            "name": "script-enforced-lease",
+            "is_required": false,
+            "is_known": true
+          }
+        },
+        "errors": [],
+        "flap_count": 1,
+        "last_flap_ns": "1792734033084173500",
+        "last_ping_payload": ""
+      }
+    ]
+  },
+  "fees": {
+    "channel_fees": [
+      {
+        "chan_id": "125344325632000",
+        "channel_point": "4f4151c31136d6d31ead8c31f1bbf31ca118c752cd570a11a506e55e4adee93b:0",
+        "base_fee_msat": "1000",
+        "fee_per_mil": "1",
+        "fee_rate": 1e-6,
+        "inbound_base_fee_msat": 0,
+        "inbound_fee_per_mil": 0
+      },
+      {
+        "chan_id": "125344325697536",
+        "channel_point": "f4bf3665f99846373fdc393da1972997ff61b496da9b704da4a60f80dfdd40c6:0",
+        "base_fee_msat": "1000",
+        "fee_per_mil": "1",
+        "fee_rate": 1e-6,
+        "inbound_base_fee_msat": 0,
+        "inbound_fee_per_mil": 0
+      }
+    ],
+    "day_fee_sum": "1",
+    "week_fee_sum": "1",
+    "month_fee_sum": "1"
+  },
+  "forwarding": {
+    "forwarding_events": [
+      {
+        "timestamp": "1792734036",
+        "chan_id_in": "125344325632000",
+        "chan_id_out": "125344325697536",
+        "amt_in": "25001",
+        "amt_out": "25000",
+        "fee": "1",
+        "fee_msat": "1025",
+        "amt_in_msat": "25001025",
+        "amt_out_msat": "25000000",
+        "timestamp_ns": "1792734036694468300",
+        "peer_alias_in": "",
+        "peer_alias_out": "",
+        "incoming_htlc_id": "0",
+        "outgoing_htlc_id": "0"
+      }
+    ],
+    "last_offset_index": 1
+  },
+  "invoices": {
+    "invoices": [
+      {
+        "memo": "Bob pays alice",
+        "r_preimage": "sQCT/sh6YyyPJTvP/jx1s6wXPKqMJWBX47I1erubDrM=",
+        "r_hash": "n1KUdxYCXFFxnncN0uCyz57aw6qXTt2HhO2eUOPRxcA=",
+        "value": "5000",
+        "value_msat": "5000000",
+        "settled": true,
+        "creation_date": "1792734036",
+        "settle_date": "1792734036",
+        "payment_request": "lnbcrt50u1p4d4u65pp5naffgackqfw9zuv7wuxa9c9je70d4sa2ja8dmpuyak09pc73chqqdqhgfhkygrsv9uhxgrpd35kxegcqzzsxqyz5vqsp5fznhwe8t6k7ejshyvwm9qje6vlft9xlvya9ufuugz0zvpz86v6vq9qxpqysgqnexc45g49rq8sh8kk63lrk7h7kd34h3c3dzpputz8qv79rd2ujn8vry4geak0rq9nk9hkrpj7wu72xl52delgsmlmen9ky8c4qyaaxgpp69ktn",
+        "description_hash": "",
+        "expiry": "86400",
+        "fallback_addr": "",
+        "cltv_expiry": "80",
+        "route_hints": [],
+        "private": false,
+        "add_index": "1",
+        "settle_index": "1",
+        "amt_paid": "5000000",
+        "amt_paid_sat": "5000",
+        "amt_paid_msat": "5000000",
+        "state": "SETTLED",
+        "htlcs": [
+          {
+            "chan_id": "125344325632000",
+            "htlc_index": "0",
+            "amt_msat": "5000000",
+            "accept_height": 119,
+            "accept_time": "1792734036",
+            "resolve_time": "1792734036",
+            "expiry_height": 202,
+            "state": "SETTLED",
+            "custom_records": {
+              "106823": "AA=="
+            },
+            "mpp_total_amt_msat": "5000000",
+            "amp": null,
+            "custom_channel_data": "/gABoUcBAA=="
+          }
+        ],
+        "features": {
+          "8": {
+            "name": "tlv-onion",
+            "is_required": true,
+            "is_known": true
+          },
+          "14": {
+            "name": "payment-addr",
+            "is_required": true,
+            "is_known": true
+          },
+          "17": {
+            "name": "multi-path-payments",
+            "is_required": false,
+            "is_known": true
+          },
+          "25": {
+            "name": "route-blinding",
+            "is_required": false,
+            "is_known": true
+          }
+        },
+        "is_keysend": false,
+        "payment_addr": "SKd3ZOvVvZlC5GO2UEs6Z9Kym+wnS8TziBPEwIj6Zpg=",
+        "is_amp": false,
+        "amp_invoice_state": {},
+        "is_blinded": false,
+        "blinded_path_config": null
+      },
+      {
+        "memo": "Never paid",
+        "r_preimage": "yRsVk9nID2CQ8ALKuBnyGbydpgrHY6BB4tHnbTs4KLQ=",
+        "r_hash": "uJZ/6XDf9mbj2D0lx9Ndtmg4FI490l+90rORAsIDons=",
+        "value": "1234",
+        "value_msat": "1234000",
+        "settled": false,
+        "creation_date": "1792734036",
+        "settle_date": "0",
+        "payment_request": "lnbcrt12340n1p4d4u65pp5hzt8l6tsmlmxdc7c85ju056ake5rs9yw8hf9l0wjkwgs9ssr5fasdqsfejhvetjypcxz6tycqzzsxqyz5vqsp5mrl66uww85r8kch5jna2uc2dm3tkhkzscuzy58ksm6avc62mcu6s9qxpqysgqukqzmy4l6wnql99ljxexnr49kufm55ty8x4je8jf0hdclw3m6z6q4pqz7ez2cgnet8a0r3agvuttep533yt8azldwspelnr0qemzuwspqlaz8u",
+        "description_hash": "",
+        "expiry": "86400",
+        "fallback_addr": "",
+        "cltv_expiry": "80",
+        "route_hints": [],
+        "private": false,
+        "add_index": "2",
+        "settle_index": "0",
+        "amt_paid": "0",
+        "amt_paid_sat": "0",
+        "amt_paid_msat": "0",
+        "state": "OPEN",
+        "htlcs": [],
+        "features": {
+          "8": {
+            "name": "tlv-onion",
+            "is_required": true,
+            "is_known": true
+          },
+          "14": {
+            "name": "payment-addr",
+            "is_required": true,
+            "is_known": true
+          },
+          "17": {
+            "name": "multi-path-payments",
+            "is_required": false,
+            "is_known": true
+          },
+          "25": {
+            "name": "route-blinding",
+            "is_required": false,
+            "is_known": true
+          }
+        },
+        "is_keysend": false,
+        "payment_addr": "2P+tcc49Bnti9JT6rmFN3Fdr2FDHBEoe0N66zGlbxzU=",
+        "is_amp": false,
+        "amp_invoice_state": {},
+        "is_blinded": false,
+        "blinded_path_config": null
+      }
+    ],
+    "last_index_offset": "2",
+    "first_index_offset": "1"
+  },
+  "payments": {
+    "payments": [
+      {
+        "payment_hash": "cfdaa4e407ddf3fb80eaf09968a17bd5eb5f883e06ecb7ca61a6a2f79eb27469",
+        "value": "25000",
+        "creation_date": "1792734036",
+        "fee": "1",
+        "payment_preimage": "b7528bcd922d31efd910414b07c2cad6ff45ed1906b041a046e5ef228101eda5",
+        "value_sat": "25000",
+        "value_msat": "25000000",
+        "payment_request": "lnbcrt250u1p4d4u65pp5eld2feq8mhelhq827zvk3gtm6h44lzp7qmkt0jnp5630084jw35sdp9f3skygrsv9uk6etwwss8g6rjda6kw6pqvfhkycqzzsxqyz5vqsp58u54d6assl2uku77mef6z55a3du6757242vcsjneg9cnud9n4f8s9qxpqysgqmfv98ahlqj75c8wehxkk309g9rc9ngrw5munrvgsn8kj0qqy4eej04lqjuhd55mumxu6p567z3fcl40ukx6w8evg43l9rxedv8gt05gq8qdxq0",
+        "status": "SUCCEEDED",
+        "fee_sat": "1",
+        "fee_msat": "1025",
+        "creation_time_ns": "1792734036486682400",
+        "htlcs": [
+          {
+            "attempt_id": "1",
+            "status": "SUCCEEDED",
+            "route": {
+              "total_time_lock": 282,
+              "total_fees": "1",
+              "total_amt": "25001",
+              "hops": [
+                {
+                  "chan_id": "125344325632000",
+                  "chan_capacity": "25001",
+                  "amt_to_forward": "25000",
+                  "fee": "1",
+                  "expiry": 202,
+                  "amt_to_forward_msat": "25000000",
+                  "fee_msat": "1025",
+                  "pub_key": "02ea685eb96b581aedf27c544287874db0c5eaf8bbf7a627591a4a6ec3c10f0c1e",
+                  "tlv_payload": true,
+                  "mpp_record": null,
+                  "amp_record": null,
+                  "custom_records": {},
+                  "metadata": "",
+                  "blinding_point": "",
+                  "encrypted_data": "",
+                  "total_amt_msat": "0"
+                },
+                {
+                  "chan_id": "125344325697536",
+                  "chan_capacity": "25000",
+                  "amt_to_forward": "25000",
+                  "fee": "0",
+                  "expiry": 202,
+                  "amt_to_forward_msat": "25000000",
+                  "fee_msat": "0",
+                  "pub_key": "02bef60534d3f98d8a15b462234292e8cabdb3c538d928ccceab00e05ed7bb87f7",
+                  "tlv_payload": true,
+                  "mpp_record": {
+                    "payment_addr": "PylW67CH1ctz3t5ToVKdi3mvU8qqmYhKeUFxPjSzqk8=",
+                    "total_amt_msat": "25000000"
+                  },
+                  "amp_record": null,
+                  "custom_records": {},
+                  "metadata": "",
+                  "blinding_point": "",
+                  "encrypted_data": "",
+                  "total_amt_msat": "0"
+                }
+              ],
+              "total_fees_msat": "1025",
+              "total_amt_msat": "25001025",
+              "first_hop_amount_msat": "25001025",
+              "custom_channel_data": ""
+            },
+            "attempt_time_ns": "1792734036492552100",
+            "resolve_time_ns": "1792734036696459400",
+            "failure": null,
+            "preimage": "t1KLzZItMe/ZEEFLB8LK1v9F7RkGsEGgRuXvIoEB7aU="
+          }
+        ],
+        "payment_index": "1",
+        "failure_reason": "FAILURE_REASON_NONE",
+        "first_hop_custom_records": {
+          "106823": "AA=="
+        }
+      }
+    ],
+    "first_index_offset": "1",
+    "last_index_offset": "1",
+    "total_num_payments": "0"
+  },
+  "graphInfo": {
+    "graph_diameter": 2,
+    "avg_out_degree": 1.3333333333333333,
+    "max_out_degree": 1,
+    "num_nodes": 3,
+    "num_channels": 2,
+    "total_network_capacity": "1800000",
+    "avg_channel_size": 900000,
+    "min_channel_size": "800000",
+    "max_channel_size": "1000000",
+    "median_channel_size_sat": "900000",
+    "num_zombie_chans": "0"
+  },
+  "macaroons": {
+    "admin": "0201036c6e6402f801030a104e79eacd0c6f224b0e740b91fa5f94491201301a160a0761646472657373120472656164120577726974651a130a04696e666f120472656164120577726974651a170a08696e766f69636573120472656164120577726974651a210a086d616361726f6f6e120867656e6572617465120472656164120577726974651a160a076d657373616765120472656164120577726974651a170a086f6666636861696e120472656164120577726974651a160a076f6e636861696e120472656164120577726974651a140a057065657273120472656164120577726974651a180a067369676e6572120867656e657261746512047265616400000620691950cf817f3a231cd1b1890b6e14ca828c37fc15a6b4a6220f96f13ad1e886",
+    "readonly": "0201036c6e6402ac01030a104d79eacd0c6f224b0e740b91fa5f94491201301a0f0a07616464726573731204726561641a0c0a04696e666f1204726561641a100a08696e766f696365731204726561641a100a086d616361726f6f6e1204726561641a0f0a076d6573736167651204726561641a100a086f6666636861696e1204726561641a0f0a076f6e636861696e1204726561641a0d0a0570656572731204726561641a0e0a067369676e6572120472656164000006208ea101cf800ad768d46caeb98a8de8ff2d9a18af24c31d222437f478c2aab314",
+    "invoice": "0201036c6e640258030a104c79eacd0c6f224b0e740b91fa5f94491201301a160a0761646472657373120472656164120577726974651a170a08696e766f69636573120472656164120577726974651a0f0a076f6e636861696e12047265616400000620610371774ef3cbe7af1cfa6e41fdaeca791749a03de6c76415d546412fb9d5fc"
+  },
+  "errors": {
+    "noMacaroon": {
+      "code": 2,
+      "message": "expected 1 macaroon, got 0",
+      "details": []
+    },
+    "permissionDenied": {
+      "code": 2,
+      "message": "permission denied",
+      "details": []
+    },
+    "wrongMacaroon": {
+      "code": 2,
+      "message": "verification failed: signature mismatch after caveat verification",
+      "details": []
+    },
+    "towersInactive": {
+      "code": 2,
+      "message": "watchtower client not active",
+      "details": []
+    }
+  },
+  "tlsCertificate": "-----BEGIN CERTIFICATE-----\nMIICNDCCAdqgAwIBAgIRALuteBH2zCcVcUE0GvJJT9AwCgYIKoZIzj0EAwIwOzEf\nMB0GA1UEChMWbG5kIGF1dG9nZW5lcmF0ZWQgY2VydDEYMBYGA1UEAxMPREVTS1RP\nUC1WN1BLRDVWMB4XDTI2MTAyMjA1NDAyNVoXDTI3MTIxNzA1NDAyNVowOzEfMB0G\nA1UEChMWbG5kIGF1dG9nZW5lcmF0ZWQgY2VydDEYMBYGA1UEAxMPREVTS1RPUC1W\nN1BLRDVWMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE6Jh274KP5KVhPufuWlZI\ntnb6YOt0B+jRI26uk41pWyYT6K/scDgzjrz1X7anUY2D9xviOpkFuLX/l1MXRocz\nJaOBvjCBuzAOBgNVHQ8BAf8EBAMCAqQwEwYDVR0lBAwwCgYIKwYBBQUHAwEwDwYD\nVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUS3pFCvcMCr3M5319sqsqgbiHvuQwZAYD\nVR0RBF0wW4IPREVTS1RPUC1WN1BLRDVWgglsb2NhbGhvc3SCBHVuaXiCCnVuaXhw\nYWNrZXSCB2J1ZmNvbm6HBH8AAAGHEAAAAAAAAAAAAAAAAAAAAAGHBAoCAAKHBMCo\n24EwCgYIKoZIzj0EAwIDSAAwRQIgNXAkzp3OwqtdcYAV1czb5jOxHKaKMCawcNbE\n6au3pf8CIQD69CAg3nTeb214T5tIhvFZp/Rl80Ai9Fb3+8UuoXMtPg==\n-----END CERTIFICATE-----\n"
+}

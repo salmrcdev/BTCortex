@@ -1,0 +1,360 @@
+[
+  {
+    "id": "bitcoin-core",
+    "name": "Bitcoin Core",
+    "category": "full-node",
+    "catalogueEligible": true,
+    "website": "https://bitcoincore.org/",
+    "repository": "https://github.com/bitcoin/bitcoin",
+    "purpose": "Reference full-node implementation of the Bitcoin protocol: downloads, validates and relays blocks and transactions, and exposes JSON-RPC, REST and ZMQ interfaces, an optional descriptor wallet and the bitcoin-qt graphical interface.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Latest stable release 31.1 announced 2026-07-08 (files in /bin/bitcoin-core-31.1/ dated 2026-07-07). Maintained lines per the lifecycle page: 31.x, 30.x (30.3, 2026-07-08) and 29.x (29.4, announced 2026-07-13, GitHub release 2026-07-10) until 32.0 ships. 32.0rc1 tagged 2026-09-14 and 32.0rc4 on 2026-10-12 (target was 2026-10-10). Latest master commit 2026-10-20. Repository not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "31.1",
+      "date": "2026-07-08",
+      "source": "https://bitcoincore.org/en/releases/31.1/"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "Windows 10 version 1903 or later for 31.x and 32.0 (29.x and 30.x release notes say Windows 10 or later)",
+      "windowsArchitectures": ["x64"],
+      "windowsDistribution": "Authenticode-signed NSIS installer (bitcoin-31.1-win64-setup.exe, 39 221 288 bytes) and signed portable ZIP (bitcoin-31.1-win64.zip, 54 894 985 bytes) from https://bitcoincore.org/bin/bitcoin-core-31.1/; unsigned variants (-win64-setup-unsigned.exe, -win64-unsigned.zip), a debug-symbols ZIP, a codesigning tarball and a torrent are also published. No Windows ARM64 build (Guix builds only x86_64-w64-mingw32).",
+      "wsl2": "likely",
+      "docker": "community-image",
+      "other": "Linux tarballs for x86_64, aarch64, armhf, riscv64 and powerpc64 (glibc 2.31 or later, Linux kernel 3.17 or later); macOS 14 or later for 31.x (x86_64 and arm64 ZIP and tarball); Snap Store package; source builds for other Unix-like systems."
+    },
+    "interfaces": [
+      {
+        "type": "json-rpc",
+        "description": "JSON-RPC over HTTP POST on 127.0.0.1 and ::1, port 8332 mainnet, 18332 testnet3, 48332 testnet4, 38332 signet, 18443 regtest. Endpoints / and /wallet/<walletname>/ (mandatory when several wallets are loaded). JSON-RPC 1.1 behaviour by default; strict JSON-RPC 2.0 when the request contains \"jsonrpc\": \"2.0\" (since 28.0), including notifications (HTTP 204). Batch arrays are executed sequentially and always return HTTP 200. Enabled by default in bitcoind (-server=1), disabled by default in bitcoin-qt. 151 public methods in 31.1 plus 19 hidden ones; 32.0 adds getopenrpcinfo and rpc.discover (OpenRPC 1.4.1).",
+        "authentication": "HTTP Basic. Default: cookie file .cookie in the network data directory containing __cookie__:<64 hex characters>, regenerated at every start and deleted on clean shutdown. Static credentials: rpcauth=<user>:<salt>$<HMAC-SHA256(key=salt, msg=password)> (share/rpcauth/rpcauth.py). rpcuser/rpcpassword still supported but logged as less secure. Optional per-user method allow-lists (rpcwhitelist, rpcwhitelistdefault). 250 ms delay after a failed login. No TLS.",
+        "documentation": "https://github.com/bitcoin/bitcoin/blob/master/doc/JSON-RPC-interface.md"
+      },
+      {
+        "type": "rest",
+        "description": "Unauthenticated read-only REST interface on the RPC listener when -rest=1 (default 0): /rest/tx, /rest/block, /rest/block/notxdetails, /rest/blockpart (31.0+), /rest/headers, /rest/blockfilter, /rest/blockfilterheaders, /rest/blockhashbyheight, /rest/spenttxouts (30.0+), /rest/chaininfo.json, /rest/deploymentinfo, /rest/getutxos, /rest/mempool/info.json and /rest/mempool/contents.json in bin, hex or json formats.",
+        "authentication": "None. Exposed wherever the RPC listener is bound; upstream warns that a local browser can be abused to read node data.",
+        "documentation": "https://github.com/bitcoin/bitcoin/blob/master/doc/REST-interface.md"
+      },
+      {
+        "type": "zmq",
+        "description": "ZeroMQ PUB notifications (Windows release binaries include ZMQ): topics hashblock, hashtx, rawblock, rawtx and sequence, configured with -zmqpub<topic>=<address> and -zmqpub<topic>hwm (default 1000). Three-part messages: topic, body, 4-byte little-endian sequence number. No ports by default.",
+        "authentication": "None; bind to loopback or a firewalled interface.",
+        "documentation": "https://github.com/bitcoin/bitcoin/blob/master/doc/zmq.md"
+      },
+      {
+        "type": "p2p",
+        "description": "Bitcoin peer-to-peer protocol on port 8333 mainnet, 18333 testnet3, 48333 testnet4, 38333 signet, 18444 regtest; BIP324 v2 encrypted transport on by default since 27.0; Tor onion, I2P (SAM) and CJDNS networks; inbound onion connections on 127.0.0.1:8334 by default (port + 1 when -port is set, since 29.0); PCP/NAT-PMP port mapping on by default since 30.0.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoin/bitcoin/blob/master/doc/bips.md"
+      },
+      {
+        "type": "cli",
+        "description": "bitcoin-cli (RPC client), the bitcoin wrapper command (30.0+: bitcoin node, gui, rpc, wallet, tx, util, test), bitcoin-wallet (offline wallet tool: info, create, dump, createfromdump), bitcoin-tx (raw transaction editor) and bitcoin-util (grind; getchainparams in 32.0).",
+        "authentication": "bitcoin-cli reads the cookie from the data directory or uses -rpcuser/-rpcpassword; -stdinrpcpass avoids exposing a password in the process command line.",
+        "documentation": "https://bitcoincore.org/en/doc/31.0.0/"
+      },
+      {
+        "type": "gui",
+        "description": "bitcoin-qt (Qt 6.8 in 31.x) with node, wallet and debug console; on Windows it stores GUI settings in HKCU\\Software\\Bitcoin\\Bitcoin-Qt (network-specific variants such as Bitcoin-Qt-testnet4) and blocks Windows session end until it has shut down cleanly.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoin/bitcoin/blob/master/doc/files.md"
+      },
+      {
+        "type": "file",
+        "description": "bitcoin.conf (never written by the node), settings.json (read-write dynamic settings that override bitcoin.conf), debug.log, .cookie, bitcoind.pid and .lock in the data directory; wallets under wallets/<name>/wallet.dat (SQLite).",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoin/bitcoin/blob/master/doc/files.md"
+      },
+      {
+        "type": "unix-socket",
+        "description": "Experimental Cap'n Proto IPC interface (mining interface used by Stratum v2 template providers) exposed by the multiprocess bitcoin-node binary via -ipcbind=unix (30.0+). Not available on Windows: ENABLE_IPC is limited to non-WIN32 builds and depends sets NO_IPC=1 for mingw32, so Windows release ZIPs contain no bitcoin-node.exe or bitcoin-gui.exe.",
+        "authentication": "Filesystem permissions on the socket path.",
+        "documentation": "https://github.com/bitcoin/bitcoin/blob/master/doc/multiprocess.md"
+      }
+    ],
+    "cli": "Windows ZIP bin\\: bitcoin.exe (wrapper), bitcoind.exe, bitcoin-qt.exe, bitcoin-cli.exe, bitcoin-wallet.exe, bitcoin-tx.exe, bitcoin-util.exe; libexec\\test_bitcoin.exe. The NSIS installer puts bitcoin-qt.exe and bitcoin.exe in the install root and bitcoind.exe, bitcoin-cli.exe, bitcoin-tx.exe, bitcoin-wallet.exe and test_bitcoin.exe in a daemon\\ subfolder (no bitcoin-util.exe). Notable flags: -datadir, -conf, -chain=main|test|testnet4|signet|regtest, -testnet4, -signet, -signetchallenge, -regtest, -prune, -txindex, -blockfilterindex, -dbcache, -reindex, -reindex-chainstate, -server, -rest, -rpcauth, -rpcbind/-rpcallowip, -zmqpub*, -proxy, -onion, -i2psam, -listen, -natpmp, -printtoconsole, -help, -help-debug. -daemon is rejected on Windows ('-daemon is not supported on this operating system'). bitcoin-cli: -named, -rpcwait, -rpcwaittimeout, -rpcclienttimeout (default 900 s), -rpcwallet, -getinfo, -netinfo, -addrinfo, -stdin, -stdinrpcpass.",
+    "remoteManagement": "No built-in remote administration or TLS. Remote control is JSON-RPC through a secured channel (SSH local port forwarding, WireGuard or Tailscale, or an authenticated Tor onion service) with rpcauth credentials, optionally restricted by rpcwhitelist; -rpcbind is ignored unless -rpcallowip is also set, and 32.0 disconnects disallowed clients immediately. REST and ZMQ are unauthenticated. Upstream explicitly says not to enable RPC connections over the public internet. A Linux node can additionally be managed over SSH (systemd units are shipped in contrib/init).",
+    "nodeCompatibility": "Reference implementation for the SHA256d Bitcoin chain followed by most of the ecosystem. Downstream software typically needs server=1, cookie or rpcauth credentials and, depending on the consumer, txindex=1 (incompatible with pruning), blockfilterindex=basic, or ZMQ rawblock/rawtx/hashblock/sequence publishers. Version-aware behaviour matters: legacy (BDB) wallets and legacy-only RPCs were removed in 30.0, cluster mempool replaced ancestor/descendant limits in 31.0, and several RPC fields are deprecated behind -deprecatedrpc. Bitcoin Knots shares the network magic, ports, default data directory, default install directory and GUI registry key, but since 29.4.1.knots20260508 validates a hard-forked chain (BLAKE2b proof of work from height 961640) and is not consensus-compatible with Bitcoin Core.",
+    "dependencies": [
+      {
+        "ids": ["tor"],
+        "relationship": "optional",
+        "notes": "SOCKS5 proxy (-proxy or -onion, typically 127.0.0.1:9050; Tor Browser uses 9150) for onion peers, and the control port (-torcontrol, default 127.0.0.1:9051) for automatic ephemeral onion services (-listenonion=1 by default when listening). Version 3 onion services only."
+      },
+      {
+        "ids": ["i2pd", "i2p"],
+        "relationship": "optional",
+        "notes": "I2P via the SAM v3 bridge (-i2psam=<ip:port>; -i2pacceptincoming default 1). The 32.0 draft notes that legacy ElGamal I2P sessions will be removed on or before v34."
+      },
+      {
+        "ids": ["cjdns"],
+        "relationship": "optional",
+        "notes": "CJDNS reachability flag (-cjdnsreachable). The 32.0 release-notes draft says the project is considering dropping CJDNS support."
+      },
+      {
+        "ids": ["hwi"],
+        "relationship": "optional",
+        "notes": "External signer (-signer=<cmd>, enumeratesigners, walletdisplayaddress) for hardware wallets; support on Windows was re-enabled in 30.0."
+      },
+      {
+        "ids": ["gpg4win"],
+        "relationship": "optional",
+        "notes": "Only for the manual verification procedure on bitcoincore.org; BTCortex should verify signatures natively instead of requiring GnuPG."
+      },
+      {
+        "ids": ["bitcoin-knots"],
+        "relationship": "conflicts",
+        "notes": "Same default data directory, default install directory (C:\\Program Files\\Bitcoin), P2P and RPC ports, bitcoin: URI handler and bitcoin-qt registry key. Knots 29.4.1.knots20260508 and later follow an incompatible chain; never let the two share a data directory or run with the same ports."
+      }
+    ],
+    "networking": "P2P listens on 0.0.0.0:8333 (mainnet) when -listen=1 (default unless -proxy, -connect or -maxconnections=0 is set); onion inbound bound to 127.0.0.1:8334. RPC and REST bind only to 127.0.0.1 and ::1 by default. Outbound: 8 full-relay and 2 block-relay-only peers plus short-lived feelers; -maxconnections default 125 (200 in 32.0, with -inboundrelaypercent=50). -natpmp=1 by default since 30.0 (PCP or NAT-PMP mapping on the router); UPnP was removed in 29.0/30.0. DNS seeds and hard-coded fixed seeds are used for bootstrap. Testnet3 18333/18332, testnet4 48333/48332, signet 38333/38332, regtest 18444/18443 (P2P/RPC). Running bitcoind with a non-loopback listener is expected to trigger a Windows Defender Firewall prompt on first run.",
+    "storage": "As of 2026-10-21: Bitcoin Core 31.1 chain parameters assume 856 GB of mainnet block data and 14 GB of chainstate (the figures used by the GUI's disk-space estimate, which include headroom); the download page still states 'about 600GB' plus 5-10 GB per month. Pruning (-prune=550 or more, in MiB) limits block and undo files only; the chainstate and block index remain. Other networks (31.1 estimates): testnet3 245 GB + 19 GB, testnet4 31 GB + 2 GB, signet 24 GB + 4 GB. Optional indexes (txindex, txospenderindex, coinstatsindex, blockfilterindex) add space; 32.0 halves the size of a rebuilt txindex.",
+    "resources": "-dbcache defaults to 1024 MiB when at least 4096 MiB of RAM is detected on 64-bit systems, otherwise 450 MiB (31.0+); a start-up warning appears when dbcache exceeds 75% of RAM. -maxmempool 300 MB, and unused mempool allowance is shared with the coins cache. -par 0 (automatic, up to 15 script-verification threads), -rpcthreads 16. Initial block download is CPU-, disk- and bandwidth-intensive; upstream gives no fixed RAM or CPU minimum.",
+    "security": "RPC is full control of the node and any loaded wallet (spending, chain manipulation, file writes on the host); keep it on loopback, prefer the cookie (protected by the data directory's NTFS ACL; -rpccookieperms maps only to POSIX-style bits) or rpcauth, never pass passwords on the command line, and use rpcwhitelist for scoped credentials. REST and ZMQ are unauthenticated. *notify and -signer options execute shell commands. Since 30.0 -natpmp=1 asks the router to forward the P2P port, which changes privacy exposure. Verify downloads with SHA256SUMS signed by multiple builder keys from bitcoin-core/guix.sigs; Windows executables are Authenticode-signed by 'Bitcoin Core Code Signing LLC' (DigiCert). Version warnings: <25.0 has High-severity remote crashes (CVE-2024-35202, CVE-2019-25220 <24.0.1); <29.0 is affected by CVE-2024-52911 (High, use-after-free in script validation); 30.0 and 30.1 were withdrawn because a failed legacy-wallet migration could delete wallet files; 31.0 with -privatebroadcast could leak the sender's IP (fixed in 31.1); 28.x is end of life since 2026-04-19 and 29.x becomes end of life with 32.0, after which three Medium/High issues fixed in 30.0 are due to be disclosed.",
+    "licence": "MIT",
+    "licenceNotes": "MIT licence; redistribution is permitted with the copyright notice, but BTCortex should download from bitcoincore.org and verify rather than bundle binaries. GitHub release pages carry no binaries and explicitly tell users not to use GitHub's links. No trademark policy was found on bitcoincore.org.",
+    "integrationMechanisms": [
+      "Download the signed portable ZIP plus SHA256SUMS and SHA256SUMS.asc from https://bitcoincore.org/bin/bitcoin-core-<version>/ and verify natively: OpenPGP signature threshold over SHA256SUMS against pinned builder keys, then SHA-256 of the archive",
+      "Extract to a per-user, versioned runtime directory under %LOCALAPPDATA% (no administrator rights, no PATH or URI-handler registration) and check Authenticode signatures of the extracted executables as defence in depth",
+      "Create a dedicated data directory per node profile and always pass -datadir explicitly; generate bitcoin.conf with comment and unknown-key preservation; read settings.json to compute effective settings",
+      "Spawn and supervise bitcoind.exe as a child process (CREATE_NO_WINDOW, separated arguments, drained stdout and stderr), poll RPC until warm-up (-28) ends",
+      "JSON-RPC 2.0 client with cookie authentication, per-wallet endpoints, batch requests and version-aware method catalogue (help parsing; getopenrpcinfo from 32.0)",
+      "Graceful stop with the stop RPC, waiting for process exit and release of .lock; handle WM_QUERYENDSESSION in BTCortex to stop managed nodes before Windows logs off or shuts down",
+      "Tail debug.log with shared read access (getrpcinfo returns logpath) and toggle debug categories at runtime with the logging RPC",
+      "Subscribe to ZMQ publishers on loopback for event monitoring",
+      "Detect and import existing installations: registry (HKCU\\SOFTWARE\\Bitcoin Core, uninstall key, HKCU\\Software\\Bitcoin\\Bitcoin-Qt strDataDir), C:\\Program Files\\Bitcoin, %APPDATA%\\Bitcoin and %LOCALAPPDATA%\\Bitcoin, running processes and .lock probing",
+      "Launch bitcoin-qt.exe as an external application on its own data directory",
+      "Manage remote nodes through SSH-tunnelled RPC with rpcauth credentials",
+      "Run the Linux build in WSL2 when IPC/multiprocess features (Stratum v2 template providers) are required"
+    ],
+    "supportLevels": ["fully-managed", "remote-managed", "connected-application", "managed-wsl2", "external-launcher", "managed-docker"],
+    "recommendedSupportLevel": "fully-managed",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Official signed x64 Windows binaries, a portable ZIP that runs without elevation (manifest requestedExecutionLevel asInvoker), a documented configuration format and a stable JSON-RPC interface make full lifecycle management straightforward. Limitations on Windows: no ARM64 build, no IPC/multiprocess binaries, no native Windows service mode, -daemon unsupported, and console-close or logoff events give only seconds before the process is killed, so BTCortex must stop the node itself."
+    },
+    "priority": "P0",
+    "implementationStatus": "researched",
+    "notes": "32.0 is in its release-candidate cycle (rc4 on 2026-10-12); its draft notes raise -maxconnections to 200, add getopenrpcinfo/rpc.discover, replace libevent with a custom HTTP server, default to PSBT version 2, deprecate -walletrbf and removeprunedfunds, and add -rpcmaxconnections, -inboundrelaypercent and -prevoutfetchthreads; re-verify when the final notes are published. 30.0 and 30.1 binaries were moved to /bin/insecure-wallet-deletion/. The Windows default data directory moved from %APPDATA%\\Bitcoin to %LOCALAPPDATA%\\Bitcoin in 28.0, but an existing %APPDATA%\\Bitcoin is still used. Custom signets share the same signet/ subdirectory, so each custom signet needs its own data directory. Testnet3 is deprecated (since 28.0) but still supported in 31.1 and 32.0rc4.",
+    "sources": [
+      { "title": "Bitcoin Core download page", "url": "https://bitcoincore.org/en/download/", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core software life cycle", "url": "https://bitcoincore.org/en/lifecycle/", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 release directory", "url": "https://bitcoincore.org/bin/bitcoin-core-31.1/", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 SHA256SUMS", "url": "https://bitcoincore.org/bin/bitcoin-core-31.1/SHA256SUMS", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 SHA256SUMS.asc", "url": "https://bitcoincore.org/bin/bitcoin-core-31.1/SHA256SUMS.asc", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 32.0rc4 test directory", "url": "https://bitcoincore.org/bin/bitcoin-core-32.0/test.rc4/", "accessed": "2026-10-21" },
+      { "title": "GitHub API: bitcoin/bitcoin releases", "url": "https://api.github.com/repos/bitcoin/bitcoin/releases?per_page=30", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-31.0.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-31.1.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 30.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-30.0.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 29.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-29.0.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 28.0 release notes", "url": "https://github.com/bitcoin/bitcoin/blob/master/doc/release-notes/release-notes-28.0.md", "accessed": "2026-10-21" },
+      { "title": "32.0 release notes draft (devwiki)", "url": "https://github.com/bitcoin-core/bitcoin-devwiki/wiki/32.0-Release-Notes-Draft", "accessed": "2026-10-21" },
+      { "title": "Release schedule for 32.0 (issue #35122)", "url": "https://github.com/bitcoin/bitcoin/issues/35122", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.0.0 RPC documentation", "url": "https://bitcoincore.org/en/doc/31.0.0/", "accessed": "2026-10-21" },
+      { "title": "Example bitcoin.conf for v31.1", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/share/examples/bitcoin.conf", "accessed": "2026-10-21" },
+      { "title": "doc/files.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/files.md", "accessed": "2026-10-21" },
+      { "title": "doc/bitcoin-conf.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bitcoin-conf.md", "accessed": "2026-10-21" },
+      { "title": "doc/JSON-RPC-interface.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/JSON-RPC-interface.md", "accessed": "2026-10-21" },
+      { "title": "doc/REST-interface.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/REST-interface.md", "accessed": "2026-10-21" },
+      { "title": "doc/zmq.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/zmq.md", "accessed": "2026-10-21" },
+      { "title": "doc/multiprocess.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/multiprocess.md", "accessed": "2026-10-21" },
+      { "title": "doc/bips.md (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md", "accessed": "2026-10-21" },
+      { "title": "share/setup.nsi.in (v31.1 NSIS installer script)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/share/setup.nsi.in", "accessed": "2026-10-21" },
+      { "title": "contrib/guix/libexec/build.sh (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/contrib/guix/libexec/build.sh", "accessed": "2026-10-21" },
+      { "title": "src/common/args.cpp GetDefaultDataDir (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/common/args.cpp", "accessed": "2026-10-21" },
+      { "title": "src/httprpc.cpp (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/httprpc.cpp", "accessed": "2026-10-21" },
+      { "title": "src/node/caches.cpp (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/node/caches.cpp", "accessed": "2026-10-21" },
+      { "title": "CMakeLists.txt ENABLE_IPC option (v31.1)", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/CMakeLists.txt", "accessed": "2026-10-21" },
+      { "title": "bitcoin-core/guix.sigs", "url": "https://github.com/bitcoin-core/guix.sigs", "accessed": "2026-10-21" },
+      { "title": "bitcoin-core/bitcoin-detached-sigs v31.1 Windows signatures", "url": "https://github.com/bitcoin-core/bitcoin-detached-sigs/tree/v31.1/win", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core security advisories", "url": "https://bitcoincore.org/en/security-advisories/", "accessed": "2026-10-21" },
+      { "title": "CVE-2024-52911 - Script Interpreter Remote Crash", "url": "https://bitcoincore.org/en/2026/05/05/disclose-cve-2024-52911/", "accessed": "2026-10-21" },
+      { "title": "Wallet Migration Failure May Delete Unrelated Wallet Files In Bitcoin Core 30.0 and 30.1", "url": "https://bitcoincore.org/en/2026/01/05/wallet-migration-bug/", "accessed": "2026-10-21" },
+      { "title": "Private Broadcast May Reveal Sender IP Address in Bitcoin Core 31.0", "url": "https://bitcoincore.org/en/2026/06/06/privatebroadcast-ip-leak/", "accessed": "2026-10-21" },
+      { "title": "SECURITY.md", "url": "https://github.com/bitcoin/bitcoin/blob/master/SECURITY.md", "accessed": "2026-10-21" },
+      { "title": "Windows ARM build and release (issue #31388)", "url": "https://github.com/bitcoin/bitcoin/issues/31388", "accessed": "2026-10-21" },
+      { "title": "bitcoin/bitcoin Docker Hub repository (unofficial)", "url": "https://hub.docker.com/r/bitcoin/bitcoin", "accessed": "2026-10-21" },
+      { "title": "HandlerRoutine callback function (Microsoft Learn)", "url": "https://learn.microsoft.com/en-us/windows/console/handlerroutine", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The x64 Windows build running under emulation on Windows 11 ARM64 was not tested and is not documented upstream.",
+      "Actual mainnet block-data and chainstate sizes on 2026-10-21 were not measured; only the 31.1 chain-parameter estimates (856 GB + 14 GB) and the download page figure (about 600 GB) were verified.",
+      "Sizes of txindex, coinstatsindex and blockfilterindex on mainnet were not verified.",
+      "That a non-loopback P2P listener triggers a Windows Defender Firewall prompt on first run is expected Windows behaviour but was not reproduced.",
+      "That -rpccookieperms has no meaningful effect on Windows is inferred from the Microsoft CRT _chmod semantics (read-only attribute only); not tested.",
+      "No trademark policy for the name 'Bitcoin Core' was found; absence was not exhaustively confirmed.",
+      "The Authenticode subject 'Bitcoin Core Code Signing LLC' was verified for 31.1 only; continuity of the certificate across future releases is not guaranteed.",
+      "32.0 behaviour is taken from the release-notes draft and rc4 sources; final release notes may differ."
+    ]
+  },
+  {
+    "id": "bitcoin-knots",
+    "name": "Bitcoin Knots",
+    "category": "full-node",
+    "catalogueEligible": true,
+    "website": "https://bitcoinknots.org/",
+    "repository": "https://github.com/bitcoinknots/bitcoin",
+    "purpose": "Derivative of Bitcoin Core maintained by Luke Dashjr with additional relay-policy (spam-filter) options, retained legacy wallet features, extra RPCs and GUI additions. Since 29.4.1.knots20260508 it also enforces consensus changes that Bitcoin Core does not: the BIP110 Reduced Data Temporary Softfork rules and a BLAKE2b proof-of-work hard fork.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Latest release 29.4.2.knots20260508 published 2026-09-21 on GitHub and bitcoinknots.org; previous releases 29.4.1.knots20260508 (2026-09-02), 29.4.knots20260508 (2026-08-07), 29.3.knots20260508 (2026-05-09), 29.3.knots20260507 (2026-05-08) and 29.3.knots20260210 (2026-02-10). Still based on the Bitcoin Core 29.x code line (default branch 29.x-knots; no 30.x or 31.x Knots branch). Repository pushed 2026-09-21; not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "29.4.2.knots20260508",
+      "date": "2026-09-21",
+      "source": "https://github.com/bitcoinknots/bitcoin/releases/tag/v29.4.2.knots20260508"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "Windows 10 or later (per the 29.4.x release notes)",
+      "windowsArchitectures": ["x64"],
+      "windowsDistribution": "NSIS installer bitcoin-29.4.2.knots20260508-win64-setup-pgpverifiable.exe and portable ZIP bitcoin-29.4.2.knots20260508-win64-pgpverifiable.zip from https://bitcoinknots.org/files/29.x/29.4.2.knots20260508/ (also attached to the GitHub release). 'pgpverifiable' builds are not Authenticode-signed; integrity relies on the OpenPGP-signed SHA256SUMS.",
+      "wsl2": "likely",
+      "docker": "community-image",
+      "other": "Linux tarballs for x86_64, aarch64, armhf, powerpc64, powerpc64le and riscv64; macOS 13 or later (x86_64 and arm64); Ubuntu PPA (ppa:luke-jr/bitcoinknots); StartOS package."
+    },
+    "interfaces": [
+      {
+        "type": "json-rpc",
+        "description": "Bitcoin Core 29.x-compatible JSON-RPC on the same ports (8332 mainnet, 18332 testnet3, 48332 testnet4, 38332 signet, 18443 regtest). 29.4.2 has 172 public methods plus 21 hidden ones. Additions over Core 31.1 include getgeneralinfo, getrpcwhitelist, listmempooltransactions, listprunelocks, setprunelock, maxmempool, savefeeestimates, scriptthreadsinfo, setscriptthreadsenabled, setfeerate, settxfee, sweepprivkeys, dumpmasterprivkey and the legacy-wallet RPCs removed from Core in 30.0 (dumpprivkey, dumpwallet, importprivkey, importwallet, importaddress, importpubkey, importmulti, addmultisigaddress, newkeypool, sethdseed, upgradewallet, getunconfirmedbalance). Missing compared with Core 31.1: getmempoolcluster, getprivatebroadcastinfo, abortprivatebroadcast and, since 29.4.2, getdifficulty (replaced by a difficulty_blake2b field).",
+        "authentication": "As Bitcoin Core: cookie, rpcauth, rpcuser/rpcpassword, rpcwhitelist; Knots adds -rpcauthfile and the getrpcwhitelist RPC.",
+        "documentation": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/doc/JSON-RPC-interface.md"
+      },
+      {
+        "type": "rest",
+        "description": "Bitcoin Core 29.x REST interface with Knots additions /rest/fee and /rest/mempool/transactions; no /rest/blockpart endpoint.",
+        "authentication": "None.",
+        "documentation": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/doc/REST-interface.md"
+      },
+      {
+        "type": "zmq",
+        "description": "Bitcoin Core topics (hashblock, hashtx, rawblock, rawtx, sequence) plus Knots wallet topics hashwallettx and rawwallettx (-zmqpubhashwallettx, -zmqpubrawwallettx).",
+        "authentication": "None.",
+        "documentation": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/doc/zmq.md"
+      },
+      {
+        "type": "p2p",
+        "description": "Same network magic and default ports as Bitcoin Core (8333 mainnet). From mainnet height 961640 (testnet4 150308) blocks use BLAKE2b proof of work; Knots 29.4.1+ prefers NODE_BLAKE2B peers and tolerates up to 8 extra outbound connections to peers on stale rules (-maxstaleoutbound). BIP324 v2 transport on by default.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoinknots/bitcoin/releases/tag/v29.4.1.knots20260508"
+      },
+      {
+        "type": "cli",
+        "description": "bitcoind, bitcoin-qt, bitcoin-cli, bitcoin-tx, bitcoin-util and bitcoin-wallet (29.x base: no 'bitcoin' wrapper command).",
+        "authentication": "As Bitcoin Core.",
+        "documentation": "https://github.com/bitcoinknots/bitcoin"
+      },
+      {
+        "type": "gui",
+        "description": "bitcoin-qt (Qt 5.15.19 in 29.4) with Knots additions such as a sweep-private-key dialog and mempool statistics; uses the same QSettings location as Bitcoin Core (HKCU\\Software\\Bitcoin\\Bitcoin-Qt) and writes several GUI-changed options (for example prune, addresstype, walletrbf, maxuploadtarget, peerbloomfilters, peerblockfilters) to bitcoin_rw.conf.",
+        "authentication": null,
+        "documentation": "https://bitcoinknots.org/"
+      },
+      {
+        "type": "file",
+        "description": "Same data-directory layout as Bitcoin Core 29.x plus bitcoin_rw.conf (read-write configuration file, -confrw) in the network data directory; settings.json may contain consensusrules=rdts after the user consented to BIP110 in 29.3.knots20260508/29.4.knots20260508.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/doc/files.md"
+      }
+    ],
+    "cli": "Same executables and most flags as Bitcoin Core 29.x. Knots-specific options include -corepolicy, -rejecttokens, -rejectparasites, -datacarriercost, -datacarriersize (maximum and default 83), -acceptnonstddatacarrier, -permitbarepubkey, -permitbaredatacarrier, -permitbareanchor, -permitephemeral, -mempoolreplacement, -mempooltruc, -spkreuse, -maxscriptsize, -maxtxlegacysigops, -bytespersigopstrict, -minrelaycoinblocks, -minrelaymaturity, -dustdynamic, -subdustfeepenalty, -blockmaxsize, -blockprioritysize, -consensusrules, -confrw, -lowmem, -pruneduringinit, -maxstaleoutbound, -torexecute, -uaappend, -upnp, -rpcauthfile, -statsenable, -walletimplicitsegwit, -walletoldsigs, -signetblocktime and the debug-only -softwareexpiry and -v2onlyclearnet.",
+    "remoteManagement": "As Bitcoin Core: JSON-RPC over a secured tunnel with rpcauth and rpcwhitelist (Knots adds -rpcauthfile and getrpcwhitelist). No built-in TLS or remote administration.",
+    "nodeCompatibility": "RPC-compatible with Bitcoin Core 29.x for most methods, but not consensus-compatible with Bitcoin Core from 29.4.1.knots20260508 onwards: Knots validates a chain with BLAKE2b proof of work from mainnet height 961640 (first BLAKE2b block on 2026-08-30 according to the project's linked site), BIP110 rules, a temporary 800 000 weight-unit block limit and, from 29.4.2, a longer coinbase maturity, while using the same magic bytes and ports. 29.3.knots20260508 and 29.4.knots20260508 required explicit consent to enforce BIP110 and, once mandatory signalling began at height 961632 on 2026-08-08, split from Bitcoin Core-following nodes. 29.3.knots20260507 and earlier follow the same chain as Bitcoin Core. Services built for the Bitcoin Core chain (Electrum servers, Lightning implementations, explorers, wallets) will follow Knots' chain when connected to it; their compatibility with that chain is unverified.",
+    "dependencies": [
+      {
+        "ids": ["tor"],
+        "relationship": "optional",
+        "notes": "Same Tor integration as Bitcoin Core, plus -torexecute to spawn a tor process if none is running."
+      },
+      {
+        "ids": ["i2pd", "i2p"],
+        "relationship": "optional",
+        "notes": "I2P via SAM (-i2psam)."
+      },
+      {
+        "ids": ["cjdns"],
+        "relationship": "optional",
+        "notes": "-cjdnsreachable as in Bitcoin Core 29.x."
+      },
+      {
+        "ids": ["hwi"],
+        "relationship": "optional",
+        "notes": "External signer support (-signer) as in Bitcoin Core 29.x."
+      },
+      {
+        "ids": ["datum-gateway"],
+        "relationship": "optional",
+        "notes": "Knots' release notes direct miners on its chain to run their own DATUM Gateway, but DATUM Gateway's README (read on 2026-10-23) says Knots versions after 29.3.knots20260507 are no longer compatible with it and would earn no mining rewards; not needed for non-mining nodes."
+      },
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "conflicts",
+        "notes": "Shares Bitcoin Core's default data directory (%LOCALAPPDATA%\\Bitcoin or legacy %APPDATA%\\Bitcoin), default install directory (C:\\Program Files\\Bitcoin), ports, bitcoin: URI handler and QSettings key, yet follows an incompatible chain since 29.4.1.knots20260508. Never share a data directory or install directory between them."
+      }
+    ],
+    "networking": "Same default ports and bind behaviour as Bitcoin Core 29.x (P2P 8333, RPC 8332 on loopback, onion 127.0.0.1:8334). -natpmp defaults to 1; -upnp is still available (default 0); -maxconnections default 125; v2 transport on by default. Peers are mixed with Bitcoin Core nodes on the same magic bytes; Knots 29.4.1+ prefers peers advertising NODE_BLAKE2B and caps automatic outbound connections to peers on stale rules (-maxstaleoutbound, default 8, maximum 10).",
+    "storage": "Knots 29.4.2 chain parameters assume 810 GB of mainnet block data and 14 GB of chainstate for its own chain, testnet4 11 GB + 1 GB, signet 9 GB + 1 GB and testnet3 200 GB + 19 GB (estimates, 2026-10-21). Pruning works as in Bitcoin Core (-prune=550 or more) with an additional -pruneduringinit option; the 29.4.2 notes warn that nodes pruned past 2026-09-21 may need a full re-sync when upgrading.",
+    "resources": "When -dbcache is not set, Knots 29.3.knots20260508+ picks a RAM-aware default between 100 MiB and 2 GiB; -lowmem flushes caches when available memory falls below a threshold; otherwise similar to Bitcoin Core 29.x.",
+    "security": "Windows binaries are not Authenticode-signed ('pgpverifiable'), so integrity rests on SHA256SUMS signed by builder keys from bitcoinknots/guix.sigs (3 to 7 signatures on recent releases, always including Luke Dashjr's key 1A3E761F19D2CC7785C5502EA291A2C45D0C504A). Consensus divergence from Bitcoin Core creates replay and chain-confusion risk: Knots wallets sign with a new 'hardfork' signature hash by default (-walletoldsigs=1 gives up replay protection), coins created before the split exist on both chains, and wallets or services connected to a Knots node see Knots' chain. Builds stop accepting new blocks after a built-in software-expiry date (about 2028-11-06 for 29.4.2) unless softwareexpiry=0 is set. Inherits Bitcoin Core 29.x code, so Core security fixes arrive only when Knots backports them; legacy BDB wallets remain loadable.",
+    "licence": "MIT",
+    "licenceNotes": "MIT licence (inherits Bitcoin Core's). Download from bitcoinknots.org or the GitHub release and verify; no Authenticode signature is available for redistribution checks.",
+    "integrationMechanisms": [
+      "Download the pgpverifiable portable ZIP plus SHA256SUMS and SHA256SUMS.asc from https://bitcoinknots.org/files/<major>.x/<version>/ (or the GitHub release) and verify natively against pinned keys from bitcoinknots/guix.sigs",
+      "Extract to a per-user runtime directory separate from any Bitcoin Core runtime; never use the NSIS installer, whose default directory is the same as Bitcoin Core's",
+      "Create a dedicated data directory per Knots profile labelled with the chain it follows; refuse to reuse a data directory last used by Bitcoin Core or by a Knots version on different consensus rules",
+      "Spawn and supervise bitcoind.exe and talk JSON-RPC exactly as for Bitcoin Core, with capability detection from getnetworkinfo.subversion (/Satoshi:29.4.2/Knots:20260508/) and the presence of difficulty_blake2b",
+      "Generate bitcoin.conf and read both settings.json and bitcoin_rw.conf to compute effective settings",
+      "Monitor getblockchaininfo/getnetworkinfo warnings for the software-expiry warning and prompt for an update",
+      "Launch bitcoin-qt.exe as an external application",
+      "Manage remote Knots nodes over SSH-tunnelled RPC"
+    ],
+    "supportLevels": ["fully-managed", "remote-managed", "connected-application", "managed-wsl2", "external-launcher", "managed-docker"],
+    "recommendedSupportLevel": "fully-managed",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Packaging and lifecycle mirror Bitcoin Core 29.x (same ZIP layout, RPC and files), so the technical effort is low. The rating is lowered because Knots 29.4.1.knots20260508+ follows a different chain: BTCortex needs a distinct network identity for it, chain-aware dependency checks for every connected service, explicit informed consent before installation, and must never pre-wire Bitcoin Core-chain services to it silently. Binaries lack Authenticode signatures."
+    },
+    "priority": "P1",
+    "implementationStatus": "researched",
+    "notes": "Versioning: <Bitcoin Core base version>.knots<YYYYMMDD>; since 29.4 the base number no longer matches a Bitcoin Core release (Core never shipped 29.4.1 or 29.4.2) and three releases share the suffix 20260508. Timeline (from Knots release notes and linked sites): 29.3.knots20260508 (2026-05-09) added BIP110 enforcement behind a consent prompt or consensusrules=rdts, with 29.3.knots20260507 offered without it; mandatory BIP110 signalling began at height 961632 on 2026-08-08 and enforcing nodes split from the chain followed by Bitcoin Core and most hash rate; 29.4.1.knots20260508 (2026-09-02) added a BLAKE2b proof-of-work hard fork activating BIP110 rules at height 961640, removed the consent requirement, enabled rejecttokens by default and added an opt-in SIGHASH_UNIFIED replay-protected signature format; 29.4.2 (2026-09-21) added a 45-day coinbase-maturity soft fork and replaced getdifficulty. Knots' release notes describe the SHA256d chain as an 'altcoin' and miners who stayed on it as attackers; Bitcoin Core does not implement BIP110, whose BIP status is Closed after its unsuccessful activation attempt. Optech (2026-09-25) notes that a pruned Knots node that enforced BIP110 probably still holds the last common block, so replacing it with Bitcoin Core and running reconsiderblock on the first rejected block may avoid a full re-sync. The project said further changes are planned around mid-October 2026 and August 2027.",
+    "sources": [
+      { "title": "Bitcoin Knots website", "url": "https://bitcoinknots.org/", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Knots 29.4.2.knots20260508 files", "url": "https://bitcoinknots.org/files/29.x/29.4.2.knots20260508/", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Knots 29.4.2.knots20260508 SHA256SUMS.asc", "url": "https://bitcoinknots.org/files/29.x/29.4.2.knots20260508/SHA256SUMS.asc", "accessed": "2026-10-21" },
+      { "title": "Release v29.4.2.knots20260508", "url": "https://github.com/bitcoinknots/bitcoin/releases/tag/v29.4.2.knots20260508", "accessed": "2026-10-21" },
+      { "title": "Release v29.4.1.knots20260508", "url": "https://github.com/bitcoinknots/bitcoin/releases/tag/v29.4.1.knots20260508", "accessed": "2026-10-21" },
+      { "title": "Release v29.4.knots20260508", "url": "https://github.com/bitcoinknots/bitcoin/releases/tag/v29.4.knots20260508", "accessed": "2026-10-21" },
+      { "title": "Release v29.3.knots20260508", "url": "https://github.com/bitcoinknots/bitcoin/releases/tag/v29.3.knots20260508", "accessed": "2026-10-21" },
+      { "title": "Release v29.3.knots20260507", "url": "https://github.com/bitcoinknots/bitcoin/releases/tag/v29.3.knots20260507", "accessed": "2026-10-21" },
+      { "title": "GitHub API: bitcoinknots/bitcoin repository metadata", "url": "https://api.github.com/repos/bitcoinknots/bitcoin", "accessed": "2026-10-21" },
+      { "title": "bitcoinknots/guix.sigs builder keys", "url": "https://github.com/bitcoinknots/guix.sigs/tree/knots/builder-keys", "accessed": "2026-10-21" },
+      { "title": "Example bitcoin.conf for v29.4.2.knots20260508", "url": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/share/examples/bitcoin.conf", "accessed": "2026-10-21" },
+      { "title": "src/kernel/chainparams.cpp (v29.4.2.knots20260508)", "url": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/src/kernel/chainparams.cpp", "accessed": "2026-10-21" },
+      { "title": "src/clientversion.h software expiry (v29.4.2.knots20260508)", "url": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/src/clientversion.h", "accessed": "2026-10-21" },
+      { "title": "share/setup.nsi.in (v29.4.2.knots20260508)", "url": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/share/setup.nsi.in", "accessed": "2026-10-21" },
+      { "title": "contrib/guix/libexec/build.sh (v29.4.2.knots20260508)", "url": "https://github.com/bitcoinknots/bitcoin/blob/v29.4.2.knots20260508/contrib/guix/libexec/build.sh", "accessed": "2026-10-21" },
+      { "title": "Bitcoin with BLAKE2b (linked from bitcoinknots.org/learn/2026-blake2b)", "url": "https://bitcoin-blake2b.org/", "accessed": "2026-10-21" },
+      { "title": "BIP-110 site (linked from bitcoinknots.org/learn/2026-rdts)", "url": "https://bip110.org/", "accessed": "2026-10-21" },
+      { "title": "BIP 110: Reduced Data Temporary Softfork", "url": "https://github.com/bitcoin/bips/blob/master/bip-0110.mediawiki", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Optech Newsletter #418", "url": "https://bitcoinops.org/en/newsletters/2026/08/14/", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Optech Newsletter #424", "url": "https://bitcoinops.org/en/newsletters/2026/09/25/", "accessed": "2026-10-21" },
+      { "title": "bitcoinknots/bitcoin Docker Hub repository (unofficial)", "url": "https://hub.docker.com/r/bitcoinknots/bitcoin", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "That Windows SmartScreen or Microsoft Defender warn about the unsigned Knots executables was not reproduced.",
+      "How Bitcoin Core behaves when started on a data directory that Knots 29.4.1+ has synchronised (BLAKE2b blocks in the block index) was not tested; a full re-sync or -reindex is assumed to be necessary.",
+      "The exact behaviour of Knots 29.4.x when started on a data directory last used by Bitcoin Core after the split was not tested beyond the release-note statements about recovery and re-sync prompts.",
+      "Exact hash-rate distribution between the two chains after 2026-08-08 was not verified from primary data; both Knots' own pages and Optech state that most SHA256d mining power did not follow BIP110.",
+      "Which exchanges, wallets and services support Knots' BLAKE2b chain was not verified.",
+      "Whether the 'mid-October 2026' Knots update announced in the 29.4.2 notes has been published elsewhere (no newer tag existed on 2026-10-21)."
+    ]
+  }
+]

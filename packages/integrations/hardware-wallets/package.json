@@ -1,0 +1,25 @@
+{
+  "name": "@btcortex/integration-hardware-wallets",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Signing devices on Windows: recognition from USB identities and driver state, and the vendor companion applications (Trezor Suite, the deprecated Trezor Bridge).",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "update-key": "node scripts/update-signing-key.mjs"
+  },
+  "dependencies": {
+    "@btcortex/installation-manager": "0.1.0",
+    "@ngraveio/bc-ur": "^1.1.13",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.6",
+    "jsqr": "^1.4.0",
+    "openpgp": "^6.3.2"
+  }
+}

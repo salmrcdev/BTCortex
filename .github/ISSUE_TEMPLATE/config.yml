@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/salmrcdev/BTCortex/security/advisories/new
+    about: Send vulnerability reports privately to the repository maintainer.
+  - name: Documentation and known limitations
+    url: https://github.com/salmrcdev/BTCortex/blob/main/docs/KNOWN_LIMITATIONS.md
+    about: Check existing limitations before opening an issue.

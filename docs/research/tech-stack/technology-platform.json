@@ -1,0 +1,969 @@
+[
+  {
+    "name": "tauri",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.12.5",
+    "releaseDate": "2026-10-21",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "The native Windows shell: the WebView2 window, the notification-area icon, starting with Windows, the sidecar lifecycle and the IPC relay to the orchestrator.",
+    "decision": "adopt",
+    "rationale": "Required by the specification. It uses the system WebView2 instead of bundling Chromium, so the installer stays near 30 MiB, and its capability system lets the WebView reach only the commands BTCortex allows. BTCortex is on 2.12.4; 2.12.5 is a patch release.",
+    "windowsNotes": "WebView2 Evergreen is installed by the bootstrapper when missing (webviewInstallMode downloadBootstrapper). Tested on Windows 10 22H2 with WebView2 155.",
+    "sources": [
+      {
+        "title": "tauri on crates.io",
+        "url": "https://crates.io/crates/tauri",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tauri crates.io API",
+        "url": "https://crates.io/api/v1/crates/tauri",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tauri-build",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.7.4",
+    "releaseDate": "2026-10-21",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "Build script of the shell: embeds the configuration and capabilities and checks the sidecar and resources exist.",
+    "decision": "adopt",
+    "rationale": "Part of Tauri 2. It also fails the build when a listed resource is missing, which is why the orchestrator build writes openpgp/ and the licence list before every build.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tauri-build on crates.io",
+        "url": "https://crates.io/crates/tauri-build",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tauri-build crates.io API",
+        "url": "https://crates.io/api/v1/crates/tauri-build",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@tauri-apps/cli",
+    "ecosystem": "npm",
+    "latestVersion": "2.12.4",
+    "releaseDate": "2026-10-21",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "Development server and release bundling: NSIS and MSI installers, sidecar placement, resources.",
+    "decision": "adopt",
+    "rationale": "The supported way to bundle a Tauri 2 application. BTCortex uses a customised NSIS template for a per-user installation without administrator rights.",
+    "windowsNotes": "NSIS installs per user into %LOCALAPPDATA%\\Programs\\BTCortex; the MSI needs administrator rights and is built but not tested.",
+    "sources": [
+      {
+        "title": "@tauri-apps/cli on npm",
+        "url": "https://www.npmjs.com/package/@tauri-apps/cli",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@tauri-apps/cli registry metadata",
+        "url": "https://registry.npmjs.org/@tauri-apps%2Fcli",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tauri-plugin-dialog",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.8.3",
+    "releaseDate": "2026-10-14",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "The system open and save dialogs, for PSBT files, exports and backups.",
+    "decision": "adopt",
+    "rationale": "Files the user picks are read and written by the orchestrator at the chosen path, so the WebView never needs file-system permissions.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tauri-plugin-dialog on crates.io",
+        "url": "https://crates.io/crates/tauri-plugin-dialog",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tauri-plugin-dialog crates.io API",
+        "url": "https://crates.io/api/v1/crates/tauri-plugin-dialog",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tauri-plugin-log",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.10.1",
+    "releaseDate": "2026-10-10",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "The shell's own log file, rotated and redacted like the orchestrator's.",
+    "decision": "adopt",
+    "rationale": "Keeps shell and orchestrator diagnostics side by side for Logs & diagnostics.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tauri-plugin-log on crates.io",
+        "url": "https://crates.io/crates/tauri-plugin-log",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tauri-plugin-log crates.io API",
+        "url": "https://crates.io/api/v1/crates/tauri-plugin-log",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tauri-plugin-notification",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.7.0",
+    "releaseDate": "2026-10-14",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "Windows notifications for alerts.",
+    "decision": "adopt",
+    "rationale": "Alerts such as an unreachable node or an expiring macaroon must be seen when the window is hidden in the notification area.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tauri-plugin-notification on crates.io",
+        "url": "https://crates.io/crates/tauri-plugin-notification",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tauri-plugin-notification crates.io API",
+        "url": "https://crates.io/api/v1/crates/tauri-plugin-notification",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tauri-plugin-opener",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.7.2",
+    "releaseDate": "2026-10-14",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "Opens web links in the user's browser.",
+    "decision": "adopt",
+    "rationale": "Scoped to https:// only, so the WebView cannot ask the system to open anything else. Explorers on the local network that use http:// are opened by the orchestrator from stored addresses instead.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tauri-plugin-opener on crates.io",
+        "url": "https://crates.io/crates/tauri-plugin-opener",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tauri-plugin-opener crates.io API",
+        "url": "https://crates.io/api/v1/crates/tauri-plugin-opener",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tauri-plugin-shell",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.5.0",
+    "releaseDate": "2026-10-10",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "Starts and supervises the orchestrator sidecar.",
+    "decision": "adopt",
+    "rationale": "Used by the shell only: the WebView has no shell permission in its capability, so it cannot start processes.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tauri-plugin-shell on crates.io",
+        "url": "https://crates.io/crates/tauri-plugin-shell",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tauri-plugin-shell crates.io API",
+        "url": "https://crates.io/api/v1/crates/tauri-plugin-shell",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tauri-plugin-single-instance",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.5.4",
+    "releaseDate": "2026-10-14",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "One BTCortex per user: a second start focuses the running window.",
+    "decision": "adopt",
+    "rationale": "Two orchestrators would compete for the same database, nodes and ports.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tauri-plugin-single-instance on crates.io",
+        "url": "https://crates.io/crates/tauri-plugin-single-instance",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tauri-plugin-single-instance crates.io API",
+        "url": "https://crates.io/api/v1/crates/tauri-plugin-single-instance",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tauri-plugin-window-state",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.5.0",
+    "releaseDate": "2026-09-26",
+    "licence": "Apache-2.0 OR MIT",
+    "purpose": "Remembers the window's size and position.",
+    "decision": "adopt",
+    "rationale": "Small usability feature with no data of its own.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tauri-plugin-window-state on crates.io",
+        "url": "https://crates.io/crates/tauri-plugin-window-state",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tauri-plugin-window-state crates.io API",
+        "url": "https://crates.io/api/v1/crates/tauri-plugin-window-state",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "windows",
+    "ecosystem": "crates.io",
+    "latestVersion": "0.62.2",
+    "releaseDate": "2025-10-06",
+    "licence": "MIT OR Apache-2.0",
+    "purpose": "Win32 bindings for DPAPI (CryptProtectData and CryptUnprotectData) and the registry entry for starting with Windows.",
+    "decision": "adopt",
+    "rationale": "DPAPI has no Node.js binding, so secrets are protected in the shell with an application entropy and stored by the orchestrator only as protected blobs; the WebView never sees them.",
+    "windowsNotes": "DPAPI ties secrets to the Windows user; copies of the disk cannot decrypt them, but programs running as the same user can.",
+    "sources": [
+      {
+        "title": "windows on crates.io",
+        "url": "https://crates.io/crates/windows",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "windows crates.io API",
+        "url": "https://crates.io/api/v1/crates/windows",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tokio",
+    "ecosystem": "crates.io",
+    "latestVersion": "1.54.1",
+    "releaseDate": "2026-10-21",
+    "licence": "MIT",
+    "purpose": "Asynchronous runtime for the shell's sidecar pipes and timers.",
+    "decision": "adopt",
+    "rationale": "Tauri 2 already runs on tokio; only the sync, time and macros features are enabled.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tokio on crates.io",
+        "url": "https://crates.io/crates/tokio",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tokio crates.io API",
+        "url": "https://crates.io/api/v1/crates/tokio",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "serde",
+    "ecosystem": "crates.io",
+    "latestVersion": "1.0.229",
+    "releaseDate": "2026-07-18",
+    "licence": "MIT OR Apache-2.0",
+    "purpose": "Serialisation of the IPC messages in the shell.",
+    "decision": "adopt",
+    "rationale": "The standard Rust serialisation framework, required by Tauri.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "serde on crates.io",
+        "url": "https://crates.io/crates/serde",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "serde crates.io API",
+        "url": "https://crates.io/api/v1/crates/serde",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "serde_json",
+    "ecosystem": "crates.io",
+    "latestVersion": "1.0.154",
+    "releaseDate": "2026-10-11",
+    "licence": "MIT OR Apache-2.0",
+    "purpose": "JSON for the relay between the WebView and the orchestrator.",
+    "decision": "adopt",
+    "rationale": "The orchestrator speaks JSON-RPC over stdio.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "serde_json on crates.io",
+        "url": "https://crates.io/crates/serde_json",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "serde_json crates.io API",
+        "url": "https://crates.io/api/v1/crates/serde_json",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "thiserror",
+    "ecosystem": "crates.io",
+    "latestVersion": "2.0.21",
+    "releaseDate": "2026-09-23",
+    "licence": "MIT OR Apache-2.0",
+    "purpose": "Error types in the shell.",
+    "decision": "adopt",
+    "rationale": "Plain error enums without runtime cost.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "thiserror on crates.io",
+        "url": "https://crates.io/crates/thiserror",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "thiserror crates.io API",
+        "url": "https://crates.io/api/v1/crates/thiserror",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "base64",
+    "ecosystem": "crates.io",
+    "latestVersion": "0.23.1",
+    "releaseDate": "2026-08-04",
+    "licence": "MIT OR Apache-2.0",
+    "purpose": "Encodes DPAPI blobs for the orchestrator.",
+    "decision": "adopt",
+    "rationale": "Protected secrets travel to the orchestrator as base64 text.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "base64 on crates.io",
+        "url": "https://crates.io/crates/base64",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "base64 crates.io API",
+        "url": "https://crates.io/api/v1/crates/base64",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "log",
+    "ecosystem": "crates.io",
+    "latestVersion": "0.4.34",
+    "releaseDate": "2026-08-22",
+    "licence": "MIT OR Apache-2.0",
+    "purpose": "Logging facade in the shell.",
+    "decision": "adopt",
+    "rationale": "Used with tauri-plugin-log.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "log on crates.io",
+        "url": "https://crates.io/crates/log",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "log crates.io API",
+        "url": "https://crates.io/api/v1/crates/log",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "ecosystem": "system",
+    "windowsNotes": "Injecting the application into node.exe invalidates the Node.js Authenticode signature; the sidecar must be signed again for release (see code-signing).",
+    "unverifiedClaims": [],
+    "name": "Node.js",
+    "latestVersion": "26.12.1",
+    "releaseDate": "2026-10-21",
+    "licence": "MIT",
+    "purpose": "The orchestrator runs as a Node.js single executable application (node --build-sea), placed beside the shell as its sidecar.",
+    "decision": "adopt-conditional",
+    "rationale": "One TypeScript code base for the orchestrator with built-in SQLite (node:sqlite), fetch and child processes, and no Node.js installation needed on the user's computer. The executable embeds the Node.js of the machine that builds it: the builds so far used 26.4.0 (2026-06-24), so a release must be built with the newest 26.x to carry its security fixes.",
+    "sources": [
+      {
+        "title": "Node.js release index",
+        "url": "https://nodejs.org/dist/index.json",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Node.js single executable applications",
+        "url": "https://nodejs.org/api/single-executable-applications.html",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "name": "esbuild",
+    "ecosystem": "npm",
+    "latestVersion": "0.28.2",
+    "releaseDate": "2026-08-08",
+    "licence": "MIT",
+    "purpose": "Bundles the orchestrator into one CommonJS file for the single executable.",
+    "decision": "adopt",
+    "rationale": "Fast, deterministic and able to keep OpenPGP.js out of the bundle (a plugin loads it from its own file, for the LGPL).",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "esbuild on npm",
+        "url": "https://www.npmjs.com/package/esbuild",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "esbuild registry metadata",
+        "url": "https://registry.npmjs.org/esbuild",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "ecosystem": "system",
+    "windowsNotes": "Version 155 was present on the test machine; the Evergreen runtime updates itself.",
+    "unverifiedClaims": [
+      "The current Evergreen version number was not looked up; the record names the version seen on the test machine."
+    ],
+    "name": "Microsoft Edge WebView2 Runtime",
+    "latestVersion": null,
+    "releaseDate": null,
+    "licence": null,
+    "purpose": "Renders the React interface inside the Tauri window.",
+    "decision": "adopt",
+    "rationale": "The Evergreen runtime ships with Windows 11 and is installed by the bootstrapper on Windows 10, so BTCortex does not bundle a browser engine.",
+    "sources": [
+      {
+        "title": "Microsoft Edge WebView2",
+        "url": "https://developer.microsoft.com/microsoft-edge/webview2/",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "ecosystem": "system",
+    "windowsNotes": "The MSVC target (x86_64-pc-windows-msvc) with the Visual Studio C++ build tools.",
+    "unverifiedClaims": [
+      "1.99.1 is the toolchain installed on the build machine (rustc -V on 2026-10-23); a newer stable release may exist."
+    ],
+    "name": "Rust toolchain",
+    "latestVersion": "1.99.1",
+    "releaseDate": "2026-10-13",
+    "licence": "MIT OR Apache-2.0",
+    "purpose": "Builds the shell (edition 2024, rust-version 1.88 or later).",
+    "decision": "adopt",
+    "rationale": "Required by Tauri. Release builds use LTO, one codegen unit and stripped symbols.",
+    "sources": [
+      {
+        "title": "Rust releases",
+        "url": "https://blog.rust-lang.org/releases/",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "ecosystem": "system",
+    "windowsNotes": null,
+    "unverifiedClaims": [],
+    "name": "Windows PowerShell 5.1",
+    "latestVersion": null,
+    "releaseDate": null,
+    "licence": null,
+    "purpose": "Read-only probes the orchestrator runs: listening ports and their programs (Get-NetTCPConnection), disks and volumes, devices (WMI), WSL distributions, the system proxy and metered connections.",
+    "decision": "adopt",
+    "rationale": "Present on every Windows 10 and 11 installation, without administrator rights. Inputs travel in environment variables, never inside the script text.",
+    "sources": [
+      {
+        "title": "Windows PowerShell 5.1",
+        "url": "https://learn.microsoft.com/powershell/scripting/windows-powershell/overview",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "ecosystem": "system",
+    "windowsNotes": null,
+    "unverifiedClaims": [],
+    "name": "node:sqlite",
+    "latestVersion": null,
+    "releaseDate": null,
+    "licence": "MIT",
+    "purpose": "The orchestrator's database: settings, protected secrets, node profiles, jobs, alerts and metrics, with transactional migrations.",
+    "decision": "adopt",
+    "rationale": "Built into Node.js, so the single executable needs no native add-on for its database.",
+    "sources": [
+      {
+        "title": "Node.js SQLite module",
+        "url": "https://nodejs.org/api/sqlite.html",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "windowsNotes": null,
+    "unverifiedClaims": [],
+    "name": "better-sqlite3",
+    "latestVersion": null,
+    "releaseDate": null,
+    "licence": "MIT",
+    "purpose": "A SQLite binding for Node.js.",
+    "decision": "reject",
+    "rationale": "A native add-on built for each Node.js ABI, which a single executable cannot load from inside itself; node:sqlite covers the same need.",
+    "sources": [
+      {
+        "title": "better-sqlite3 on npm",
+        "url": "https://www.npmjs.com/package/better-sqlite3",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "better-sqlite3 registry metadata",
+        "url": "https://registry.npmjs.org/better-sqlite3",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "windowsNotes": null,
+    "unverifiedClaims": [],
+    "name": "zeromq",
+    "latestVersion": null,
+    "releaseDate": null,
+    "licence": "MIT",
+    "purpose": "A ZeroMQ binding for Node.js.",
+    "decision": "reject",
+    "rationale": "Another native add-on. Bitcoin Core's notifications need only a ZMTP 3 subscriber with the NULL mechanism, which BTCortex implements in TypeScript over node:net.",
+    "sources": [
+      {
+        "title": "zeromq on npm",
+        "url": "https://www.npmjs.com/package/zeromq",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "zeromq registry metadata",
+        "url": "https://registry.npmjs.org/zeromq",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "windowsNotes": null,
+    "unverifiedClaims": [
+      "The archived state of the repository was not re-checked on 2026-10-23."
+    ],
+    "name": "keytar",
+    "latestVersion": null,
+    "releaseDate": null,
+    "licence": "MIT",
+    "purpose": "Credential storage through the operating system's keychain.",
+    "decision": "reject",
+    "rationale": "A native add-on, and the repository is archived; DPAPI through the shell gives the same protection on Windows without it.",
+    "sources": [
+      {
+        "title": "keytar repository",
+        "url": "https://github.com/atom/node-keytar",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "ecosystem": "npm",
+    "windowsNotes": null,
+    "unverifiedClaims": [],
+    "name": "Electron",
+    "latestVersion": null,
+    "releaseDate": null,
+    "licence": "MIT",
+    "purpose": "A desktop shell bundling Chromium and Node.js.",
+    "decision": "reject",
+    "rationale": "The specification asks for Tauri and WebView2; Electron would bundle a browser engine of its own and give the renderer process a larger attack surface.",
+    "sources": [
+      {
+        "title": "electron on npm",
+        "url": "https://www.npmjs.com/package/electron",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "electron registry metadata",
+        "url": "https://registry.npmjs.org/electron",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "ecosystem": "system",
+    "windowsNotes": null,
+    "unverifiedClaims": [
+      "The current Gpg4win version was not looked up for this record."
+    ],
+    "name": "Gpg4win",
+    "latestVersion": null,
+    "releaseDate": null,
+    "licence": "GPL-2.0-or-later",
+    "purpose": "GnuPG for Windows, for checking OpenPGP signatures.",
+    "decision": "reject",
+    "rationale": "It would have to be installed first and its output parsed; OpenPGP.js checks the signatures inside BTCortex against keys pinned in the application.",
+    "sources": [
+      {
+        "title": "Gpg4win",
+        "url": "https://www.gpg4win.org/",
+        "accessed": "2026-10-23"
+      }
+    ]
+  },
+  {
+    "name": "openpgp",
+    "ecosystem": "npm",
+    "latestVersion": "6.3.2",
+    "releaseDate": "2026-09-24",
+    "licence": "LGPL-3.0+",
+    "purpose": "Checks the OpenPGP signatures on every download against keys pinned in BTCortex.",
+    "decision": "adopt",
+    "rationale": "Pure JavaScript and strict about key validity at signature time. It is LGPL-3.0-or-later, so it ships as a separate, replaceable file (openpgp/openpgp.cjs) with its licence instead of inside the executable.",
+    "windowsNotes": "One Bitcoin Core builder signature is reported invalid because OpenPGP.js checks key validity at the signature's creation time; enough others are valid.",
+    "sources": [
+      {
+        "title": "openpgp on npm",
+        "url": "https://www.npmjs.com/package/openpgp",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "openpgp registry metadata",
+        "url": "https://registry.npmjs.org/openpgp",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "yauzl",
+    "ecosystem": "npm",
+    "latestVersion": "3.4.0",
+    "releaseDate": "2026-06-07",
+    "licence": "MIT",
+    "purpose": "Reads ZIP archives for the verified installer.",
+    "decision": "adopt",
+    "rationale": "Streaming and lazy, so every entry's path, type and size can be checked before anything is written.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "yauzl on npm",
+        "url": "https://www.npmjs.com/package/yauzl",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "yauzl registry metadata",
+        "url": "https://registry.npmjs.org/yauzl",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "zod",
+    "ecosystem": "npm",
+    "latestVersion": "4.6.7",
+    "releaseDate": "2026-10-12",
+    "licence": "MIT",
+    "purpose": "The shared contracts: every JSON-RPC method's parameters and results, validated on both sides of the boundary, and the shapes of external answers.",
+    "decision": "adopt",
+    "rationale": "Types and runtime validation from one definition, used by the interface and the orchestrator alike.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "zod on npm",
+        "url": "https://www.npmjs.com/package/zod",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "zod registry metadata",
+        "url": "https://registry.npmjs.org/zod",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "qrcode",
+    "ecosystem": "npm",
+    "latestVersion": "1.5.4",
+    "releaseDate": "2024-08-05",
+    "licence": "MIT",
+    "purpose": "Makes QR matrices for PSBTs and payment URIs in the orchestrator.",
+    "decision": "adopt",
+    "rationale": "Pure JavaScript; the interface draws the matrices as SVG paths.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "qrcode on npm",
+        "url": "https://www.npmjs.com/package/qrcode",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "qrcode registry metadata",
+        "url": "https://registry.npmjs.org/qrcode",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@ngraveio/bc-ur",
+    "ecosystem": "npm",
+    "latestVersion": "1.1.13",
+    "releaseDate": "2024-04-17",
+    "licence": "MIT",
+    "purpose": "Uniform Resources (ur:crypto-psbt) with fountain codes, for animated PSBT QR codes.",
+    "decision": "adopt",
+    "rationale": "The encoding air-gapped signers such as Keystone and Passport read. Last released in 2024-04; stable.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@ngraveio/bc-ur on npm",
+        "url": "https://www.npmjs.com/package/@ngraveio/bc-ur",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@ngraveio/bc-ur registry metadata",
+        "url": "https://registry.npmjs.org/@ngraveio%2Fbc-ur",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "typescript",
+    "ecosystem": "npm",
+    "latestVersion": "7.0.2",
+    "releaseDate": "2026-07-08",
+    "licence": "Apache-2.0",
+    "purpose": "The language of the interface, the orchestrator and the packages, in strict mode.",
+    "decision": "adopt-conditional",
+    "rationale": "BTCortex stays on 6.0.x: typescript-eslint 8.72.0, which lints the repository, supports TypeScript >=4.8.4 <6.1.0, so 7.x waits for typescript-eslint.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "typescript on npm",
+        "url": "https://www.npmjs.com/package/typescript",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "typescript registry metadata",
+        "url": "https://registry.npmjs.org/typescript",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "typescript-eslint 8.72.0 peer dependencies",
+        "url": "https://registry.npmjs.org/typescript-eslint/8.72.0",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "vitest",
+    "ecosystem": "npm",
+    "latestVersion": "5.0.5",
+    "releaseDate": "2026-10-15",
+    "licence": "MIT",
+    "purpose": "Unit, component and integration tests, in three projects (node, desktop, integration).",
+    "decision": "adopt",
+    "rationale": "Shares Vite's configuration and TypeScript handling; integration tests run against real regtest services.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "vitest on npm",
+        "url": "https://www.npmjs.com/package/vitest",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "vitest registry metadata",
+        "url": "https://registry.npmjs.org/vitest",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tsx",
+    "ecosystem": "npm",
+    "latestVersion": "4.23.15",
+    "releaseDate": "2026-09-20",
+    "licence": "MIT",
+    "purpose": "Runs the TypeScript development scripts (scripts/dev/install-*.ts).",
+    "decision": "adopt",
+    "rationale": "No separate compile step for scripts.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tsx on npm",
+        "url": "https://www.npmjs.com/package/tsx",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tsx registry metadata",
+        "url": "https://registry.npmjs.org/tsx",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "eslint",
+    "ecosystem": "npm",
+    "latestVersion": "10.13.0",
+    "releaseDate": "2026-10-16",
+    "licence": "MIT",
+    "purpose": "Linting of the whole repository.",
+    "decision": "adopt",
+    "rationale": "Flat configuration with typescript-eslint's type-aware rules.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "eslint on npm",
+        "url": "https://www.npmjs.com/package/eslint",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "eslint registry metadata",
+        "url": "https://registry.npmjs.org/eslint",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "typescript-eslint",
+    "ecosystem": "npm",
+    "latestVersion": "8.72.0",
+    "releaseDate": "2026-10-19",
+    "licence": "MIT",
+    "purpose": "Type-aware lint rules.",
+    "decision": "adopt",
+    "rationale": "Catches unsafe any, floating promises and unnecessary conditions.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "typescript-eslint on npm",
+        "url": "https://www.npmjs.com/package/typescript-eslint",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "typescript-eslint registry metadata",
+        "url": "https://registry.npmjs.org/typescript-eslint",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@eslint/js",
+    "ecosystem": "npm",
+    "latestVersion": "10.0.1",
+    "releaseDate": "2026-02-06",
+    "licence": "MIT",
+    "purpose": "ESLint's recommended rules.",
+    "decision": "adopt",
+    "rationale": "Baseline rule set.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@eslint/js on npm",
+        "url": "https://www.npmjs.com/package/@eslint/js",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@eslint/js registry metadata",
+        "url": "https://registry.npmjs.org/@eslint%2Fjs",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "globals",
+    "ecosystem": "npm",
+    "latestVersion": "17.13.0",
+    "releaseDate": "2026-10-01",
+    "licence": "MIT",
+    "purpose": "Global variable sets for ESLint.",
+    "decision": "adopt",
+    "rationale": "Node and browser globals per file group.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "globals on npm",
+        "url": "https://www.npmjs.com/package/globals",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "globals registry metadata",
+        "url": "https://registry.npmjs.org/globals",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "prettier",
+    "ecosystem": "npm",
+    "latestVersion": "3.9.10",
+    "releaseDate": "2026-10-10",
+    "licence": "MIT",
+    "purpose": "Formatting, checked in CI-style runs (npm run format:check).",
+    "decision": "adopt",
+    "rationale": "One format for code and documents, LF line endings.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "prettier on npm",
+        "url": "https://www.npmjs.com/package/prettier",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "prettier registry metadata",
+        "url": "https://registry.npmjs.org/prettier",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  }
+]

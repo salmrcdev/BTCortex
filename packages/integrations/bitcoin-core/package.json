@@ -1,0 +1,23 @@
+{
+  "name": "@btcortex/integration-bitcoin-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bitcoin Core integration: verified installation, detection, lifecycle and monitoring.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "update-keys": "node scripts/update-builder-keys.mjs"
+  },
+  "dependencies": {
+    "@btcortex/bitcoin-config": "0.1.0",
+    "@btcortex/bitcoin-rpc": "0.1.0",
+    "@btcortex/contracts": "0.1.0",
+    "@btcortex/core": "0.1.0",
+    "@btcortex/installation-manager": "0.1.0",
+    "zod": "^4.6.7"
+  }
+}

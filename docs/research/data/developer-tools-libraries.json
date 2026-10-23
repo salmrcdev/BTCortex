@@ -1,0 +1,1894 @@
+[
+  {
+    "id": "polar",
+    "name": "Polar",
+    "category": "developer-tool",
+    "catalogueEligible": true,
+    "website": "https://lightningpolar.com",
+    "repository": "https://github.com/jamaljsr/polar",
+    "purpose": "One-click Bitcoin and Lightning networks for local development and testing: regtest Bitcoin Core with LND, Core Lightning, Eclair, Taproot Assets and Lightning Terminal nodes, run as Docker containers from a desktop application.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Polar v4.0.0 published on 2026-01-06; the repository was pushed on 2026-10-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "4.0.0",
+      "date": "2026-01-06",
+      "source": "https://github.com/jamaljsr/polar/releases/tag/v4.0.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "Windows installer (exe); needs Docker Desktop",
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "macOS (dmg) and Linux (deb, AppImage, RPM); the networks it builds run in Docker."
+    },
+    "interfaces": [
+      {
+        "type": "gui",
+        "description": "Desktop application that builds and runs the networks.",
+        "authentication": null,
+        "documentation": "https://github.com/jamaljsr/polar/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Its own regtest Bitcoin Core and Lightning nodes in containers, separate from the user’s nodes.",
+    "dependencies": [],
+    "networking": "Containers on the local Docker network.",
+    "storage": null,
+    "resources": null,
+    "security": "Regtest only, with containers of its own; Docker Desktop on Windows is a large dependency with its own security model.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Launch the user’s own installation (not built)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "external-launcher"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "A Windows installer exists, but it needs Docker Desktop, which BTCortex does not install (zero-touch)."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Polar README",
+        "url": "https://github.com/jamaljsr/polar/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Polar v4.0.0",
+        "url": "https://github.com/jamaljsr/polar/releases/tag/v4.0.0",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The Windows installer’s architecture and signing were not checked."
+    ]
+  },
+  {
+    "id": "nigiri",
+    "name": "Nigiri",
+    "category": "test-network",
+    "catalogueEligible": true,
+    "website": "https://nigiri.vulpem.com",
+    "repository": "https://github.com/vulpemventures/nigiri",
+    "purpose": "Command-line tool for a regtest development environment in Docker Compose: Bitcoin Core in regtest, electrs and the Esplora explorer, Chopsticks (an HTTP proxy with a faucet and automatic blocks), and optionally Liquid, Lightning and Ark.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.5.17 published on 2026-05-13; the repository was pushed on 2026-07-10.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.5.17",
+      "date": "2026-05-13",
+      "source": "https://github.com/vulpemventures/nigiri/releases/tag/v0.5.17"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "yes",
+      "docker": "compose-only",
+      "other": "The README strongly encourages WSL on Windows; Docker is required."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "nigiri start (--liquid, --ln, --ark), nigiri faucet <address>, nigiri push <hex>, nigiri rpc <command>.",
+        "authentication": null,
+        "documentation": "https://github.com/vulpemventures/nigiri/blob/master/README.md"
+      },
+      {
+        "type": "http",
+        "description": "Esplora at http://localhost:5000; Chopsticks on port 3000 (3001 with --liquid).",
+        "authentication": null,
+        "documentation": "https://github.com/vulpemventures/nigiri/blob/master/README.md"
+      }
+    ],
+    "cli": "nigiri.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Its own regtest Bitcoin Core in a container.",
+    "dependencies": [],
+    "networking": "Esplora on 5000, Chopsticks on 3000 and 3001.",
+    "storage": null,
+    "resources": null,
+    "security": "Regtest only.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Needs Docker and, on Windows, WSL; BTCortex runs regtest nodes natively instead."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Nigiri README",
+        "url": "https://github.com/vulpemventures/nigiri/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Nigiri releases feed",
+        "url": "https://github.com/vulpemventures/nigiri/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The electrs port is not stated in the README."
+    ]
+  },
+  {
+    "id": "warnet",
+    "name": "Warnet",
+    "category": "test-network",
+    "catalogueEligible": true,
+    "website": "https://warnet.dev",
+    "repository": "https://github.com/bitcoin-dev-project/warnet",
+    "purpose": "Launches Bitcoin networks with a chosen number of nodes and topology, optionally with a Lightning network and payment activity, to monitor and analyse emergent network behaviour, on a local or remote cluster.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v1.1.20 published on 2026-02-28; the repository was pushed on 2026-09-20.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.1.20",
+      "date": "2026-02-28",
+      "source": "https://github.com/bitcoin-dev-project/warnet/releases/tag/v1.1.20"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "A local or remote cluster back end, chosen at set-up."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "warnet, which asks for its back end and checks it.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoin-dev-project/warnet/blob/main/README.md"
+      }
+    ],
+    "cli": "warnet.",
+    "remoteManagement": "Networks on a remote cluster.",
+    "nodeCompatibility": "Its own Bitcoin Core nodes, optionally with Lightning.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Test networks of its own.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Research tooling for network simulations, not for a user’s node."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Warnet README",
+        "url": "https://github.com/bitcoin-dev-project/warnet/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Warnet releases feed",
+        "url": "https://github.com/bitcoin-dev-project/warnet/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Which cluster back ends it supports, and whether it runs on Windows, are not stated in the README."
+    ]
+  },
+  {
+    "id": "btcdeb",
+    "name": "btcdeb",
+    "category": "developer-tool",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/bitcoin-core/btcdeb",
+    "purpose": "Bitcoin Script debugging utilities: btcdeb steps through a script showing the stack, and btcc compiles readable script to hex.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The repository was pushed on 2026-07-26; its latest tag is v5.0.24, from 2023.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "5.0.24",
+      "date": null,
+      "source": "https://github.com/bitcoin-core/btcdeb/tags"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Built from source on Linux or macOS (autogen, configure, make); a Docker build and an Emscripten (JavaScript) build."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "btcdeb and btcc.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoin-core/btcdeb/blob/master/README.md"
+      }
+    ],
+    "cli": "btcdeb, btcc.",
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Offline tool.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A developer tool without Windows builds."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "btcdeb README",
+        "url": "https://github.com/bitcoin-core/btcdeb/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "btcdeb tags",
+        "url": "https://github.com/bitcoin-core/btcdeb/tags",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The exact date of v5.0.24 (2023) and Taproot support were not checked."
+    ]
+  },
+  {
+    "id": "sim-ln",
+    "name": "SimLN",
+    "category": "developer-tool",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/bitcoin-dev-project/sim-ln",
+    "purpose": "Generates realistic payment activity on a Lightning network: on nodes the user controls (LND, Core Lightning, Eclair, LDK Server) or on a simulated network defined in a file.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.2.5 published on 2025-06-24; the repository was pushed on 2026-09-16.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.2.5",
+      "date": "2025-06-24",
+      "source": "https://github.com/bitcoin-dev-project/sim-ln/releases/tag/v0.2.5"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "file",
+        "description": "sim.json with node credentials (certificates and macaroons, keys or API credentials) or a sim_network topology.",
+        "authentication": "The nodes’ own credentials.",
+        "documentation": "https://github.com/bitcoin-dev-project/sim-ln/blob/main/README.md"
+      }
+    ],
+    "cli": "sim-cli.",
+    "remoteManagement": null,
+    "nodeCompatibility": "LND, Core Lightning, Eclair and LDK Server, with keysend enabled.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd",
+          "core-lightning",
+          "eclair"
+        ],
+        "relationship": "optional",
+        "notes": "Nodes to drive, unless the network is simulated."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "It sends real payments from the nodes it is given; the README warns that paying destinations outside the user’s own nodes can drain liquidity and suggests signets and test environments.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A testing tool that spends from the nodes it controls."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "SimLN README",
+        "url": "https://github.com/bitcoin-dev-project/sim-ln/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "SimLN releases feed",
+        "url": "https://github.com/bitcoin-dev-project/sim-ln/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The binary name sim-cli and Windows support were not checked."
+    ]
+  },
+  {
+    "id": "mutinynet",
+    "name": "Mutinynet",
+    "category": "test-network",
+    "catalogueEligible": true,
+    "website": "https://mutinynet.com/",
+    "repository": null,
+    "purpose": "Public Bitcoin signet for developers, with a mempool explorer (mutinynet.com) and a faucet (faucet.mutinynet.com) that sends on-chain coins, pays Lightning invoices and opens channels.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The explorer and the faucet answered on 2026-10-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "A public network with web services."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Faucet with an OpenAPI description (faucet.mutinynet.com/openapi.json): up to 1,000,000 sats per request, on chain or over Lightning, and channel opening to the user’s node.",
+        "authentication": null,
+        "documentation": "https://faucet.mutinynet.com/openapi.json"
+      },
+      {
+        "type": "http",
+        "description": "mempool explorer at mutinynet.com.",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "A signet of its own; joining it needs its signet parameters, which its pages do not show.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Test coins with no value.",
+    "licence": null,
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "BTCortex sets up the default signet and testnet4, not custom signets."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Public faucets for the default signet and testnet4 were not researched.",
+    "sources": [
+      {
+        "title": "Mutinynet explorer",
+        "url": "https://mutinynet.com/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Mutinynet faucet",
+        "url": "https://faucet.mutinynet.com/",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Its block interval, signet challenge and whether it needs a modified Bitcoin Core were not checked."
+    ]
+  },
+  {
+    "id": "bitcoinjs-lib",
+    "name": "bitcoinjs-lib",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/bitcoinjs/bitcoinjs-lib",
+    "purpose": "Client-side Bitcoin JavaScript library: transactions, PSBTs, scripts and addresses.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "7.0.4 is the latest version on npm; the newest GitHub release is v7.0.1 (2026-01-07).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "7.0.4",
+      "date": null,
+      "source": "https://www.npmjs.com/package/bitcoinjs-lib/v/7.0.4"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "npm package bitcoinjs-lib (Node.js 18 or later)."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoinjs/bitcoinjs-lib"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Applications using it handle keys themselves.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "bitcoinjs-lib on npm",
+        "url": "https://registry.npmjs.org/bitcoinjs-lib/latest",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "bitcoinjs-lib releases feed",
+        "url": "https://github.com/bitcoinjs/bitcoinjs-lib/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The publication date of 7.0.4 was not found."
+    ]
+  },
+  {
+    "id": "scure-btc-signer",
+    "name": "@scure/btc-signer",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/paulmillr/scure-btc-signer",
+    "purpose": "Audited, minimal Bitcoin library: transactions, Schnorr, Taproot, UTXO selection and PSBTs.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "2.4.1 published on 2026-08-29.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.4.1",
+      "date": "2026-08-29",
+      "source": "https://github.com/paulmillr/scure-btc-signer/releases/tag/2.4.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "npm package @scure/btc-signer."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/paulmillr/scure-btc-signer"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Described by its author as audited; applications using it handle keys themselves.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "@scure/btc-signer on npm",
+        "url": "https://registry.npmjs.org/@scure/btc-signer/latest",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "scure-btc-signer releases feed",
+        "url": "https://github.com/paulmillr/scure-btc-signer/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Which version the audit covered was not checked."
+    ]
+  },
+  {
+    "id": "noble-curves",
+    "name": "@noble/curves",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/paulmillr/noble-curves",
+    "purpose": "Audited, minimal JavaScript implementation of elliptic-curve cryptography, including secp256k1 and Schnorr signatures.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "2.4.0 published on 2026-08-27.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.4.0",
+      "date": "2026-08-27",
+      "source": "https://github.com/paulmillr/noble-curves/releases/tag/2.4.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "npm package @noble/curves."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/paulmillr/noble-curves"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Described by its author as audited.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "@noble/curves on npm",
+        "url": "https://registry.npmjs.org/@noble/curves/latest",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "noble-curves releases feed",
+        "url": "https://github.com/paulmillr/noble-curves/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Which version the audit covered was not checked."
+    ]
+  },
+  {
+    "id": "bitcoinerlab-descriptors",
+    "name": "@bitcoinerlab/descriptors",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/bitcoinerlab/descriptors",
+    "purpose": "Parses and creates Miniscript output descriptors and builds PSBTs, with signers and finalizers for single-signature, BIP32 and hardware wallets, for the bitcoinjs family.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Tag v.3.2.0 on 2026-08-30 (3.2.0 on npm).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.2.0",
+      "date": "2026-08-30",
+      "source": "https://github.com/bitcoinerlab/descriptors/tags"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "npm package; depends on bip32, ecpair, bitcoinjs-lib, @bitcoinerlab/secp256k1 and @bitcoinerlab/descriptors-core, with @ledgerhq/ledger-bitcoin optional."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoinerlab/descriptors"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Applications using it handle keys themselves.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "@bitcoinerlab/descriptors on npm",
+        "url": "https://registry.npmjs.org/@bitcoinerlab/descriptors/latest",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "descriptors tags",
+        "url": "https://github.com/bitcoinerlab/descriptors/tags",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "bitcoinerlab-miniscript",
+    "name": "@bitcoinerlab/miniscript",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/bitcoinerlab/miniscript",
+    "purpose": "Bitcoin Miniscript in JavaScript: a compiler and analyser, and a signer-agnostic satisfier that produces symbolic witnesses.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Tag v2.0.0 on 2026-01-30.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.0.0",
+      "date": "2026-01-30",
+      "source": "https://github.com/bitcoinerlab/miniscript/tags"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "npm package @bitcoinerlab/miniscript."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoinerlab/miniscript"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Analysis library without keys.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "@bitcoinerlab/miniscript on npm",
+        "url": "https://registry.npmjs.org/@bitcoinerlab/miniscript/latest",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "miniscript tags",
+        "url": "https://github.com/bitcoinerlab/miniscript/tags",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "bdk",
+    "name": "BDK (bdk_wallet)",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": "https://bitcoindevkit.org",
+    "repository": "https://github.com/bitcoindevkit/bdk_wallet",
+    "purpose": "Modern, lightweight, descriptor-based wallet library in Rust (Bitcoin Dev Kit).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "bdk_wallet 3.2.0 published on crates.io on 2026-09-20.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.2.0",
+      "date": "2026-09-20",
+      "source": "https://crates.io/crates/bdk_wallet/3.2.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Rust crate bdk_wallet."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoindevkit/bdk_wallet"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Applications using it handle keys themselves.",
+    "licence": "MIT OR Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "utreexod’s optional wallet is built on BDK.",
+    "sources": [
+      {
+        "title": "bdk_wallet on crates.io",
+        "url": "https://crates.io/crates/bdk_wallet",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "rust-bitcoin",
+    "name": "rust-bitcoin",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/rust-bitcoin/rust-bitcoin",
+    "purpose": "General-purpose Rust library for using and interoperating with Bitcoin.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The bitcoin crate 0.32.102 was published on 2026-07-15.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.32.102",
+      "date": "2026-07-15",
+      "source": "https://crates.io/crates/bitcoin/0.32.102"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Rust crate bitcoin."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/rust-bitcoin/rust-bitcoin"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Library without keys of its own.",
+    "licence": "CC0-1.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "bitcoin crate on crates.io",
+        "url": "https://crates.io/crates/bitcoin",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "rust-miniscript",
+    "name": "rust-miniscript",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/rust-bitcoin/rust-miniscript",
+    "purpose": "Miniscript, a subset of Bitcoin Script designed for analysis, in Rust.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The miniscript crate 13.2.0 was published on 2026-10-17.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "13.2.0",
+      "date": "2026-10-17",
+      "source": "https://crates.io/crates/miniscript/13.2.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Rust crate miniscript."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/rust-bitcoin/rust-miniscript"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Analysis library without keys.",
+    "licence": "CC0-1.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "miniscript crate on crates.io",
+        "url": "https://crates.io/crates/miniscript",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "bc-ur",
+    "name": "@ngraveio/bc-ur",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/ngraveio/bc-ur",
+    "purpose": "JavaScript implementation of Blockchain Commons’ Uniform Resources (UR): animated QR codes for PSBTs and other data across air gaps.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "1.1.13 (2024-04-17) is the latest version on npm.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.1.13",
+      "date": "2024-04-17",
+      "source": "https://www.npmjs.com/package/@ngraveio/bc-ur/v/1.1.13"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "npm package @ngraveio/bc-ur."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/ngraveio/bc-ur"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "BTCortex itself uses it for UR QR codes (see the technology-platform records).",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "@ngraveio/bc-ur on npm",
+        "url": "https://registry.npmjs.org/@ngraveio/bc-ur",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "bbqr",
+    "name": "BBQr",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": "https://bbqr.org",
+    "repository": "https://github.com/coinkite/BBQr",
+    "purpose": "Better Bitcoin QR: encodes larger files into a series of QR codes so they can cross air gaps; the npm package implements it for the browser in TypeScript.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "1.2.0 is the latest version on npm; the repository was pushed on 2026-07-27.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.2.0",
+      "date": null,
+      "source": "https://www.npmjs.com/package/bbqr/v/1.2.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "npm package bbqr."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/coinkite/BBQr"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Encoding library.",
+    "licence": null,
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "bbqr on npm",
+        "url": "https://registry.npmjs.org/bbqr/latest",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "BBQr repository",
+        "url": "https://github.com/coinkite/BBQr",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Its licence is not detected by GitHub or named in the npm metadata.",
+      "The publication date of 1.2.0 was not found."
+    ]
+  },
+  {
+    "id": "bitcoin-core-js",
+    "name": "bitcoin-core (Node.js client)",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/ruimarinho/bitcoin-core",
+    "purpose": "Node.js REST and RPC client for Bitcoin Core.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v5.0.0 published on 2025-01-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "5.0.0",
+      "date": "2025-01-23",
+      "source": "https://github.com/ruimarinho/bitcoin-core/releases/tag/v5.0.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "npm package bitcoin-core."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/ruimarinho/bitcoin-core"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Holds the node’s RPC credentials given to it.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "BTCortex has its own typed RPC client (packages/bitcoin-rpc).",
+    "sources": [
+      {
+        "title": "bitcoin-core on npm",
+        "url": "https://registry.npmjs.org/bitcoin-core/latest",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "bitcoin-core releases feed",
+        "url": "https://github.com/ruimarinho/bitcoin-core/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "neutrino",
+    "name": "Neutrino",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/lightninglabs/neutrino",
+    "purpose": "Privacy-preserving Bitcoin light client in Go using compact block filters (BIP 157 and 158); LND can use it as its chain back end.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Tag v0.18.0 on 2026-06-24; the repository was pushed on 2026-10-09.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.18.0",
+      "date": "2026-06-24",
+      "source": "https://github.com/lightninglabs/neutrino/tags"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Go module."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/lightninglabs/neutrino"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "A light client that its description calls privacy-preserving; it relies on the filters its peers serve.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Neutrino repository",
+        "url": "https://github.com/lightninglabs/neutrino",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Neutrino tags",
+        "url": "https://github.com/lightninglabs/neutrino/tags",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "How Neutrino checks filters across peers was not examined."
+    ]
+  },
+  {
+    "id": "kyoto",
+    "name": "Kyoto (bip157)",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/2140-dev/kyoto",
+    "purpose": "Bitcoin light client in Rust according to BIP 157 and 158 (compact block filters).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The bip157 crate 0.7.0 was published on 2026-09-25.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.7.0",
+      "date": "2026-09-25",
+      "source": "https://crates.io/crates/bip157/0.7.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Rust crate bip157."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Programming interface for applications.",
+        "authentication": null,
+        "documentation": "https://github.com/2140-dev/kyoto"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Light client.",
+    "licence": "MIT OR Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Bitcoin software; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "bip157 crate on crates.io",
+        "url": "https://crates.io/crates/bip157",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "restic",
+    "name": "restic",
+    "category": "backup-tool",
+    "catalogueEligible": true,
+    "website": "https://restic.net",
+    "repository": "https://github.com/restic/restic",
+    "purpose": "Fast, secure and efficient backup program with encrypted, deduplicated snapshots in local or remote repositories.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "restic 0.19.1 published on 2026-07-05; the repository was pushed on 2026-10-18.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.19.1",
+      "date": "2026-07-05",
+      "source": "https://github.com/restic/restic/releases/tag/v0.19.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64",
+        "x86"
+      ],
+      "windowsDistribution": "restic_0.19.1_windows_amd64.zip and restic_0.19.1_windows_386.zip, with SHA256SUMS and its signature",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS, BSD."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "restic.",
+        "authentication": "The repository password.",
+        "documentation": "https://restic.net"
+      }
+    ],
+    "cli": "restic.",
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": "Remote repositories over the network.",
+    "storage": null,
+    "resources": null,
+    "security": "Repositories are encrypted with the user’s password; signed checksums cover the releases.",
+    "licence": "BSD-2-Clause",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Point restic at BTCortex’s backup folder (documentation only)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "fully-managed"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Signed Windows archives would allow managed off-site copies of BTCortex’s backups, which BTCortex does not offer yet."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "restic v0.19.1",
+        "url": "https://github.com/restic/restic/releases/tag/v0.19.1",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "restic repository",
+        "url": "https://github.com/restic/restic",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Who signs SHA256SUMS was not identified."
+    ]
+  },
+  {
+    "id": "kopia",
+    "name": "Kopia",
+    "category": "backup-tool",
+    "catalogueEligible": true,
+    "website": "https://kopia.io",
+    "repository": "https://github.com/kopia/kopia",
+    "purpose": "Cross-platform backup tool with fast incremental backups, client-side end-to-end encryption, compression and deduplication, with a command line and a desktop interface (KopiaUI).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.23.1 published on 2026-06-16; the repository was pushed on 2026-10-20.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.23.1",
+      "date": "2026-06-16",
+      "source": "https://github.com/kopia/kopia/releases/tag/v0.23.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64"
+      ],
+      "windowsDistribution": "kopia-0.23.1-windows-x64.zip and KopiaUI-Setup-0.23.1.exe, with checksums.txt and its signature",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "macOS and Linux."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "kopia.",
+        "authentication": "The repository password.",
+        "documentation": "https://kopia.io"
+      },
+      {
+        "type": "gui",
+        "description": "KopiaUI desktop application.",
+        "authentication": null,
+        "documentation": "https://kopia.io"
+      }
+    ],
+    "cli": "kopia.",
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": "Remote repositories over the network.",
+    "storage": null,
+    "resources": null,
+    "security": "Client-side end-to-end encryption; signed checksums cover the releases.",
+    "licence": "Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Point Kopia at BTCortex’s backup folder (documentation only)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "external-launcher"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "A Windows installer and archive exist; BTCortex does not offer off-site copies yet."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Kopia v0.23.1",
+        "url": "https://github.com/kopia/kopia/releases/tag/v0.23.1",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Kopia repository",
+        "url": "https://github.com/kopia/kopia",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Who signs checksums.txt was not identified."
+    ]
+  },
+  {
+    "id": "gpg4win",
+    "name": "Gpg4win",
+    "category": "security-tool",
+    "catalogueEligible": true,
+    "website": "https://www.gpg4win.org/",
+    "repository": null,
+    "purpose": "GNU Privacy Guard for Windows: GnuPG with its Windows tools, used among other things to verify signed software releases by hand.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Gpg4win 5.1.1 released on 2026-09-23, according to its news.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "5.1.1",
+      "date": "2026-09-23",
+      "source": "https://www.gpg4win.org/"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "Windows 10 (1809 or later) and Windows 11",
+      "windowsArchitectures": [
+        "x64"
+      ],
+      "windowsDistribution": "Installer from gpg4win.org; 64-bit only since 5.0.0",
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "gpg and the Windows tools.",
+        "authentication": null,
+        "documentation": "https://www.gpg4win.org/"
+      }
+    ],
+    "cli": "gpg.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Bitcoin Core’s manual verification procedure uses GnuPG; BTCortex verifies signatures itself with OpenPGP.js and does not need it.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Not needed by BTCortex, which checks every download against keys pinned in its repository.",
+    "licence": "GPL-2.0-or-later",
+    "licenceNotes": "The installer is GPL-2.0-or-later and GnuPG GPL-3.0-or-later, according to the licence page.",
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Not needed: BTCortex verifies releases natively."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Gpg4win",
+        "url": "https://www.gpg4win.org/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Gpg4win licence",
+        "url": "https://www.gpg4win.org/license.html",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Gpg4win system requirements",
+        "url": "https://www.gpg4win.org/system-requirements.html",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Which components (Kleopatra, GpgOL, GpgEX) 5.1.1 contains was not checked."
+    ]
+  },
+  {
+    "id": "arkd",
+    "name": "arkd (Arkade operator)",
+    "category": "other",
+    "catalogueEligible": true,
+    "website": "https://docs.arkadeos.com/arkd/what-is-arkd",
+    "repository": "https://github.com/arkade-os/arkd",
+    "purpose": "The software behind the Arkade operator: it executes transactions off chain, coordinates batch settlement on chain and manages virtual outputs, with unilateral exit as the path when the operator is unavailable.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.9.16 published on 2026-08-25; the repository was pushed on 2026-09-28.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.9.16",
+      "date": "2026-08-25",
+      "source": "https://github.com/arkade-os/arkd/releases/tag/v0.9.16"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Developers can run their own operator only in regtest, according to its documentation."
+    },
+    "interfaces": [],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Its documentation calls the operator software alpha, with limited mainnet testing, to be treated as experimental.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Alpha software; running an operator is only supported in regtest."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Nigiri can start Ark components for development.",
+    "sources": [
+      {
+        "title": "What is arkd",
+        "url": "https://docs.arkadeos.com/arkd/what-is-arkd",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "arkd releases feed",
+        "url": "https://github.com/arkade-os/arkd/releases.atom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The custody model and supported platforms are not stated on the page read."
+    ]
+  },
+  {
+    "id": "postgresql",
+    "name": "PostgreSQL",
+    "category": "other",
+    "catalogueEligible": false,
+    "website": "https://www.postgresql.org/",
+    "repository": null,
+    "purpose": "Relational database.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "18.6 is the latest release of the 18 series (2026-08-11), according to endoflife.date.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "18.6",
+      "date": "2026-08-11",
+      "source": "https://endoflife.date/postgresql"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Recorded because NBXplorer (and so BTCPay Server) depends on it; BTCortex does not install or run it.",
+    "licence": "PostgreSQL",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Only a dependency of NBXplorer (and so BTCPay Server)."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "PostgreSQL release cycles (endoflife.date)",
+        "url": "https://endoflife.date/postgresql",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The version and date come from endoflife.date, a secondary source, not from the vendor’s own pages.",
+      "Windows packages and container images were not checked.",
+      "The licence was not checked on the vendor’s own pages."
+    ]
+  },
+  {
+    "id": "mariadb",
+    "name": "MariaDB",
+    "category": "other",
+    "catalogueEligible": false,
+    "website": "https://mariadb.org/",
+    "repository": null,
+    "purpose": "Relational database.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "12.3.3 is the latest release of the 12.3 (long-term support) series (2026-08-24), according to endoflife.date.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "12.3.3",
+      "date": "2026-08-24",
+      "source": "https://endoflife.date/mariadb"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Recorded because mempool depends on it; BTCortex does not install or run it.",
+    "licence": "GPL-2.0-only",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Only a dependency of mempool."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "MariaDB release cycles (endoflife.date)",
+        "url": "https://endoflife.date/mariadb",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The version and date come from endoflife.date, a secondary source, not from the vendor’s own pages.",
+      "Windows packages and container images were not checked.",
+      "The licence was not checked on the vendor’s own pages."
+    ]
+  },
+  {
+    "id": "mongodb",
+    "name": "MongoDB",
+    "category": "other",
+    "catalogueEligible": false,
+    "website": "https://www.mongodb.com/",
+    "repository": null,
+    "purpose": "Document database.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "9.0.4 is the latest release of the 9.0 series (2026-10-14), according to endoflife.date.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "9.0.4",
+      "date": "2026-10-14",
+      "source": "https://endoflife.date/mongodb"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Recorded because Bitcore Node depends on it; BTCortex does not install or run it.",
+    "licence": "SSPL-1.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Only a dependency of Bitcore Node."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "MongoDB release cycles (endoflife.date)",
+        "url": "https://endoflife.date/mongodb",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The version and date come from endoflife.date, a secondary source, not from the vendor’s own pages.",
+      "Windows packages and container images were not checked.",
+      "The licence was not checked on the vendor’s own pages."
+    ]
+  }
+]

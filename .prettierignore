@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/
+apps/desktop/src-tauri/binaries/
+.claude/
+design-system/
+docs/ECOSYSTEM_RESEARCH.md
+docs/INTEGRATION_MATRIX.md
+docs/DEPENDENCY_MATRIX.md
+package-lock.json
+docs/research/
+**/*.generated.ts
+**/*.generated.json
+docs/IMPLEMENTATION_STATUS.md
+docs/implementation/

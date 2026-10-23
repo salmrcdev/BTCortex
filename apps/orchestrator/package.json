@@ -1,0 +1,34 @@
+{
+  "name": "@btcortex/orchestrator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BTCortex orchestration sidecar: service adapters, monitoring, persistence and background jobs.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:sea": "node scripts/build.mjs --sea",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@btcortex/bitcoin-config": "0.1.0",
+    "@btcortex/bitcoin-rpc": "0.1.0",
+    "@btcortex/catalogue": "0.1.0",
+    "@btcortex/contracts": "0.1.0",
+    "@btcortex/core": "0.1.0",
+    "@btcortex/installation-manager": "0.1.0",
+    "@btcortex/integration-bitcoin-core": "0.1.0",
+    "@btcortex/integration-bitcoin-knots": "0.1.0",
+    "@btcortex/integration-btcpay": "0.1.0",
+    "@btcortex/integration-electrum-wallet": "0.1.0",
+    "@btcortex/integration-esplora": "0.1.0",
+    "@btcortex/integration-fulcrum": "0.1.0",
+    "@btcortex/integration-hardware-wallets": "0.1.0",
+    "@btcortex/integration-hwi": "0.1.0",
+    "@btcortex/integration-i2p": "0.1.0",
+    "@btcortex/integration-lnd": "0.1.0",
+    "@btcortex/integration-sparrow": "0.1.0",
+    "@btcortex/integration-tor": "0.1.0",
+    "zod": "^4.6.7"
+  }
+}

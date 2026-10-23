@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose an improvement with a concrete use case.
+title: 'feat: '
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: Describe the task you cannot complete or the behaviour you would improve.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: Explain the outcome and how it fits BTCortex's current scope.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include existing tools or workarounds, if relevant.

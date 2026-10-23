@@ -1,0 +1,1026 @@
+[
+  {
+    "id": "desktop-shell",
+    "area": "Foundations",
+    "title": "Native Windows shell (Tauri 2, WebView2): window, single instance, window state, notification-area icon, closing to it, starting with Windows, shell log",
+    "state": "verified-on-windows",
+    "specSections": [
+      "3.1",
+      "3.4"
+    ],
+    "evidence": [
+      "Development and release builds run on Windows 10 22H2 with WebView2 155",
+      "Window fitted to the monitor work area on first launch",
+      "Installed release build tested: see windows-installer",
+      "Notification-area icon live on Windows 10: a left click shows the hidden window, its menu’s Quit BTCortex exits with the orchestrator’s graceful shutdown; closing with the preference on hides the window while the orchestrator keeps running",
+      "Starting with Windows live: the HKCU Run value written with the quoted program path and --autostart, a StartupApproved “turned off” mark reported, both values removed when switched off; apps/desktop/src-tauri/src/shell.rs unit tests"
+    ],
+    "notes": null
+  },
+  {
+    "id": "orchestrator-sidecar",
+    "area": "Foundations",
+    "title": "TypeScript orchestrator as a Node.js single executable, supervised with restart back-off",
+    "state": "verified-on-windows",
+    "specSections": [
+      "3.1",
+      "3.3",
+      "32"
+    ],
+    "evidence": [
+      "apps/orchestrator/scripts/smoke-test.mjs runs after every build",
+      "Crash restart and give-up observed in the shell log"
+    ],
+    "notes": null
+  },
+  {
+    "id": "ipc-boundary",
+    "area": "Foundations",
+    "title": "Typed JSON-RPC boundary with origin stamping, per-method access and risk classes",
+    "state": "verified-on-windows",
+    "specSections": [
+      "3.1",
+      "21.1"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/rpc/peer.test.ts",
+      "Interface calls logged with origin ui in the development build"
+    ],
+    "notes": null
+  },
+  {
+    "id": "dpapi-vault",
+    "area": "Foundations",
+    "title": "Secret storage with Windows DPAPI, never exposed to the WebView",
+    "state": "unit-tested",
+    "specSections": [
+      "3.3",
+      "21.1"
+    ],
+    "evidence": [
+      "apps/desktop/src-tauri/src/vault.rs tests use real DPAPI",
+      "apps/orchestrator/src/persistence/database.test.ts (vault with a stand-in shell)"
+    ],
+    "notes": "The full orchestrator → shell → DPAPI path is not covered by an automated test yet."
+  },
+  {
+    "id": "persistence",
+    "area": "Foundations",
+    "title": "SQLite persistence with transactional migrations and newer-schema refusal",
+    "state": "unit-tested",
+    "specSections": [
+      "3.3",
+      "28"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/persistence/database.test.ts"
+    ],
+    "notes": null
+  },
+  {
+    "id": "logging",
+    "area": "Foundations",
+    "title": "Structured logs with secret redaction and bounded size-based rotation",
+    "state": "unit-tested",
+    "specSections": [
+      "20"
+    ],
+    "evidence": [
+      "packages/core/src/redaction.test.ts",
+      "apps/orchestrator/src/logging/logger.test.ts"
+    ],
+    "notes": null
+  },
+  {
+    "id": "backups",
+    "area": "Backups",
+    "title": "Backup centre: inventory by kind (configuration, wallets, descriptors, channel backups, credentials) with what is left out and why; manual and scheduled backups into a chosen folder; AES-256-GCM encryption with a scrypt-derived key, required for wallets and credentials; wallets copied by Bitcoin Core (backupwallet); verification of every new backup and on request; retention; restore preview; restoring a managed node’s bitcoin.conf through the configuration checks and wallets through restorewallet",
+    "state": "integration-tested",
+    "specSections": [
+      "22",
+      "21"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/backups/archive.test.ts (encryption, tampering, wrong passphrase, crafted manifests, retention that keeps the last copy of a wallet, interrupted writes)",
+      "tests/integration/backups.test.ts (real managed regtest node: inventory, unencrypted backup without secrets or onion addresses, encrypted backup with Bitcoin Core’s wallet copies verified with and without the passphrase, retention, restore preview, bitcoin.conf and a wallet restored with its balance and loaded at start-up, risky settings restored only once confirmed and commands never from an unencrypted backup)",
+      "apps/desktop/src/features/backups/backups.test.tsx",
+      "docs/BACKUP_AND_RECOVERY.md"
+    ],
+    "notes": "BTCortex’s own settings are backed up but restored by hand; automatic backups run only while BTCortex is open."
+  },
+  {
+    "id": "monitoring",
+    "area": "Monitoring",
+    "title": "Monitoring and alerts: health of nodes, Tor, Electrum servers, Lightning and backups in one summary; processor, memory, disk space and the whole computer’s disk and network activity; alerts with grace periods for passing trouble (node failed, unreachable, refusing credentials, stalled synchronisation, no peers, low disk space, tor or Electrum stopped, Lightning unavailable, macaroon or TLS certificate expiring, backup failed or overdue, memory exhausted) shown in the window, the status bar and as Windows notifications; security-relevant bitcoin.conf changes detected without storing values; metrics history per computer and per node with configurable retention, compared as small multiples over an hour to a year; CSV and plain-text report exports; recent errors",
+    "state": "unit-tested",
+    "specSections": [
+      "19",
+      "19.1",
+      "19.2"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/monitoring/monitoring.test.ts (alert rules and grace periods, thresholds, sampling and rates, retention, exports, bitcoin.conf changes without stored values)",
+      "apps/desktop/src/features/monitoring/monitoring.test.tsx",
+      "apps/desktop/src/components/charts/chart-scale.test.ts (downsampling, gaps)"
+    ],
+    "notes": "Verified live on Windows 10: real disk and network counters, CSV and report exports, a disk alert raised and resolved with the in-window message and a Windows notification. Measures and alerts only while BTCortex runs; no e-mail or messaging."
+  },
+  {
+    "id": "security-centre",
+    "area": "Monitoring",
+    "title": "Security centre: findings for every node (sign-in, version against the research’s warning matrix, RPC and REST exposure, commands run on events, plain-text passwords, ZMQ publishers, port mapping), Tor’s version rating, Electrum servers’ reach, Lightning macaroons and certificates, installed software’s signatures and recorded hashes, the DPAPI vault, backups, changed bitcoin.conf settings, Windows Firewall and the data folder’s access rules — each with what to do and where — and the controls BTCortex applies",
+    "state": "verified-on-windows",
+    "specSections": [
+      "21",
+      "21.1",
+      "24.1"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/security/security.test.ts",
+      "apps/desktop/src/features/security/security.test.tsx",
+      "Live check on Windows 10: a regtest node set up by a profile, tor and the computer checked — Windows Firewall read as on for every profile and the data folder as private to the user, SYSTEM and administrators, without administrator rights"
+    ],
+    "notes": "Read-only: nothing is changed from the security centre. Firewall rules for individual programs need administrator rights and are not read."
+  },
+  {
+    "id": "log-centre",
+    "area": "Foundations",
+    "title": "Logs & diagnostics: BTCortex, window and node logs in one view, live updates, search, level and period filters, structured details, sanitised diagnostic bundle",
+    "state": "unit-tested",
+    "specSections": [
+      "20",
+      "21.1"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/logs/logs.test.ts",
+      "apps/orchestrator/src/diagnostics/diagnostics.test.ts (bundle checked for secrets, profile paths and transaction ids)",
+      "apps/desktop/src/features/logs/logs.test.tsx",
+      "apps/orchestrator/scripts/smoke-test.mjs reads the log through the built executable"
+    ],
+    "notes": "Only the last 4 MiB of each file is searched. Exit codes of bitcoind are not recorded, because it runs detached. tor's notices are a log source, and the diagnostic bundle includes tor's state."
+  },
+  {
+    "id": "jobs",
+    "area": "Foundations",
+    "title": "Persistent background jobs with progress events and interrupted-job reporting",
+    "state": "integration-tested",
+    "specSections": [
+      "30",
+      "32"
+    ],
+    "evidence": [
+      "tests/integration/node-lifecycle.test.ts",
+      "apps/orchestrator/src/jobs/job-manager.test.ts (jobs running or waiting when BTCortex closed are reported as interrupted in the next session; finished jobs are left alone)"
+    ],
+    "notes": null
+  },
+  {
+    "id": "design-system",
+    "area": "Interface",
+    "title": "Design system, accessible components, British English text resources",
+    "state": "implemented",
+    "specSections": [
+      "4",
+      "24"
+    ],
+    "evidence": [
+      "design-system/btcortex/MASTER.md",
+      "apps/desktop/src/i18n/en-GB.ts",
+      "Component tests for status, nodes and set-up"
+    ],
+    "notes": "No automated accessibility audit yet."
+  },
+  {
+    "id": "bitcoin-core-verified-install",
+    "area": "Bitcoin Core",
+    "title": "Verified installation: pinned builder signatures, checksums, safe extraction, Authenticode",
+    "state": "verified-on-windows",
+    "specSections": [
+      "5.2",
+      "17.3",
+      "21.1"
+    ],
+    "evidence": [
+      "Bitcoin Core 31.1 installed with 10 valid builder signatures and Authenticode Valid on all 8 executables",
+      "packages/integrations/bitcoin-core/src/release/*.test.ts"
+    ],
+    "notes": null
+  },
+  {
+    "id": "bitcoin-core-detection",
+    "area": "Bitcoin Core",
+    "title": "Read-only detection of existing data directories, installations, running nodes and how to reach them",
+    "state": "integration-tested",
+    "specSections": [
+      "5.2",
+      "25"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/nodes/discovery.test.ts",
+      "tests/integration/discovery.test.ts (real bitcoind 31.1 in a %APPDATA%-style folder)"
+    ],
+    "notes": "Reads bitcoin.conf and settings.json for the RPC port, cookie and whether RPC is on (Bitcoin Core’s window leaves it off by default); never writes anything."
+  },
+  {
+    "id": "bitcoin-core-config",
+    "area": "Bitcoin Core",
+    "title": "Lossless bitcoin.conf parser, option catalogue, validation and effective settings",
+    "state": "unit-tested",
+    "specSections": [
+      "5.6"
+    ],
+    "evidence": [
+      "packages/bitcoin-config/src/config.test.ts"
+    ],
+    "notes": null
+  },
+  {
+    "id": "bitcoin-core-config-editor",
+    "area": "Bitcoin Core",
+    "title": "Configuration editor: graphical editor by category and raw editor over one draft, live checks, managed settings locked, hidden secrets, risky options confirmed, review, backup, restart-required detection",
+    "state": "verified-on-windows",
+    "specSections": [
+      "5.6",
+      "21.1",
+      "21.3"
+    ],
+    "evidence": [
+      "packages/bitcoin-config/src/editing.test.ts",
+      "apps/orchestrator/src/nodes/config-service.test.ts",
+      "apps/desktop/src/features/config/*.test.ts(x)",
+      "tests/integration/node-lifecycle.test.ts (saved maxmempool applied by a restart of real bitcoind 31.1)",
+      "apps/desktop/src/features/config/configuration.test.tsx (draft kept on its base revision, hidden values never put in fields, refusal reasons shown, focus kept)"
+    ],
+    "notes": "Nodes BTCortex did not set up are shown read-only. Options added with includeconf, settings.json and command-line arguments other than those BTCortex passes are not shown."
+  },
+  {
+    "id": "config-history",
+    "area": "Bitcoin Core",
+    "title": "Configuration history and export: the ten earlier versions of bitcoin.conf, compared with the current file with secret values never shown, restored through the full save checks with the current file kept; a copy without secrets exported to a chosen file",
+    "state": "verified-on-windows",
+    "specSections": [
+      "28",
+      "5.6"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/nodes/config-service.test.ts (history, comparison without secret values, restore through the checks, refused restore, version ids, export)",
+      "apps/desktop/src/features/config/history-card.test.tsx",
+      "apps/desktop/src/features/config/export-button.test.tsx",
+      "Live on Windows 10: dbcache changed on the regtest node, its earlier version compared (500 now, 450 then) and restored, leaving two kept versions"
+    ],
+    "notes": "No encrypted export with secrets; importing is by pasting into the file tab."
+  },
+  {
+    "id": "bitcoin-core-recommendations",
+    "area": "Bitcoin Core",
+    "title": "Hardware-aware configuration (pruning, cache, mempool, connections)",
+    "state": "unit-tested",
+    "specSections": [
+      "5.10",
+      "18",
+      "25"
+    ],
+    "evidence": [
+      "packages/bitcoin-config/src/config.test.ts"
+    ],
+    "notes": null
+  },
+  {
+    "id": "bitcoin-core-lifecycle",
+    "area": "Bitcoin Core",
+    "title": "Managed node lifecycle: detached start, graceful RPC stop, restart that applies configuration changes, robust against repeated requests and stale pid files, per-node policies for starting with BTCortex and running on after it quits",
+    "state": "verified-on-windows",
+    "specSections": [
+      "5.2",
+      "32"
+    ],
+    "evidence": [
+      "tests/integration/bitcoin-core-regtest.test.ts",
+      "tests/integration/node-lifecycle.test.ts (real bitcoind 31.1: restart after a configuration change, a restart asked for during a shutdown, a stale pid file naming another program)",
+      "tests/integration/node-lifecycle.test.ts: a new manager starts the node chosen to start with BTCortex, and quitting leaves it running when chosen so (real bitcoind 31.1)",
+      "Live on Windows 10: after Quit from the notification area and a new start, the regtest node chosen to start with BTCortex started by itself and its Electrum server followed"
+    ],
+    "notes": "Verified on regtest. Mainnet and public test networks not exercised end to end."
+  },
+  {
+    "id": "zero-touch-setup",
+    "area": "Bitcoin Core",
+    "title": "Zero-touch set-up: plan, single approval, job that installs, configures, registers and starts",
+    "state": "integration-tested",
+    "specSections": [
+      "18",
+      "25"
+    ],
+    "evidence": [
+      "tests/integration/node-lifecycle.test.ts",
+      "apps/desktop/src/features/setup/setup.test.tsx"
+    ],
+    "notes": "Run end to end on regtest; the mainnet path is the same code but has not been run to completion. A node created as an Electrum back end gets txindex=1 and its Electrum server set up afterwards. The first-run guide (first-run-guide) leads to it and to the profiles."
+  },
+  {
+    "id": "first-run-guide",
+    "area": "Bitcoin Core",
+    "title": "First-run guide: beginner or advanced mode, read-only checks of Windows, hardware, disk space, existing Bitcoin software, WSL2 and Docker, ports in use, release servers, proxy and metered connection; a recommended profile; the existing node or a profile's plan and deployment",
+    "state": "verified-on-windows",
+    "specSections": [
+      "25"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/onboarding/onboarding.test.ts",
+      "apps/desktop/src/features/welcome/welcome.test.tsx",
+      "Live check on Windows 10: WebView2 155, Windows 10 22H2 flagged as out of support, a Ryzen 5 3600 with 5.9 GiB, 58 GB free judged as room for a pruned node only, Electrum and Trezor Suite found, WSL2 and Docker absent, BTCortex’s own tor and bitcoind told apart on 9050 and 18443, the release servers answering"
+    ],
+    "notes": "Deployment itself is the profiles' (deployment-profiles); no Bitcoin peer is contacted by the checks."
+  },
+  {
+    "id": "deployment-profiles",
+    "area": "Bitcoin Core",
+    "title": "Deployment profiles A–H: what each brings and whether BTCortex can deploy it (Lightning and BTCPay Server marked as not yet, with the reason); customisation (new or existing node, network, optional parts, Tor mode, onion service, private broadcasting); a plan with steps, downloads with their real sizes and checks, storage, memory, processors, ports and who can reach them, dependencies, warnings, privacy and security implications, resource impact and the need for Docker or WSL2; one confirmed job that runs the existing set-ups in order with each step’s outcome kept",
+    "state": "verified-on-windows",
+    "specSections": [
+      "18",
+      "24.1"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/profiles/profiles.test.ts (plans, deployment order, consent, failures, interruption, release sizes)",
+      "apps/desktop/src/features/profiles/profiles.test.tsx",
+      "Live run on Windows 10: profile D on regtest deployed in 2 min 16 s — Bitcoin Core 31.1 (52.4 MiB) and Fulcrum 2.1.4 (16.4 MiB) downloaded, verified and set up, built-in parts ready, backups left to the user; the mainnet plan on a 60 GB disk refused the Electrum server with the reason"
+    ],
+    "notes": "Lightning (E) and merchant (F) profiles are not deployable yet. Mainnet deployments have not been run to completion."
+  },
+  {
+    "id": "bitcoin-rpc-client",
+    "area": "Bitcoin Core",
+    "title": "Typed JSON-RPC client with cookie reload, warm-up, timeout and schema validation",
+    "state": "integration-tested",
+    "specSections": [
+      "5.7"
+    ],
+    "evidence": [
+      "packages/bitcoin-rpc/src/client.test.ts",
+      "tests/integration/bitcoin-core-regtest.test.ts"
+    ],
+    "notes": null
+  },
+  {
+    "id": "node-monitoring",
+    "area": "Bitcoin Core",
+    "title": "Monitoring and dashboard: synchronisation, chain, network, mempool, traffic, labelled estimate",
+    "state": "integration-tested",
+    "specSections": [
+      "5.5",
+      "5.9",
+      "19"
+    ],
+    "evidence": [
+      "tests/integration/node-lifecycle.test.ts",
+      "apps/desktop/src/features/nodes/nodes.test.tsx"
+    ],
+    "notes": "The charts on a node’s own pages keep 24 hours in memory; the monitoring history keeps each node’s peers, mempool, traffic and progress in the database for as long as chosen there."
+  },
+  {
+    "id": "network-safety",
+    "area": "Bitcoin Core",
+    "title": "Network safety: chain pinned in configuration, chain mismatch refusal, visual network identity",
+    "state": "integration-tested",
+    "specSections": [
+      "5.4"
+    ],
+    "evidence": [
+      "tests/integration/node-lifecycle.test.ts (mismatched profile refused)"
+    ],
+    "notes": null
+  },
+  {
+    "id": "peer-list",
+    "area": "Bitcoin Core",
+    "title": "Network & peers: reachable networks and proxies, peers with Tor/I2P and v2 encryption indicators, details, disconnect, manual connections, bans, connection history",
+    "state": "integration-tested",
+    "specSections": [
+      "5.8"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/nodes/peer-service.test.ts",
+      "apps/desktop/src/features/peers/peers.test.tsx",
+      "tests/integration/peers.test.ts (bans, manual peers and refusals against real bitcoind 31.1)"
+    ],
+    "notes": "Regtest has no peers, so the peer table itself is covered by component tests only. Connection history is kept in memory while BTCortex runs. No geolocation, by design."
+  },
+  {
+    "id": "connect-existing-node",
+    "area": "Bitcoin Core",
+    "title": "Connect an existing node: one click for Bitcoin Core found on this computer (cookie, or the password in its bitcoin.conf with consent), or a node on another computer by RPC address, user name and password (DPAPI-protected; plain HTTP only on the local network), with a connection test first",
+    "state": "integration-tested",
+    "specSections": [
+      "5.1",
+      "26"
+    ],
+    "evidence": [
+      "tests/integration/discovery.test.ts",
+      "tests/integration/node-passwords.test.ts (real bitcoind 31.1 whose bitcoin.conf sets rpcuser and rpcpassword: the found node connected with that password only once agreed, the remote node form refusing a wrong password before keeping anything, the password kept in the vault and never in the profile, removed with the node)",
+      "apps/desktop/src/features/nodes/nodes.test.tsx (found nodes and the remote node form)",
+      "packages/contracts/src/nodes.test.ts (cookies only to loopback, no plain-text passwords beyond the local network)"
+    ],
+    "notes": null
+  },
+  {
+    "id": "remote-infrastructure",
+    "area": "Bitcoin Core",
+    "title": "Remote infrastructure: every node, LND and BTCPay Server on another computer grouped by host, with how it is reached, what its own credentials allow, and a timed connection test",
+    "state": "unit-tested",
+    "specSections": [
+      "24.1",
+      "26"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/handlers/remote.test.ts",
+      "apps/desktop/src/features/remote/remote.test.tsx"
+    ],
+    "notes": "No SSH or agent: other computers are not administered, only their services' interfaces are used. No remote service was available on this computer to test live."
+  },
+  {
+    "id": "rpc-console",
+    "area": "Bitcoin Core",
+    "title": "RPC console: catalogue from the node’s help with risk classes, help texts, read-only mode, confirmation of dangerous methods, hidden secret parameters, wallet selection, call statistics",
+    "state": "integration-tested",
+    "specSections": [
+      "5.7",
+      "15",
+      "21.3"
+    ],
+    "evidence": [
+      "packages/bitcoin-rpc/src/catalogue.test.ts (every method in the help of Bitcoin Core 31.1 and Bitcoin Knots 29.4.2 regtest nodes, taken on 2026-10-23, has a risk class; legacy-wallet key methods refused)",
+      "apps/desktop/src/features/console/*.test.ts(x)",
+      "tests/integration/rpc-console.test.ts (real bitcoind 31.1: catalogue, calls, refusals, wallet endpoint, no parameters logged)"
+    ],
+    "notes": "Methods that would pass private keys or wallet passphrases through BTCortex are refused, including the legacy-wallet methods of Bitcoin Knots and of Bitcoin Core before 30 (dumpprivkey, dumpmasterprivkey, dumpwallet, importprivkey, importmulti, sethdseed, sweepprivkeys), as are test-only methods and stop (which has its own button). Typed input forms per method and JSON-RPC batches are not built; arguments are typed as in Bitcoin Core’s console."
+  },
+  {
+    "id": "developer-tools",
+    "area": "Bitcoin Core",
+    "title": "Developer tools: raw transactions, scripts, PSBTs (decodepsbt, analyzepsbt) and public descriptors (getdescriptorinfo, deriveaddresses) decoded by the node, private keys refused; conversions of amounts, fee rates, hexadecimal and JSON; protocol features by kind of rule (consensus, relay policy, wallet policy, implementation-specific, experimental) with their state on the node; live ZMQ notifications through BTCortex’s own ZMTP subscriber (blocks, mempool additions and removals, missed notifications); regtest block generation; endpoint probes directly or through Tor with TLS validation",
+    "state": "integration-tested",
+    "specSections": [
+      "15",
+      "24.1"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/devtools/devtools.test.ts (private keys, PSBT summary, descriptors, regtest only, features incl. Knots, probes against local Electrum, HTTP and closed ports)",
+      "packages/integrations/bitcoin-core/src/node/zmq.test.ts (ZMTP handshake and multipart frames against a stand-in publisher)",
+      "tests/integration/devtools.test.ts (real bitcoind 31.1: blocks without a wallet and to an address, a wallet-funded PSBT analysed, the wallet’s descriptor deriving its own first address, Taproot, BIP324 and cluster mempool reported, the RPC interface probed without credentials)",
+      "tests/integration/zmq.test.ts (real bitcoind 31.1 on Windows: hashblock, hashtx and sequence notifications for a mined block and a wallet transaction; the watch service’s batches)",
+      "apps/desktop/src/features/developer/convert.test.ts",
+      "apps/desktop/src/features/developer/developer.test.tsx",
+      "Live check on Windows 10: 101 regtest blocks generated from the page brought a node set up by a profile out of its initial synchronisation, its Electrum server started by itself, and the endpoint probe got Fulcrum 2.1.4’s server.version answer; the node’s soft forks and relay policy read from the running bitcoind 31.1"
+    ],
+    "notes": "No JSON-RPC batches; PSBTs are analysed, never signed here. Live events need the node to publish ZMQ notifications over TCP."
+  },
+  {
+    "id": "transaction-tools",
+    "area": "Developer tools",
+    "title": "Transaction tools: lock time, BIP 68 and BIP 125 analysis, spend types, signatures and sighash, Taproot annex and control block, multisig and timelock scripts, weight and dust; address checks; BIP 321 payment URIs with QR codes; PSBTs combined and finalised; transactions sent after confirmation and followed until they confirm; coins looked up and found by address or descriptor with their spending cost; size and fee estimates",
+    "state": "verified-on-windows",
+    "specSections": [
+      "14"
+    ],
+    "evidence": [
+      "apps/desktop/src/lib/script.test.ts, transaction-analysis.test.ts, transaction-size.test.ts",
+      "apps/desktop/src/features/developer/transaction-analysis-view.test.tsx, uri-tab.test.tsx, coins-tab.test.tsx, developer.test.tsx",
+      "apps/orchestrator/src/devtools/bip321.test.ts, transaction-tools.test.ts, tracker.test.ts",
+      "tests/integration/transaction-tools.test.ts (real bitcoind 31.1: addresses with bech32 mistakes, a payment URI, a wallet-signed PSBT combined, finalised, sent and followed into a block without the transaction index, coins found and looked up)",
+      "Live on Windows 10: a SegWit transaction with a Taproot script path decoded and explained on the regtest node; a payment URI made and its QR code read back from the screen; a URI with a mistyped address read with the mistake marked; the 101 coinbase coins of the regtest node found with raw(51), immature ones marked"
+    ],
+    "notes": "Nothing is signed; transactions are not built (no wallet). Signatures are not verified; sizes are estimates; no miniscript policy compiler."
+  },
+  {
+    "id": "mempool-analysis",
+    "area": "Bitcoin Core",
+    "title": "Mempool analysis: statistics, fee-rate distribution and next-block threshold, fee estimates, relay policy and version-dependent relay features, size, count and minimum-fee trends, transaction look-up with the CPFP chunk rate, cluster and replacement minimum",
+    "state": "integration-tested",
+    "specSections": [
+      "5.9",
+      "19"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/nodes/mempool.test.ts",
+      "apps/desktop/src/features/mempool/mempool.test.tsx",
+      "apps/desktop/src/components/charts/chart-scale.test.ts",
+      "tests/integration/mempool.test.ts (real bitcoind 31.1: parent at 1 sat/vB and child at 50 mined as one chunk above 10 sat/vB, cluster of two, fee-rate buckets, replacement one satoshi below the stated minimum refused and at the minimum accepted)"
+    ],
+    "notes": "Labelled throughout as this node’s own view. The distribution needs getmempoolfeeratediagram (Bitcoin Core 31.0 and later). Chart colours checked with the dataviz palette validator in light and dark mode; charts rendered and inspected at 1104 and 704 px."
+  },
+  {
+    "id": "storage-indexing",
+    "area": "Bitcoin Core",
+    "title": "Storage and indexing: data locations, free space and disk type, folder sizes, pruning and oldest block kept, index status and build progress, wallets, warnings, consequences of switching; guided index and pruning changes, chain verification, chainstate and full rebuilds, removal of unused index files",
+    "state": "integration-tested",
+    "specSections": [
+      "5.10"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/nodes/storage.test.ts",
+      "apps/desktop/src/features/storage/storage.test.tsx",
+      "tests/integration/storage.test.ts (real bitcoind 31.1: txindex and block filter index built and measured, pruned node at 550 MiB with the genesis block as oldest kept)",
+      "tests/integration/storage-actions.test.ts (real bitcoind 31.1, managed node: indexes switched on and built, verifychain, -reindex-chainstate as a one-shot flag, txindex refused with pruning, pruning on and off again through -reindex)"
+    ],
+    "notes": "Changes are offered only for nodes BTCortex set up; existing installations are read-only apart from the verification of the latest blocks. Folder sizes and the disk are measured only for nodes whose files are on this computer. Manual pruning is shown but not offered."
+  },
+  {
+    "id": "storage-management",
+    "area": "System",
+    "title": "Storage across BTCortex: the volumes its data is on, every folder it keeps or reads with its owner and size, WSL2 and Docker Desktop disks shown read-only, growth forecasts per node, and confirmed clean-ups of BTCortex's own leftovers only",
+    "state": "verified-on-windows",
+    "specSections": [
+      "27"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/storage/disk-usage.test.ts (owners, leftovers older than an hour only, refusal while a job runs, forecasts, virtual disks)",
+      "apps/desktop/src/features/disk-usage/disk-usage.test.tsx",
+      "Live on Windows 10: C: measured (SSD, 60 % used) with every folder and its owner; an unfinished download and a temporary copy older than an hour removed after confirmation while a newer download stayed; the WSL registry read found nothing on this PC and found a test distribution under a temporary key"
+    ],
+    "notes": "Blockchain, index, wallet, backup and export files are never deleted from here. Docker volumes are shown only as Docker Desktop's disk file; WSL2 and Docker are not installed on the test computer."
+  },
+  {
+    "id": "bitcoin-knots",
+    "area": "Node implementations",
+    "title": "Bitcoin Knots: the pgpverifiable release installed against builder keys pinned from bitcoinknots/guix.sigs (three builders, the maintainer's signature required, the executable must report Knots of that version), set up only on request after the user agrees to its chain, in runtime and data folders of its own, without an Electrum server; nodes never moved between Knots and Bitcoin Core; existing Knots nodes recognised and monitored",
+    "state": "integration-tested",
+    "specSections": [
+      "5.1",
+      "37"
+    ],
+    "evidence": [
+      "packages/integrations/bitcoin-knots/src/release/releases.test.ts (versions, the forked releases, release files, trust anchors)",
+      "packages/installation-manager/src/openpgp.test.ts and archive-installer.test.ts (a builder's two keys count once; the required signer)",
+      "scripts/dev/install-bitcoin-knots.ts: Bitcoin Knots 29.4.2.knots20260508 installed through the real release files, seven valid builder signatures including luke-jr's, the archive matching its signed checksum, bitcoind -version reporting Knots",
+      "tests/integration/bitcoin-knots.test.ts (real Knots 29.4.2 on regtest: the plan, refusal without agreement and with an Electrum server, the node set up, started and reporting /Satoshi:29.4.2/Knots:20260508/)",
+      "apps/orchestrator/src/installations/installations.test.ts (no move between Knots and Bitcoin Core)",
+      "apps/orchestrator/src/security/security.test.ts",
+      "apps/desktop/src/features/setup/setup.test.tsx",
+      "Live check on Windows 10 in the development build: Bitcoin Knots chosen on Set up a node for regtest, the Electrum option withdrawn, the chain explained and Install and start held back until agreed, the node set up and started from the Knots runtime (reporting /Satoshi:29.4.2/Knots:20260508/), listed as worth knowing in the security centre, then stopped and removed without deleting data"
+    ],
+    "notes": "Tested on regtest only; Knots follows a chain Bitcoin Core rejects since 29.4.1, which the set-up states before asking for agreement. The latest release is looked up through GitHub's API, which limits anonymous requests to 60 an hour per address; the plan says so when it is refused."
+  },
+  {
+    "id": "electrum-servers",
+    "area": "Electrum servers",
+    "title": "Electrum server: Fulcrum installed from its signed release (pinned DSA key), set up for a node after a plan the user confirms (index folder, room needed, the node’s transaction index, one restart), loopback listeners with peering off, indexing progress, Electrum health check, stop before the node, survives BTCortex closing, restart after a crash, reachable from other devices through Tor as an onion service (its key in the DPAPI vault, the address kept), removal with or without the index, connection details for Sparrow, Electrum and Trezor Suite, and nodes created as Electrum back ends",
+    "state": "integration-tested",
+    "specSections": [
+      "7",
+      "17.2",
+      "17.3"
+    ],
+    "evidence": [
+      "packages/installation-manager/src/openpgp.test.ts (Fulcrum’s real DSA-signed checksums, refused without allowDsa and when altered)",
+      "packages/installation-manager/src/extract.test.ts (skipped archive files still checked)",
+      "packages/integrations/fulcrum/src/fulcrum.test.ts (configuration, /stats, admin and Electrum protocol against test servers)",
+      "packages/integrations/tor/src/control.test.ts (ADD_ONION, detached services, DEL_ONION)",
+      "tests/integration/electrum.test.ts (real bitcoind 31.1 and Fulcrum 2.1.4 under a folder with accented letters: plan, set-up with txindex and a restart, indexing, Electrum probe at the node’s height and genesis, new blocks, log centre, stop before the node, found again after BTCortex closes, restart after being ended, removal with the index)",
+      "apps/desktop/src/features/electrum/electrum.test.tsx",
+      "Fulcrum 2.1.4 installed through the real release files: Calin Culianu’s DSA-2048 signature valid for the pinned key, archive hash matching the signed checksums, FulcrumAdmin.exe left out",
+      "Fulcrum 2.1.4 on Windows 10 with a database path containing accented letters: RocksDB cannot create its folder, so short 8.3 paths are used",
+      "tests/integration/electrum.test.ts with the real tor offline: onion service published, the same address after turning access off and on, published again after tor restarted, the key only in the vault",
+      "Live check over the real Tor network on Windows 10: tor connected in 25 s, the regtest Fulcrum’s onion service answered server.version through tor’s SOCKS port about ten seconds after it was published"
+    ],
+    "notes": "Tested on regtest only; mainnet index sizes and indexing times are estimates. No TLS; other devices reach the server only through Tor, and mobile wallets have not been tried. electrs and ElectrumX are researched, not integrated."
+  },
+  {
+    "id": "remote-electrum-servers",
+    "area": "Electrum servers",
+    "title": "Electrum servers on other computers (electrs, Fulcrum, ElectrumX): tested directly or through Tor over TCP or TLS, certificates shown and pinned only once accepted, chain told from the genesis block, checked every minute with alerts, listed under Remote infrastructure, and answering a node's address lookups while its own Electrum server is not ready",
+    "state": "integration-tested",
+    "specSections": [
+      "7",
+      "26",
+      "37"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/electrum/remote-electrum.test.ts (stand-in server over TCP and TLS, self-signed certificates, pinning and a changed certificate, chains, onion addresses)",
+      "tests/integration/electrum.test.ts (the real Fulcrum 2.1.4 read as a server on another computer, answering the regtest node's address lookups)",
+      "apps/desktop/src/features/electrum/remote-servers.test.tsx",
+      "apps/orchestrator/src/monitoring/monitoring.test.ts (alerts after five minutes, at once when the certificate changed)"
+    ],
+    "notes": "No electrs on another computer was available to test against; the real Fulcrum stood in for one. Wallets are not configured for such servers from BTCortex."
+  },
+  {
+    "id": "remote-explorers",
+    "area": "Block explorers",
+    "title": "Block explorers on other computers (mempool, Esplora): tested directly or through Tor, chain told from the genesis block, checked every minute with how far behind the node they are and alerts after five minutes of silence or at once on another chain, listed under Remote infrastructure with a connection test, Open in buttons for blocks, transactions and addresses (pages opened by the orchestrator; for an explorer reached through Tor the address is copied for Tor Browser instead), mempool and Esplora at the connected level in the catalogue",
+    "state": "unit-tested",
+    "specSections": [
+      "12",
+      "26",
+      "37"
+    ],
+    "evidence": [
+      "packages/integrations/esplora/src/client.test.ts (the API under /api or at the root, plain-text answers, refusals)",
+      "apps/orchestrator/src/explorer/remote-explorer.test.ts (stand-in mempool: chains, a node's chain, blocks behind, unreachable, pages opened, explorers reached through Tor never opened in the browser)",
+      "apps/orchestrator/src/handlers/remote.test.ts",
+      "apps/orchestrator/src/monitoring/monitoring.test.ts (an alert after five minutes of silence, another chain at once)",
+      "apps/desktop/src/features/explorer/remote-explorers.test.tsx and apps/desktop/src/features/remote/remote.test.tsx",
+      "The Esplora client run by hand against blockstream.info on 2026-10-23: API found at /api, tip height and the mainnet genesis read over HTTPS",
+      "Live check on Windows 10 in the development build, with a stand-in regtest mempool: tested and added for a regtest node, shown as 2 blocks behind it, Open in on a block opened /block/<hash> in the browser, the explorer listed and tested under Remote infrastructure, then removed"
+    ],
+    "notes": "No self-hosted mempool or Esplora was available; a stand-in served the Esplora API. BTCortex does not install or run explorers."
+  },
+  {
+    "id": "block-explorers",
+    "area": "Block explorers",
+    "title": "Block explorer built into BTCortex: search by height, block hash, transaction id, address, raw transaction or script; blocks with statistics and paged transactions; transactions with the coins they spend, fees, spent outputs and unconfirmed relatives, followed until confirmed; raw transactions checked without broadcasting; scripts decoded; address history through an Electrum server (the node’s own or, while it is not ready, one on another computer added for the node); chain overview with fee estimates. mempool and Esplora on other computers followed (see remote-explorers); BTC RPC Explorer researched",
+    "state": "integration-tested",
+    "specSections": [
+      "12"
+    ],
+    "evidence": [
+      "docs/research/notes/electrum-indexers-explorers.md",
+      "apps/orchestrator/src/explorer/explorer.test.ts (amounts, fee rates, the Electrum protocol’s documented script hash, coinbase tags)",
+      "tests/integration/explorer.test.ts (real bitcoind 31.1 with and without the transaction index, real Fulcrum 2.1.4: search, blocks, confirmed and unconfirmed transactions with parents and children, testmempoolaccept, scripts, address history, the message without the index)",
+      "apps/desktop/src/features/explorer/explorer.test.tsx"
+    ],
+    "notes": "The built-in explorer reads the chosen node; address lookups go to an Electrum server, the node’s own or one on another computer added for it, which then learns the addresses. BTCortex installs no mempool or Esplora, and BTC RPC Explorer is research only."
+  },
+  {
+    "id": "shared-verified-installation",
+    "area": "Foundations",
+    "title": "Shared verified installation pipeline: pinned OpenPGP keys with thresholds, checksum manifests, resumable downloads, safe extraction, Authenticode",
+    "state": "verified-on-windows",
+    "specSections": [
+      "17.3",
+      "21.1"
+    ],
+    "evidence": [
+      "packages/installation-manager/src/*.test.ts (signer thresholds counted per person, concurrent installations of one release done once, the staging folder removed after any failure, a complete partial download started again)",
+      "packages/integrations/tor/src/release.test.ts (a revocation in the fresh copy of the Tor key applies)",
+      "Bitcoin Core 31.1 installed through it on Windows"
+    ],
+    "notes": null
+  },
+  {
+    "id": "sparrow-integration",
+    "area": "Wallets",
+    "title": "Sparrow: verified installation, cookie-based connection to a node, conflict consent, network-marker and running checks, launch",
+    "state": "unit-tested",
+    "specSections": [
+      "8",
+      "8.2"
+    ],
+    "evidence": [
+      "packages/integrations/sparrow/src/config.test.ts",
+      "apps/orchestrator/src/apps/sparrow-service.test.ts",
+      "apps/desktop/src/features/nodes/nodes.test.tsx",
+      "Sparrow 2.5.5 manifest signature verified with the pinned key; archive layout inspected"
+    ],
+    "notes": "The full flow with a real Sparrow download and launch has not been run yet. Nodes with password authentication are not offered (Sparrow would store the password in plain text)."
+  },
+  {
+    "id": "electrum-wallet",
+    "area": "Wallets",
+    "title": "Electrum wallet opened with the user’s own Electrum server: an Electrum installed on this computer used as it is (and flagged when outdated), otherwise the standalone release installed after checking ThomasV’s or SomberNight’s signature and Electrum Technologies GmbH’s Windows signature; started on the node’s network with --oneserver --server, so its settings and wallets are not changed",
+    "state": "verified-on-windows",
+    "specSections": [
+      "8",
+      "17.3"
+    ],
+    "evidence": [
+      "packages/installation-manager/src/signed-executable.test.ts (signed standalone executables)",
+      "packages/integrations/electrum-wallet/src/electrum-wallet.test.ts",
+      "apps/orchestrator/src/apps/electrum-wallet-service.test.ts",
+      "apps/desktop/src/features/electrum/electrum.test.tsx",
+      "Electrum 4.8.2 installed through the real release files: SomberNight’s and ThomasV’s signatures valid for the pinned keys, Windows signature of Electrum Technologies GmbH valid",
+      "Live check on Windows 10: the verified Electrum 4.8.2, started with --regtest --oneserver --server, connected to a real Fulcrum 2.1.4 within 3 s and did not write the server to its settings",
+      "The Electrum 4.7.2 already installed on the test computer is found through its uninstall key and left untouched"
+    ],
+    "notes": "Checked on regtest only. Electrum 4.9 is expected to require Electrum protocol 1.7, which Fulcrum 2.1 does not offer; until servers do, only the 4.8 series is installed."
+  },
+  {
+    "id": "wallets-page",
+    "area": "Wallets",
+    "title": "Wallets page: Sparrow and Electrum for a chosen node in one place, Sparrow through the Electrum server once it is ready, with hardware wallets and other wallets explained",
+    "state": "verified-on-windows",
+    "specSections": [
+      "8",
+      "24.1"
+    ],
+    "evidence": [
+      "apps/desktop/src/features/wallets/wallets.test.tsx",
+      "Live check on Windows 10: the regtest node with a ready Fulcrum showed Sparrow through the Electrum server and the Electrum 4.7.2 installed on this computer, with 4.8.2 reported as available"
+    ],
+    "notes": "Brings together the existing Sparrow and Electrum integrations (sparrow-integration, electrum-wallet)."
+  },
+  {
+    "id": "tor-integration",
+    "area": "Tor and privacy",
+    "title": "Tor: the Tor Expert Bundle installed from verified releases (signed checksums and a signed archive, pinned key refreshed from the Tor Project), one per-user tor with loopback ports and SAFECOOKIE control authentication, bootstrap and health as tor reports them, restart after a crash, reconnection in the next session, other software's tor detected, updates and removal",
+    "state": "verified-on-windows",
+    "specSections": [
+      "10",
+      "17.3"
+    ],
+    "evidence": [
+      "packages/installation-manager/src/extract-tar.test.ts (hostile tar entries, decompression bomb)",
+      "packages/installation-manager/src/archive-installer.test.ts (signed tar.gz, archive signature, acceptance check)",
+      "packages/integrations/tor/src/control.test.ts (control protocol, SAFECOOKIE, impostor on the port)",
+      "packages/integrations/tor/src/release.test.ts",
+      "tests/integration/tor.test.ts (real tor 0.4.9.14, offline)",
+      "tests/integration/tor-service.test.ts (real tor: start, survives BTCortex closing for a node, found again, restart after a crash, port in use)",
+      "apps/desktop/src/features/tor/tor.test.tsx",
+      "Tor Expert Bundle 15.0.26 installed through the real release files: manifest and archive signatures valid for the pinned key",
+      "Live check on Windows 10: BTCortex's tor service connected to the Tor network (bootstrap 0 to 100 % in 118 s, circuits built, the network rated tor 0.4.9.14 recommended) and stopped cleanly"
+    ],
+    "notes": "The automated tests run tor offline (DisableNetwork); the live connection was checked by hand. Bridges and pluggable transports are not offered yet. Profiles with non-ASCII folder names fall back to 8.3 short paths, tested in tests/integration/electrum.test.ts."
+  },
+  {
+    "id": "node-tor-routing",
+    "area": "Tor and privacy",
+    "title": "Bitcoin Core through Tor: onion peers, every connection or Tor only, an onion service listening on loopback only, private broadcasting; tor started before the node, and the node held back when tor cannot start",
+    "state": "integration-tested",
+    "specSections": [
+      "10"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/nodes/privacy.test.ts",
+      "tests/integration/privacy.test.ts (real bitcoind 31.1 and tor: cookie authentication on BTCortex's control port, onion address published, clearnet unreachable in Tor-only mode, back to direct)",
+      "apps/desktop/src/features/tor/tor.test.tsx"
+    ],
+    "notes": "Nodes BTCortex set up only; other nodes are shown read-only. Tested on regtest with tor offline."
+  },
+  {
+    "id": "node-i2p-peers",
+    "area": "Tor and privacy",
+    "title": "I2P peers through an I2P router the user runs (i2pd or the Java I2P router): the router found by its SAM bridge on 127.0.0.1:7656 and named, a router with its bridge off recognised by its console, where to get a router, and for nodes BTCortex set up a new I2P address for every connection (i2pacceptincoming=0) alongside any Tor mode, refused while no router answers",
+    "state": "integration-tested",
+    "specSections": [
+      "10"
+    ],
+    "evidence": [
+      "packages/integrations/i2p/src/i2p.test.ts (SAM greeting, NOVERSION, other programs, silence, routers told apart by their consoles)",
+      "apps/orchestrator/src/i2p/i2p-router.test.ts (the router named, the answer kept for half a minute, the Java router with its bridge off)",
+      "apps/orchestrator/src/nodes/privacy.test.ts (I2P alongside each mode, onlynet=i2p with Tor only, kept when a change leaves it out, I2P set up by hand shown as custom)",
+      "tests/integration/privacy.test.ts (real bitcoind 31.1: refused without a router, I2P reachable through 127.0.0.1:7656 beside onion peers only, HELLO VERSION MIN=3.1 MAX=3.1 and a TRANSIENT session request received by a stand-in SAM bridge, I2P removed again)",
+      "apps/desktop/src/features/tor/tor.test.tsx",
+      "Live check on Windows 10 in the development build, with a stand-in SAM bridge on 127.0.0.1:7656: no router shown with where to get one; after Check again the bridge found and its program named; I2P turned on for a regtest node, which restarted with i2psam=127.0.0.1:7656 and i2pacceptincoming=0 and reported I2P reachable through 127.0.0.1:7656; with the bridge stopped the node's page warned that no router answers; I2P turned off again"
+    ],
+    "notes": "Connected level: BTCortex does not install or run the router (KNOWN_LIMITATIONS.md gives the reasons). Not tried against a real router or the live I2P network."
+  },
+  {
+    "id": "network-topology",
+    "area": "Tor and privacy",
+    "title": "Network topology: BTCortex, Sparrow, Electrum servers, Lightning nodes, Bitcoin nodes, tor, the I2P router and the networks drawn from live state, with each connection’s protocol, port, protection and whether it is live; a connections table; updated every 15 seconds",
+    "state": "verified-on-windows",
+    "specSections": [
+      "10.2",
+      "24.1"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/topology/topology.test.ts",
+      "apps/desktop/src/features/topology/topology.test.tsx",
+      "apps/desktop/src/features/topology/layout.test.ts (rows, waypoints, labels clear of boxes)",
+      "Live check on Windows 10: a regtest node with its Electrum server drawn from live state; starting the node turned its RPC link live and its state to synchronising within the 15-second refresh"
+    ],
+    "notes": "An LND node’s own Bitcoin back end is not drawn."
+  },
+  {
+    "id": "ecosystem-catalogue",
+    "area": "Catalogue and orchestration",
+    "title": "Bitcoin Ecosystem Catalogue: researched entries with target support levels, search and filters, verified project information, Windows compatibility, dependencies checked against this computer, sources",
+    "state": "unit-tested",
+    "specSections": [
+      "6",
+      "17.2"
+    ],
+    "evidence": [
+      "docs/research: 176 ecosystem entries in eight scopes (134 in the catalogue), 92 standards and 65 technology records, verified on 2026-10-21 to 2026-10-23; scripts/research/validate.mjs reports no errors and no warnings (every dependency names a researched entry)",
+      "packages/catalogue/src/catalogue.test.ts (data in step with the research records; no requirement loop in any entry)",
+      "apps/orchestrator/src/services/catalogue.test.ts",
+      "apps/desktop/src/features/catalogue/catalogue.test.tsx",
+      "apps/orchestrator/scripts/smoke-test.mjs (catalogue read back from the built executable)"
+    ],
+    "notes": "Only entries with a service adapter are offered as available; the rest are research only. Installing from the catalogue page itself is not built yet; integrated entries are managed from their own pages."
+  },
+  {
+    "id": "service-adapters",
+    "area": "Catalogue and orchestration",
+    "title": "Service adapters with declared capabilities and evidence levels, live state, and a dependency resolver (missing requirements, conflicts, set-up order, loop detection)",
+    "state": "unit-tested",
+    "specSections": [
+      "17",
+      "17.2"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/services/catalogue.test.ts (adapters declare the same evidence as this manifest)",
+      "packages/catalogue/src/catalogue.test.ts"
+    ],
+    "notes": "Adapters are registered for 22 entries (apps/orchestrator/src/main.ts): Bitcoin Core, Bitcoin Knots, Fulcrum, Tor and HWI as fully managed; Sparrow, Electrum, LND, BTCPay Server, mempool and Esplora explorers, and the signing devices Trezor, Ledger, BitBox02, COLDCARD, Jade, KeepKey, Passport, Keystone, SeedSigner and Krux as connected applications; Trezor Suite as an external launcher. Version, port and disk checks for services without an adapter and a generic installer for new services are not built yet; ordered start and stop across services is the service-orchestration entry."
+  },
+  {
+    "id": "software-installations",
+    "area": "Catalogue and orchestration",
+    "title": "Installed software: verified versions side by side, update checks against the official sources, updates as background jobs, file-by-file integrity checks, safe removal, moving a node to a newer Bitcoin Core",
+    "state": "unit-tested",
+    "specSections": [
+      "6",
+      "17.3"
+    ],
+    "evidence": [
+      "packages/installation-manager/src/archive-installer.test.ts (whole pipeline against an in-memory release server)",
+      "packages/installation-manager/src/integrity.test.ts",
+      "apps/orchestrator/src/installations/installations.test.ts",
+      "apps/desktop/src/features/software/software.test.tsx"
+    ],
+    "notes": "Bitcoin Core, Sparrow, Tor and HWI on this page; Fulcrum and Electrum through the update centre. No move to an older Bitcoin Core."
+  },
+  {
+    "id": "update-centre",
+    "area": "Catalogue and orchestration",
+    "title": "Update centre: a daily background check and one on request against the official sources, every installed program with its newest release, security relevance (the version-warning matrix for the versions nodes run, Tor’s rating), release notes and what an update touches; each node’s Bitcoin Core with what moving across major versions changes for good and the last backup; deferring for a week or skipping a version; update alerts in the monitoring",
+    "state": "verified-on-windows",
+    "specSections": [
+      "23",
+      "24.1"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/updates/updates.test.ts",
+      "apps/orchestrator/src/monitoring/monitoring.test.ts (update alerts, deferred security updates kept)",
+      "apps/desktop/src/features/updates/updates.test.tsx",
+      "Live check on Windows 10: the background check a minute after start and Check now against the official sources; Bitcoin Core 31.1, Tor 15.0.26 and Fulcrum 2.1.4 reported current, the regtest node’s Bitcoin Core shown, programs not installed named once"
+    ],
+    "notes": "Every installed program was already current, so installing, deferring and moving a node were exercised by the tests only; they run the Installed software page’s verified steps. BTCortex does not update itself: its releases are not yet signed."
+  },
+  {
+    "id": "settings",
+    "area": "Foundations",
+    "title": "Settings: theme following Windows or fixed, starting with Windows (optionally into the notification area), closing to the notification area, per-node start and quit policies, data folder, privacy statement and versions",
+    "state": "verified-on-windows",
+    "specSections": [
+      "3.4",
+      "24.1",
+      "24.2",
+      "32"
+    ],
+    "evidence": [
+      "apps/desktop/src/features/settings/settings.test.tsx",
+      "apps/desktop/src-tauri/src/shell.rs (unit tests)",
+      "Live check on Windows 10: every choice applied at once and read back; see desktop-shell and bitcoin-core-lifecycle"
+    ],
+    "notes": "Language is fixed to British English. Notification choices stay on the Monitoring page, which Settings links to."
+  },
+  {
+    "id": "command-palette",
+    "area": "Foundations",
+    "title": "Global command palette (pages, nodes and their sections, safe actions, explorer lookups), keyboard shortcuts with their list, and breadcrumbs on nested pages",
+    "state": "verified-on-windows",
+    "specSections": [
+      "24",
+      "24.2"
+    ],
+    "evidence": [
+      "apps/desktop/src/components/layout/command-palette.test.tsx (search, arrow keys and Enter, node sections, explorer lookups, empty state, breadcrumbs)",
+      "apps/desktop/src/components/layout/keyboard.test.ts",
+      "Live check on Windows 10: Ctrl+K opened the palette in the WebView, “peers” found the regtest node’s Network & peers section, Enter went there with its breadcrumb trail, and the shortcuts list opened from the palette"
+    ],
+    "notes": "The palette only navigates and changes interface preferences; actions on nodes and services keep their confirmations on their pages."
+  },
+  {
+    "id": "help-documentation",
+    "area": "Foundations",
+    "title": "Help & documentation in the window: the shipped documents grouped and searchable, rendered safely, with links between them and F1 opening the section about the current page",
+    "state": "verified-on-windows",
+    "specSections": [
+      "24.1",
+      "24.2",
+      "33"
+    ],
+    "evidence": [
+      "apps/desktop/src/components/data/markdown.test.tsx (blocks, anchors, links, no markup from the text)",
+      "apps/desktop/src/features/help/help.test.tsx (the real documents, search, contextual sections)",
+      "Live check on Windows 10: F1 on Monitoring opened the user guide at its Monitoring section"
+    ],
+    "notes": "The ecosystem research (ECOSYSTEM_RESEARCH.md, about 1 MB) is not bundled; the catalogue shows what it found."
+  },
+  {
+    "id": "lightning-lnd",
+    "area": "Lightning",
+    "title": "LND connections: the LND on this computer found and connected in one click, or a REST address with certificate and macaroon files, or an lndconnect address; onion addresses through BTCortex’s tor; macaroon kept in the vault and classified from its own permissions (read-only recommended, spending macaroons only with explicit acceptance); certificate pinned; state checked every 30 s; dashboard with identity, synchronisation, balances, channels and liquidity, pending channels, peers, payments and invoices without their secrets, routing fees and forwards, watchtowers and warnings; static channel backups saved on request; verified LND installer (5 of 16 release keys)",
+    "state": "integration-tested",
+    "specSections": [
+      "11",
+      "11.1",
+      "11.2",
+      "11.3",
+      "42"
+    ],
+    "evidence": [
+      "docs/research/notes/lightning.md and docs/research/data/lightning.json (24 projects researched)",
+      "docs/LIGHTNING_INTEGRATIONS.md",
+      "packages/integrations/lnd/src/lnd.test.ts (real LND 0.21.4 answers, macaroon permissions, pinned TLS against a local HTTPS server, streaming, release signatures, local detection, lndconnect)",
+      "packages/integrations/tor/src/socks.test.ts (SOCKS5 with stream isolation)",
+      "tests/integration/lightning.test.ts (three real LND 0.21.4 nodes on a regtest Bitcoin Core 31.1: a payment routed through the middle node, local detection, read-only connection, spending macaroon refused then accepted, dashboard with fees and forwards, no preimages, channel backup verified by LND, wrong macaroon and certificate, node stopped)",
+      "scripts/dev/install-lnd.ts (real install of LND 0.21.4-beta: 8 valid signatures of 16 pinned keys)",
+      "apps/desktop/src/features/lightning/lightning.test.tsx"
+    ],
+    "notes": "BTCortex only reads: it does not pay, open, close or rebalance channels. It does not yet install and run LND for the user (creating the wallet shows its seed, which must stay in LND’s own tools). Core Lightning, Eclair and the management tools are researched only. The onion path was tested with a stand-in SOCKS proxy, not against a real onion LND."
+  },
+  {
+    "id": "payments-btcpay",
+    "area": "Lightning and payments",
+    "title": "Payments & merchants: BTCPay Server connected through the Greenfield API with a read-only key (BTCPay's own key form, tested before it is kept in the vault), checked every minute with synchronisation per chain, and per store its payment methods, on-chain balance and the invoices of the last 30 days; alerts when a server stays unavailable",
+    "state": "unit-tested",
+    "specSections": [
+      "13",
+      "24.1"
+    ],
+    "evidence": [
+      "packages/integrations/btcpay/src/greenfield.test.ts (a local stand-in server with the documented shapes)",
+      "apps/orchestrator/src/payments/payments.test.ts",
+      "apps/orchestrator/src/monitoring/monitoring.test.ts (payment alerts)",
+      "apps/desktop/src/features/payments/payments.test.tsx",
+      "docs/research/notes/payments-sidechains-mining.md (Greenfield API read from the OpenAPI document on 2026-10-23)",
+      "Live on Windows 10: a public http:// address refused before any request, and https://btcpay.invalid reported as unreachable (ENOTFOUND), in the running application"
+    ],
+    "notes": "No real BTCPay Server was available to test against. BTCPay Server is connected to, not installed (Linux and Docker only)."
+  },
+  {
+    "id": "hardware-wallets",
+    "area": "Wallets",
+    "title": "Hardware wallets: devices recognised from Windows’ device list without opening them, HWI installed from its clear-signed release, a watch-only wallet on the node through Bitcoin Core’s external signer, addresses shown on the device, transactions built for review, signed on the device only when asked and broadcast after confirmation, PSBT files and animated QR codes (UR) for devices that sign without a cable",
+    "state": "integration-tested",
+    "specSections": [
+      "9"
+    ],
+    "evidence": [
+      "packages/installation-manager/src/archive-installer.test.ts (clear-signed checksums, checksums of files inside the archive)",
+      "packages/integrations/hwi/src/client.test.ts",
+      "packages/integrations/hardware-wallets/src/devices.test.ts",
+      "packages/integrations/hardware-wallets/src/qr.test.ts (UR parts, fountain recovery, QR matrices read back by jsQR)",
+      "apps/orchestrator/src/hardware/hardware.test.ts",
+      "tests/integration/hardware-signer.test.ts (real bitcoind 31.1 with a stand-in for HWI that simulates a device: signer setting with a quoted path containing spaces, watch-only wallet from the device’s descriptors, address shown on the device and a wrong echo refused, PSBT reviewed, signed only when asked, finalised and broadcast, PSBT files)",
+      "apps/desktop/src/features/hardware/hardware.test.tsx",
+      "HWI 3.2.0 installed through the real release: Ava Chow’s clear signature valid, hwi.exe and hwi-qt.exe match their signed checksums, enumerate runs on Windows 10",
+      "tests/integration/hwi.test.ts (the real HWI 3.2.0 without a device: its version, devices listed in JSON, and Bitcoin Core 31.1 running it as its external signer from a quoted path with spaces)"
+    ],
+    "notes": "No physical hardware wallet has been used yet: the device side is simulated. HWI does not support the Trezor Safe 7 or the Ledger Nano Gen5 (use Sparrow); HWI is in maintenance mode upstream. Multisignature coordination is not built yet; camera reading is tested with generated codes only."
+  },
+  {
+    "id": "trezor-suite",
+    "area": "Wallets",
+    "title": "Trezor Suite: the vendor installer verified by its detached signature from the SatoshiLabs 2021 key and SatoshiLabs’ Windows code signature, installed silently for the current user, detected and opened; the deprecated Trezor Bridge detected",
+    "state": "verified-on-windows",
+    "specSections": [
+      "9",
+      "17.3"
+    ],
+    "evidence": [
+      "packages/installation-manager/src/signed-installer.test.ts (a validly code-signed stand-in: run only after both signatures check out)",
+      "packages/integrations/hardware-wallets/src/devices.test.ts",
+      "Trezor Suite 26.10.2 installed through BTCortex on Windows 10: detached signature valid for the SatoshiLabs 2021 key, Authenticode valid for Trezor Company s.r.o., silent per-user installation without administrator rights, then detected as installed by BTCortex"
+    ],
+    "notes": "Suite updates itself after the first installation; BTCortex does not manage its later versions."
+  },
+  {
+    "id": "windows-installer",
+    "area": "Packaging",
+    "title": "NSIS and MSI installers: the NSIS installer installs per user into %LOCALAPPDATA%\\Programs\\BTCortex (the MSI installs for all users into Program Files), separate from the data, with a data-preserving uninstall",
+    "state": "verified-on-windows",
+    "specSections": [
+      "3.4",
+      "42"
+    ],
+    "evidence": [
+      "apps/desktop/src-tauri/tauri.conf.json",
+      "apps/desktop/src-tauri/windows/installer.nsi (Tauri CLI 2.12.3 template with the per-user program folder changed)",
+      "docs/WINDOWS_BUILD.md, \"Verified on Windows\": silent per-user install, start without a development server, graceful close, silent uninstall keeping %LOCALAPPDATA%\\BTCortex",
+      "docs/WINDOWS_BUILD.md, step 6: an upgrade over an earlier build of 0.1.0, its database migrated and kept, then a silent uninstall keeping the data",
+      "docs/WINDOWS_BUILD.md, step 7: OpenPGP.js installed as a separate, replaceable file with its licence (LGPL-3.0) and THIRD_PARTY_LICENCES.txt beside the executables; the installed orchestrator verified the Tor Expert Bundle's signatures with it"
+    ],
+    "notes": "The MSI is built but not tested (it needs administrator rights). Upgrades were tested between builds of the same version number only. Installers are unsigned (see code-signing)."
+  },
+  {
+    "id": "code-signing",
+    "area": "Packaging",
+    "title": "Code-signed releases",
+    "state": "blocked",
+    "specSections": [
+      "3.4"
+    ],
+    "evidence": [],
+    "notes": "Needs signing credentials."
+  },
+  {
+    "id": "service-orchestration",
+    "area": "Platform",
+    "title": "Service orchestration and integration modules: a module contract covering metadata, dependencies, detection, installation, lifecycle, configuration, health, metrics, logs, updates, documentation and interface; modules for nodes, Fulcrum and tor with declared permissions; services started and stopped in dependency order after a plan is shown and confirmed; a sample module run through the whole lifecycle",
+    "state": "verified-on-windows",
+    "specSections": [
+      "24.1",
+      "29"
+    ],
+    "evidence": [
+      "apps/orchestrator/src/orchestration/orchestration.test.ts (order, plans, consequences, refusals, runs and failures, the sample module's whole lifecycle)",
+      "apps/orchestrator/src/services/modules.test.ts",
+      "apps/desktop/src/features/orchestration/orchestration.test.tsx",
+      "Live on Windows 10: the regtest node stopped through the orchestration with its Electrum server stopped first, then everything started again in order, node before server"
+    ],
+    "notes": "Only tor, nodes BTCortex set up and their Electrum servers are orchestrated; permissions are declared, not sandboxed; no third-party plug-ins are loaded at run time."
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "name": "@btcortex/integration-tor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tor integration: verified installation of the Tor Expert Bundle, a per-user tor process and its control port.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "update-key": "node scripts/update-signing-key.mjs"
+  },
+  "dependencies": {
+    "@btcortex/installation-manager": "0.1.0",
+    "openpgp": "^6.3.2"
+  }
+}

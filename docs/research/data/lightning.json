@@ -1,0 +1,2249 @@
+[
+  {
+    "id": "lnd",
+    "name": "LND",
+    "category": "lightning-implementation",
+    "catalogueEligible": true,
+    "website": "https://lightning.engineering/",
+    "repository": "https://github.com/lightningnetwork/lnd",
+    "purpose": "Lightning Labs’ Lightning Network node, written in Go: channels, payments, routing and an on-chain wallet, with Bitcoin Core (bitcoind), btcd or Neutrino as its chain backend. It exposes gRPC and REST interfaces authenticated with macaroons, and is the base of Lightning Terminal, Loop and Pool.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.21.4-beta and v0.20.5-beta published on 2026-10-01 (two maintained lines); release candidates v0.21.5-beta.rc1 and v0.20.6-beta.rc1 on 2026-10-22; repository pushed on 2026-10-23 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.21.4-beta",
+      "date": "2026-10-01",
+      "source": "https://github.com/lightningnetwork/lnd/releases/tag/v0.21.4-beta"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "Not stated by the project. Verified on Windows 10 22H2 (19045) x64 on 2026-10-23.",
+      "windowsArchitectures": [
+        "x64",
+        "x86",
+        "arm64"
+      ],
+      "windowsDistribution": "One ZIP per architecture: lnd-windows-amd64-v0.21.4-beta.zip (49 391 174 bytes), lnd-windows-386 and lnd-windows-arm64, each holding lnd.exe and lncli.exe in a folder of the same name. No installer and no Authenticode signature (both executables reported NotSigned on 2026-10-23). Hashes in manifest-v0.21.4-beta.txt, signed in separate binary OpenPGP files manifest-<signer>-v0.21.4-beta.sig, with OpenTimestamps proofs.",
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Release archives for other platforms; reproducible builds with go1.27.1 (make release); Docker image lightninglabs/lnd with a /verify-install.sh script."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "REST (grpc-gateway) on restlisten, default localhost:8080: JSON over HTTPS with LND’s self-signed tls.cert. 64-bit integers are strings and bytes are base64. Routes used by BTCortex: /v1/state (answers without a macaroon), /v1/getinfo, /v1/balance/blockchain, /v1/balance/channels, /v1/channels, /v1/channels/pending, /v1/peers, /v1/fees, POST /v1/switch (forwarding history), /v1/invoices, /v1/payments, /v1/graph/info, /v1/channels/backup and /v2/watchtower/client. Streaming calls such as POST /v2/router/send answer with newline-delimited JSON objects {\"result\": …}.",
+        "authentication": "Macaroon, hex-encoded, in the Grpc-Metadata-macaroon header. Errors are grpc-gateway JSON {code, message, details}; observed on 0.21.4: \"expected 1 macaroon, got 0\", \"verification failed: signature mismatch after caveat verification\", \"permission denied\", \"watchtower client not active\".",
+        "documentation": "https://lightning.engineering/api-docs/api/lnd/"
+      },
+      {
+        "type": "grpc",
+        "description": "gRPC on rpclisten, default localhost:10009, with the same certificate and macaroons; used by lncli, Lightning Terminal, Loop and Pool. Sub-servers (routerrpc, walletrpc, invoicesrpc, signrpc, chainrpc, peersrpc, watchtowerrpc and others) are included in release builds.",
+        "authentication": "Macaroon in the macaroon metadata field, TLS with tls.cert.",
+        "documentation": "https://lightning.engineering/api-docs/api/lnd/"
+      },
+      {
+        "type": "p2p",
+        "description": "Lightning peer protocol (BOLT 8 transport) on listen, default port 9735.",
+        "authentication": "Node keys (Noise_XK).",
+        "documentation": "https://github.com/lightning/bolts/blob/master/08-transport.md"
+      },
+      {
+        "type": "cli",
+        "description": "lncli.exe drives the gRPC interface.",
+        "authentication": "The same macaroons and certificate.",
+        "documentation": null
+      }
+    ],
+    "cli": "lnd.exe takes go-flags options; on Windows lnd --help prints the /option:value form and --option=value is also accepted, but a switch takes no value on the command line (--noseedbackup=true is refused, verified on 0.21.4). Exactly one of bitcoin.mainnet, testnet, testnet4, signet, regtest or simnet is required. Settings can also go in lnd.conf, an INI file whose keys carry their namespace (bitcoin.mainnet=true under [Bitcoin]).",
+    "remoteManagement": "REST and gRPC over TLS with macaroons are meant for remote use: tlsextraip and tlsextradomain add names to the certificate, node packages show lndconnect:// URIs for wallets, and tor.active publishes an onion service. A macaroon can be baked with fewer permissions and with caveats such as time-before.",
+    "nodeCompatibility": "bitcoin.node=bitcoind needs Bitcoin Core with RPC and either ZMQ (zmqpubrawblock and zmqpubrawtx) or bitcoind.rpcpolling; btcd and Neutrino are the alternatives. Verified on 2026-10-23: LND 0.21.4-beta with Bitcoin Core 31.1 on regtest, using bitcoind.rpccookie and bitcoind.rpcpolling with 1 s polling intervals.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "requires",
+        "notes": "Or btcd, or Neutrino without a full node. With bitcoind: RPC credentials or the cookie, and ZMQ or RPC polling."
+      },
+      {
+        "ids": [
+          "tor"
+        ],
+        "relationship": "optional",
+        "notes": "tor.active for an onion service and for reaching onion peers."
+      }
+    ],
+    "networking": "Listens on 9735 for peers, 10009 for gRPC and 8080 for REST (the last two on localhost by default). Connects out to peers, the bitcoind RPC and ZMQ endpoints, and with Tor through its SOCKS port.",
+    "storage": "Under %LOCALAPPDATA%\\Lnd: lnd.conf, tls.cert, tls.key, logs, and data\\chain\\bitcoin\\<network>\\ with wallet.db, the macaroons (admin, readonly, invoice) and channel.backup; the channel database and graph under data\\graph\\<network>\\ (bbolt by default; SQLite and Postgres backends are compiled into release builds). Mainnet size not measured here.",
+    "resources": "Not measured on mainnet. On regtest each lnd 0.21.4 process reached synced_to_chain in about 5 s.",
+    "security": "admin.macaroon can spend; readonly.macaroon is enough for monitoring and can export the static channel backup. tls.cert is self-signed; LND creates a new one when it is deleted, and with tlsautorefresh when its addresses change, which breaks clients that pinned the old one. The wallet is encrypted with the password chosen at creation; the 24-word aezeed seed together with channel.backup recovers channel funds. --noseedbackup creates an unencrypted wallet without showing a seed (tests only). Releases: manifest-v<version>.txt must carry signatures from at least 5 of the 16 keys listed in scripts/verify-install.sh, each user counted once; v0.21.4-beta carried 8 valid signatures (bhandras, boris, georgetsagk, gijswijs, roasbeef, suheb, ViktorT-11, ziggie1984) on 2026-10-23. One listed key (ellemouton) expired on 2026-06-21.",
+    "licence": "MIT",
+    "licenceNotes": "MIT (LICENSE: Copyright (C) 2015-2022 Lightning Labs and The Lightning Network Developers).",
+    "integrationMechanisms": [
+      "Connect over REST with the read-only macaroon (kept in the vault) and the certificate pinned by its SHA-256 fingerprint",
+      "Find LND on this computer in %LOCALAPPDATA%\\Lnd and read lnd.conf (restlisten, norest, network, datadir, tlscertpath, *macaroonpath) without changing it",
+      "Accept lndconnect:// URIs from node packages; refuse the gRPC port 10009",
+      "Read what a macaroon allows from its identifier (entity and action pairs) without asking the node",
+      "Reach onion addresses through BTCortex’s tor with per-connection SOCKS stream isolation",
+      "Export the static channel backup through /v1/channels/backup and keep it in BTCortex’s backups folder",
+      "Install the Windows ZIP after checking 5 of the 16 release keys on the manifest (used for integration tests)",
+      "Run lnd as a managed process for a BTCortex node (not implemented: creating the wallet shows its seed, which must happen in LND’s own tools)"
+    ],
+    "supportLevels": [
+      "connected-application",
+      "remote-managed",
+      "fully-managed",
+      "managed-docker"
+    ],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Official Windows builds, documented REST and gRPC, read-only macaroons, and an end-to-end test of BTCortex against three LND 0.21.4 nodes on Windows 10 regtest (payments routed through a middle node, forwarding fees, channel backup verified by LND)."
+    },
+    "priority": "P0",
+    "implementationStatus": "integration-tested",
+    "notes": "go-flags option syntax and lnd.conf layout were checked against lnd 0.21.4 on Windows. The REST interface reports peer aliases on channels with peer_alias_lookup=true. Gossip of channel policies takes a moment after channels are announced: route queries (/v1/graph/routes) fail until both policies are known.",
+    "sources": [
+      {
+        "title": "LND releases (GitHub API)",
+        "url": "https://api.github.com/repos/lightningnetwork/lnd/releases?per_page=8",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LND v0.21.4-beta release",
+        "url": "https://github.com/lightningnetwork/lnd/releases/tag/v0.21.4-beta",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LND scripts/verify-install.sh at v0.21.4-beta",
+        "url": "https://raw.githubusercontent.com/lightningnetwork/lnd/v0.21.4-beta/scripts/verify-install.sh",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LND release-signing keys (scripts/keys)",
+        "url": "https://github.com/lightningnetwork/lnd/tree/v0.21.4-beta/scripts/keys",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LND config.go at v0.21.4-beta (defaults, networks, TLS options)",
+        "url": "https://raw.githubusercontent.com/lightningnetwork/lnd/v0.21.4-beta/config.go",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LND lncfg/chain.go at v0.21.4-beta",
+        "url": "https://raw.githubusercontent.com/lightningnetwork/lnd/v0.21.4-beta/lncfg/chain.go",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LND REST routes (lnrpc/lightning.yaml)",
+        "url": "https://raw.githubusercontent.com/lightningnetwork/lnd/v0.21.4-beta/lnrpc/lightning.yaml",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LND router REST routes (lnrpc/routerrpc/router.yaml)",
+        "url": "https://raw.githubusercontent.com/lightningnetwork/lnd/v0.21.4-beta/lnrpc/routerrpc/router.yaml",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "btcutil AppDataDir (LND’s folder on Windows)",
+        "url": "https://github.com/btcsuite/btcd/blob/master/btcutil/appdata.go",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LND API documentation",
+        "url": "https://lightning.engineering/api-docs/api/lnd/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "lndconnect URI specification",
+        "url": "https://github.com/LN-Zap/lndconnect/blob/master/lnd_connect_uri.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LND licence",
+        "url": "https://raw.githubusercontent.com/lightningnetwork/lnd/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Mainnet memory, CPU and disk use were not measured.",
+      "Running LND under WSL2 was not tested.",
+      "The Docker image’s verification script was not tried."
+    ]
+  },
+  {
+    "id": "core-lightning",
+    "name": "Core Lightning",
+    "category": "lightning-implementation",
+    "catalogueEligible": true,
+    "website": "https://corelightning.org/",
+    "repository": "https://github.com/ElementsProject/lightning",
+    "purpose": "Blockstream’s Lightning implementation in C with a plugin architecture; JSON-RPC over a Unix socket, with gRPC (cln-grpc) and REST (clnrest) plugins authenticated by runes.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v26.06.9 published on 2026-10-07; repository pushed on 2026-10-22 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "26.06.9",
+      "date": "2026-10-07",
+      "source": "https://github.com/ElementsProject/lightning/releases/tag/v26.06.9"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Release binaries for Ubuntu 22.04, 24.04 and 26.04 (amd64, arm64, armv7) and Fedora 40 (amd64), with SHA256SUMS signed in SHA256SUMS-v26.06.9.asc; build instructions for Ubuntu, Fedora, NixOS and macOS; Docker image elementsproject/lightningd. The installation guide mentions no Windows."
+    },
+    "interfaces": [
+      {
+        "type": "json-rpc",
+        "description": "JSON-RPC 2.0 over the lightning-rpc Unix socket in the network directory; lightning-cli uses it.",
+        "authentication": "Access to the socket file.",
+        "documentation": "https://docs.corelightning.org/reference/get-started-with-your-reference"
+      },
+      {
+        "type": "rest",
+        "description": "clnrest plugin: enabled by clnrest-port (3010 is common; the plugin disables itself without it), HTTPS by default (clnrest-protocol), on 127.0.0.1 by default (clnrest-host), certificates from clnrest-certs (by default the gRPC ones). Every RPC method is POST /v1/<method>; a Swagger interface and a Socket.IO notification stream are served on the same port.",
+        "authentication": "A rune in the Rune header (createrune, showrunes); a read-only rune suffices for read methods and for notifications.",
+        "documentation": "https://docs.corelightning.org/docs/rest"
+      },
+      {
+        "type": "grpc",
+        "description": "cln-grpc plugin on grpc-port with mutual TLS.",
+        "authentication": "Client certificates generated by the plugin.",
+        "documentation": "https://docs.corelightning.org/docs/grpc"
+      }
+    ],
+    "cli": "lightningd and lightning-cli (JSON-RPC over the Unix socket).",
+    "remoteManagement": "clnrest (HTTPS with runes) or cln-grpc (mutual TLS) for remote clients; node packages expose them.",
+    "nodeCompatibility": "Bitcoin Core through the bcli plugin (bitcoin-cli), so a reachable bitcoind with RPC is required.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "requires",
+        "notes": "Through bitcoin-cli (bcli plugin)."
+      }
+    ],
+    "networking": "Peers on 9735; clnrest and cln-grpc only when their ports are set.",
+    "storage": null,
+    "resources": null,
+    "security": "Runes carry restrictions (methods, parameters, rate, expiry) and can be revoked. Release checksums are signed (SHA256SUMS-<version>.asc).",
+    "licence": "BSD-MIT",
+    "licenceNotes": "LICENSE: the ccan/ modules have their own licences; the rest is under the BSD-MIT licence.",
+    "integrationMechanisms": [
+      "Remote connection through clnrest with a read-only rune (not implemented)",
+      "WSL2 or Docker deployment (not implemented)"
+    ],
+    "supportLevels": [
+      "remote-managed",
+      "managed-wsl2",
+      "managed-docker",
+      "research-only"
+    ],
+    "recommendedSupportLevel": "remote-managed",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "No Windows build, so only a remote connection (clnrest) or WSL2/Docker is possible; clnrest is a straightforward HTTPS JSON interface, but no Windows test environment exists here to verify it against a real node."
+    },
+    "priority": "P1",
+    "implementationStatus": "researched",
+    "notes": "Never claim that Core Lightning runs natively on Windows.",
+    "sources": [
+      {
+        "title": "Core Lightning releases (GitHub API)",
+        "url": "https://api.github.com/repos/ElementsProject/lightning/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Core Lightning installation guide (repository)",
+        "url": "https://raw.githubusercontent.com/ElementsProject/lightning/master/doc/getting-started/getting-started/installation.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Core Lightning REST (clnrest) guide (repository)",
+        "url": "https://raw.githubusercontent.com/ElementsProject/lightning/master/doc/developers-guide/app-development/rest.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Core Lightning licence",
+        "url": "https://raw.githubusercontent.com/ElementsProject/lightning/master/LICENSE",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Core Lightning repository metadata (GitHub API)",
+        "url": "https://api.github.com/repos/ElementsProject/lightning",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "WSL2 operation not tested.",
+      "The gRPC documentation page was not read (docs.corelightning.org refused automated access); the description follows the repository."
+    ]
+  },
+  {
+    "id": "eclair",
+    "name": "Eclair",
+    "category": "lightning-implementation",
+    "catalogueEligible": true,
+    "website": "https://acinq.co/",
+    "repository": "https://github.com/ACINQ/eclair",
+    "purpose": "ACINQ’s Lightning implementation in Scala on the JVM, built for large routing nodes; it uses Bitcoin Core’s wallet for on-chain funds and offers an HTTP JSON API.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.14.5 published on 2026-10-20; repository pushed on 2026-10-22 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.14.5",
+      "date": "2026-10-20",
+      "source": "https://github.com/ACINQ/eclair/releases/tag/v0.14.5"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "eclair-node-0.14.5-01384e9-bin.zip, a JVM distribution, with SHA256SUMS.asc. Eclair targets Java 21 and \"will run on any compatible Java runtime\"; Windows is not mentioned.",
+      "wsl2": "likely",
+      "docker": "community-image",
+      "other": "Any platform with a Java 21 runtime."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "HTTP API (eclair.api.enabled, off by default) on eclair.api.port, default 8080; must not be reachable from outside.",
+        "authentication": "HTTP Basic with eclair.api.password (required when the API is on).",
+        "documentation": "https://acinq.github.io/eclair"
+      },
+      {
+        "type": "p2p",
+        "description": "Lightning peers on eclair.server.port, default 9735.",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": "eclair-cli (a shell script over the API).",
+    "remoteManagement": "The HTTP API with its password, through a secure tunnel.",
+    "nodeCompatibility": "Bitcoin Core 31 or later, synchronised, with ZMQ (zmqpubhashblock, zmqpubrawtx), its wallet enabled, txindex and no pruning; channel funding and closing use the Bitcoin Core wallet, which must be backed up.",
+    "dependencies": [
+      {
+        "ids": [
+          "bitcoin-core"
+        ],
+        "relationship": "requires",
+        "notes": "Bitcoin Core 31+, wallet enabled, ZMQ, txindex=1, not pruned."
+      }
+    ],
+    "networking": "9735 for peers; API on 8080 when enabled. Remote bitcoind only through an encrypted tunnel (the project’s own warning).",
+    "storage": null,
+    "resources": null,
+    "security": "The API gives full control and must stay private; funds are in the Bitcoin Core wallet as well as in channels.",
+    "licence": "Apache-2.0",
+    "licenceNotes": "Apache License 2.0.",
+    "integrationMechanisms": [
+      "Connect to the HTTP API with its password (not implemented)"
+    ],
+    "supportLevels": [
+      "remote-managed",
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "A JVM application could run on Windows, but its requirements on Bitcoin Core (wallet, ZMQ, txindex) and Java 21 make it an operator’s tool; Windows operation is not documented."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Eclair README",
+        "url": "https://raw.githubusercontent.com/ACINQ/eclair/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Eclair releases (GitHub API)",
+        "url": "https://api.github.com/repos/ACINQ/eclair/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Eclair licence",
+        "url": "https://raw.githubusercontent.com/ACINQ/eclair/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Running Eclair on Windows was not tested.",
+      "The Docker image status is from memory of community images and was not checked."
+    ]
+  },
+  {
+    "id": "ldk-node",
+    "name": "LDK Node",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": "https://lightningdevkit.org/",
+    "repository": "https://github.com/lightningdevkit/ldk-node",
+    "purpose": "A ready-to-go Lightning node library built on the Lightning Development Kit (rust-lightning) and BDK, for embedding a node in an application rather than running a daemon.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.7.0 published on 2025-12-03; repository pushed on 2026-10-22 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.7.0",
+      "date": "2025-12-03",
+      "source": "https://github.com/lightningdevkit/ldk-node/releases/tag/v0.7.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "A Rust library with language bindings; the release ships an iOS/macOS framework (LDKNodeFFI.xcframework.zip)."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Rust API and generated bindings.",
+        "authentication": null,
+        "documentation": "https://docs.rs/ldk-node"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Chain data from Esplora, Electrum or Bitcoin Core RPC, depending on configuration.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Keys live in the embedding application.",
+    "licence": "MIT OR Apache-2.0",
+    "licenceNotes": "Dual-licensed (LICENSE-MIT and LICENSE-APACHE).",
+    "integrationMechanisms": [
+      "Through applications built on it, such as Alby Hub"
+    ],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library, not something to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "LDK Node releases (GitHub API)",
+        "url": "https://api.github.com/repos/lightningdevkit/ldk-node/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LDK Node repository metadata (GitHub API)",
+        "url": "https://api.github.com/repos/lightningdevkit/ldk-node",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LDK Node licence (MIT)",
+        "url": "https://raw.githubusercontent.com/lightningdevkit/ldk-node/main/LICENSE-MIT",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The chain sources are from the project’s documentation as remembered, not re-read on 2026-10-23."
+    ]
+  },
+  {
+    "id": "phoenixd",
+    "name": "phoenixd",
+    "category": "lightning-implementation",
+    "catalogueEligible": true,
+    "website": "https://phoenix.acinq.co/server",
+    "repository": "https://github.com/ACINQ/phoenixd",
+    "purpose": "The server version of the Phoenix wallet: a minimal Lightning node with automated liquidity from ACINQ, driven through an HTTP API.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.9.3 published on 2026-10-13; repository pushed on 2026-10-13 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.9.3",
+      "date": "2026-10-13",
+      "source": "https://github.com/ACINQ/phoenixd/releases/tag/v0.9.3"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "yes",
+      "docker": "unknown",
+      "other": "Native builds for Linux (x64, arm64) and macOS (x64, arm64), and a JVM build (phoenixd-0.9.3-jvm.zip); SHA256SUMS.asc. The README says it runs on Windows through WSL."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "HTTP API (documented at phoenix.acinq.co/server/api).",
+        "authentication": "HTTP password from phoenix.conf.",
+        "documentation": "https://phoenix.acinq.co/server/api"
+      }
+    ],
+    "cli": "phoenix-cli.",
+    "remoteManagement": "The HTTP API.",
+    "nodeCompatibility": "Does not use the user’s Bitcoin node: it relies on ACINQ’s infrastructure for liquidity and chain data.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Custodial elements are absent, but channel liquidity and fees depend on ACINQ as the only peer.",
+    "licence": "Apache-2.0",
+    "licenceNotes": "Apache License 2.0.",
+    "integrationMechanisms": [
+      "Connect to its HTTP API (not implemented)"
+    ],
+    "supportLevels": [
+      "remote-managed",
+      "managed-wsl2",
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No native Windows build, and it does not use the user’s node, which is BTCortex’s focus."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "phoenixd README",
+        "url": "https://raw.githubusercontent.com/ACINQ/phoenixd/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "phoenixd releases (GitHub API)",
+        "url": "https://api.github.com/repos/ACINQ/phoenixd/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "phoenixd licence",
+        "url": "https://raw.githubusercontent.com/ACINQ/phoenixd/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The HTTP password location (phoenix.conf) and the liquidity model are from the project’s site as remembered, not re-read on 2026-10-23."
+    ]
+  },
+  {
+    "id": "ride-the-lightning",
+    "name": "Ride The Lightning (RTL)",
+    "category": "lightning-management",
+    "catalogueEligible": true,
+    "website": "https://www.ridethelightning.info/",
+    "repository": "https://github.com/Ride-The-Lightning/RTL",
+    "purpose": "A web interface for managing Lightning nodes: LND, Core Lightning and Eclair.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.15.15 published on 2026-10-21; repository pushed on 2026-10-23 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.15.15",
+      "date": "2026-10-21",
+      "source": "https://github.com/Ride-The-Lightning/RTL/releases/tag/v0.15.15"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64"
+      ],
+      "windowsDistribution": "Source releases with signatures (v0.15.15.zip.asc, v0.15.15.tar.gz.asc); runs on Node.js v22.23.4 or later (or v24.22.1 or later) after npm ci.",
+      "wsl2": "likely",
+      "docker": "community-image",
+      "other": "Docker image shahanafarooqui/rtl."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web interface, port 3000 in the sample configuration.",
+        "authentication": "A password (multiPass) in RTL-Config.json; LND access through admin.macaroon.",
+        "documentation": "https://github.com/Ride-The-Lightning/RTL/blob/master/docs/Application_configurations.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Through its web interface.",
+    "nodeCompatibility": "LND (macaroon path and lnd.conf), Core Lightning and Eclair.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd",
+          "core-lightning",
+          "eclair"
+        ],
+        "relationship": "requires",
+        "notes": "One of them."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Uses an admin macaroon for LND, so it can move funds: keep its web interface private.",
+    "licence": "MIT",
+    "licenceNotes": "MIT.",
+    "integrationMechanisms": [
+      "Install from source on Node.js and launch next to a connected LND (not implemented)"
+    ],
+    "supportLevels": [
+      "external-launcher",
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Node.js runs on Windows, but RTL is installed from source with npm; BTCortex already shows the same read-only figures itself."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "RTL README (GitHub API)",
+        "url": "https://api.github.com/repos/Ride-The-Lightning/RTL/readme",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "RTL releases (GitHub API)",
+        "url": "https://api.github.com/repos/Ride-The-Lightning/RTL/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "RTL licence",
+        "url": "https://raw.githubusercontent.com/Ride-The-Lightning/RTL/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Running RTL on Windows was not tested."
+    ]
+  },
+  {
+    "id": "thunderhub",
+    "name": "ThunderHub",
+    "category": "lightning-management",
+    "catalogueEligible": true,
+    "website": "https://thunderhub.io/",
+    "repository": "https://github.com/apotdevin/thunderhub",
+    "purpose": "A web interface for managing LND nodes.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.19.1 published on 2026-10-22 (no binary assets); repository pushed on 2026-10-22 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.19.1",
+      "date": "2026-10-22",
+      "source": "https://github.com/apotdevin/thunderhub/releases/tag/v0.19.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "Source only (no release assets); documentation moved to docs.thunderhub.io.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web interface.",
+        "authentication": "Its own accounts; LND access through macaroons.",
+        "documentation": "http://docs.thunderhub.io/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Through its web interface.",
+    "nodeCompatibility": "LND.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "requires",
+        "notes": null
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Holds macaroons that may allow spending.",
+    "licence": "MIT",
+    "licenceNotes": "MIT.",
+    "integrationMechanisms": [
+      "Launch next to a connected LND (not implemented)"
+    ],
+    "supportLevels": [
+      "external-launcher",
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Source-only Node.js application without Windows guidance."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "ThunderHub README",
+        "url": "https://raw.githubusercontent.com/apotdevin/thunderhub/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "ThunderHub releases (GitHub API)",
+        "url": "https://api.github.com/repos/apotdevin/thunderhub/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "ThunderHub licence",
+        "url": "https://raw.githubusercontent.com/apotdevin/thunderhub/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The documentation site was not read."
+    ]
+  },
+  {
+    "id": "lnbits",
+    "name": "LNbits",
+    "category": "lightning-management",
+    "catalogueEligible": true,
+    "website": "https://lnbits.com/",
+    "repository": "https://github.com/lnbits/lnbits",
+    "purpose": "A Python server on top of a Lightning funding source that offers isolated wallets with their own API keys and an extension system.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v1.6.2 published on 2026-09-18; repository pushed on 2026-10-22 (default branch dev) and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.6.2",
+      "date": "2026-09-18",
+      "source": "https://github.com/lnbits/lnbits/releases/tag/v1.6.2"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "The release ships a Linux AppImage only (LNbits-v1.6.2.AppImage).",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web interface and REST API per wallet.",
+        "authentication": "Per-wallet API keys.",
+        "documentation": "https://docs.lnbits.org/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Web interface.",
+    "nodeCompatibility": "Funding sources include LND (REST and gRPC) and others.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "optional",
+        "notes": "One of several funding sources."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Wallets share the funding node’s liquidity; their keys are bearer credentials.",
+    "licence": "MIT",
+    "licenceNotes": "MIT.",
+    "integrationMechanisms": [
+      "Not planned"
+    ],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Linux-oriented distribution; a payment layer rather than node management."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "LNbits README",
+        "url": "https://raw.githubusercontent.com/lnbits/lnbits/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LNbits releases (GitHub API)",
+        "url": "https://api.github.com/repos/lnbits/lnbits/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LNbits licence",
+        "url": "https://raw.githubusercontent.com/lnbits/lnbits/main/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The list of funding sources was not re-read in full."
+    ]
+  },
+  {
+    "id": "lndg",
+    "name": "LNDg",
+    "category": "lightning-management",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/cryptosharks131/lndg",
+    "purpose": "A web interface for analysing LND data and automating node management (rebalancing, fee changes).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v1.11.1 published on 2026-09-27; repository pushed on 2026-09-27 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.11.1",
+      "date": "2026-09-27",
+      "source": "https://github.com/cryptosharks131/lndg/releases/tag/v1.11.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "compose-only",
+      "other": "Docker Compose or a manual Python/Django installation; the example mounts ~/.lnd read-only and talks to gRPC on 127.0.0.1:10009."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web interface (port 8889 in the example).",
+        "authentication": "Its own login.",
+        "documentation": "https://github.com/cryptosharks131/lndg/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Web interface.",
+    "nodeCompatibility": "LND over gRPC.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "requires",
+        "notes": null
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Automates rebalancing and fee changes, so it needs a macaroon that can move funds.",
+    "licence": "MIT",
+    "licenceNotes": "MIT.",
+    "integrationMechanisms": [
+      "Not planned"
+    ],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Moves funds automatically, which BTCortex does not do without a defined policy."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "LNDg README",
+        "url": "https://raw.githubusercontent.com/cryptosharks131/lndg/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LNDg releases (GitHub API)",
+        "url": "https://api.github.com/repos/cryptosharks131/lndg/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "LNDg licence",
+        "url": "https://raw.githubusercontent.com/cryptosharks131/lndg/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "lightning-terminal",
+    "name": "Lightning Terminal (litd)",
+    "category": "lightning-management",
+    "catalogueEligible": true,
+    "website": "https://lightning.engineering/lightning-terminal/",
+    "repository": "https://github.com/lightninglabs/lightning-terminal",
+    "purpose": "Lightning Labs’ bundle of a web interface with Loop, Pool, Faraday and Taproot Assets daemons, run against a remote LND or with LND integrated.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.17.8 published on 2026-10-22; repository pushed on 2026-10-22 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.17.8",
+      "date": "2026-10-22",
+      "source": "https://github.com/lightninglabs/lightning-terminal/releases/tag/v0.17.8"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64"
+      ],
+      "windowsDistribution": "lightning-terminal-windows-amd64-v0.17.8.zip, with manifest-v0.17.8.txt signed by roasbeef (manifest-roasbeef-v0.17.8.sig).",
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Linux and macOS archives."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web interface and gRPC/REST proxy for its daemons.",
+        "authentication": "UI password; macaroons.",
+        "documentation": "https://github.com/lightninglabs/lightning-terminal/blob/master/README.md"
+      }
+    ],
+    "cli": "litcli.",
+    "remoteManagement": "Its web interface; Lightning Node Connect.",
+    "nodeCompatibility": "LND built with all sub-servers (official releases are).",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "requires",
+        "notes": "Remote, or integrated in litd."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Loop and Pool move funds and depend on Lightning Labs’ servers.",
+    "licence": "MIT",
+    "licenceNotes": "MIT.",
+    "integrationMechanisms": [
+      "Verified installation and launch against a connected LND (not implemented)"
+    ],
+    "supportLevels": [
+      "external-launcher",
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Official Windows build with the same release signing as LND; worth adding after LND management."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Lightning Terminal README",
+        "url": "https://raw.githubusercontent.com/lightninglabs/lightning-terminal/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Lightning Terminal releases (GitHub API)",
+        "url": "https://api.github.com/repos/lightninglabs/lightning-terminal/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Lightning Terminal licence",
+        "url": "https://raw.githubusercontent.com/lightninglabs/lightning-terminal/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Its Windows build was not run."
+    ]
+  },
+  {
+    "id": "lightning-loop",
+    "name": "Lightning Loop",
+    "category": "lightning-liquidity",
+    "catalogueEligible": true,
+    "website": "https://lightning.engineering/loop/",
+    "repository": "https://github.com/lightninglabs/loop",
+    "purpose": "Non-custodial submarine swaps between Lightning and on-chain funds (Loop Out, Loop In) for managing channel liquidity, through Lightning Labs’ swap server.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.35.2-beta published on 2026-10-22; repository pushed on 2026-10-22 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.35.2-beta",
+      "date": "2026-10-22",
+      "source": "https://github.com/lightninglabs/loop/releases/tag/v0.35.2-beta"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64"
+      ],
+      "windowsDistribution": "loop-windows-amd64-v0.35.2-beta.zip.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux and macOS archives."
+    },
+    "interfaces": [
+      {
+        "type": "grpc",
+        "description": "loopd gRPC, default port 11010.",
+        "authentication": "Loop’s own macaroons, independent from LND’s.",
+        "documentation": "https://lightning.engineering/loopapi/index.html"
+      },
+      {
+        "type": "rest",
+        "description": "loopd REST, default port 8081.",
+        "authentication": "Loop’s own macaroons.",
+        "documentation": "https://lightning.engineering/loopapi/index.html#loop-rest-api-reference"
+      }
+    ],
+    "cli": "loop.",
+    "remoteManagement": null,
+    "nodeCompatibility": "LND with all sub-servers; loopd connects to localhost:10009 and reads ~/.lnd by default.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "requires",
+        "notes": null
+      }
+    ],
+    "networking": "Connects to Lightning Labs’ swap server.",
+    "storage": null,
+    "resources": null,
+    "security": "Moves funds; swaps cost fees.",
+    "licence": "MIT",
+    "licenceNotes": "MIT.",
+    "integrationMechanisms": [
+      "Not planned until BTCortex has an explicit policy for moving funds"
+    ],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Windows build exists, but it moves funds."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Loop README",
+        "url": "https://raw.githubusercontent.com/lightninglabs/loop/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Loop releases (GitHub API)",
+        "url": "https://api.github.com/repos/lightninglabs/loop/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Loop licence",
+        "url": "https://raw.githubusercontent.com/lightninglabs/loop/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "lightning-pool",
+    "name": "Lightning Pool",
+    "category": "lightning-liquidity",
+    "catalogueEligible": true,
+    "website": "https://lightning.engineering/pool/",
+    "repository": "https://github.com/lightninglabs/pool",
+    "purpose": "A marketplace for leasing channel liquidity through batched auctions run by Lightning Labs.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.7.0-beta published on 2026-05-20 with no binary assets; repository pushed on 2026-10-21 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.7.0-beta",
+      "date": "2026-05-20",
+      "source": "https://github.com/lightninglabs/pool/releases/tag/v0.7.0-beta"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "The latest release has no binary assets.",
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Included in Lightning Terminal."
+    },
+    "interfaces": [],
+    "cli": "pool.",
+    "remoteManagement": null,
+    "nodeCompatibility": "LND 0.19.0-beta or later with all sub-servers.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "requires",
+        "notes": null
+      }
+    ],
+    "networking": "Connects to Lightning Labs’ auctioneer.",
+    "storage": null,
+    "resources": null,
+    "security": "Leases move funds into channels.",
+    "licence": "MIT",
+    "licenceNotes": "MIT.",
+    "integrationMechanisms": [
+      "Not planned"
+    ],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No standalone binaries in the latest release; reached through Lightning Terminal."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Pool README",
+        "url": "https://raw.githubusercontent.com/lightninglabs/pool/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Pool releases (GitHub API)",
+        "url": "https://api.github.com/repos/lightninglabs/pool/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Pool licence",
+        "url": "https://raw.githubusercontent.com/lightninglabs/pool/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "boltz-client",
+    "name": "Boltz Client",
+    "category": "lightning-liquidity",
+    "catalogueEligible": true,
+    "website": "https://boltz.exchange/",
+    "repository": "https://github.com/BoltzExchange/boltz-client",
+    "purpose": "Connects to LND or Core Lightning to rebalance channels automatically or accept on-chain and Liquid payments through Boltz swaps.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v2.12.5 published on 2026-07-15; repository pushed on 2026-10-21 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.12.5",
+      "date": "2026-07-15",
+      "source": "https://github.com/BoltzExchange/boltz-client/releases/tag/v2.12.5"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux amd64 and arm64 archives with a signed manifest."
+    },
+    "interfaces": [],
+    "cli": "boltzcli.",
+    "remoteManagement": null,
+    "nodeCompatibility": "LND or Core Lightning.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd",
+          "core-lightning"
+        ],
+        "relationship": "requires",
+        "notes": "One of them."
+      }
+    ],
+    "networking": "Connects to Boltz’s swap service.",
+    "storage": null,
+    "resources": null,
+    "security": "Automates swaps that move funds.",
+    "licence": "MIT",
+    "licenceNotes": "MIT.",
+    "integrationMechanisms": [
+      "Not planned"
+    ],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No Windows build, and it moves funds automatically."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Boltz Client README",
+        "url": "https://raw.githubusercontent.com/BoltzExchange/boltz-client/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Boltz Client releases (GitHub API)",
+        "url": "https://api.github.com/repos/BoltzExchange/boltz-client/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Boltz Client licence",
+        "url": "https://raw.githubusercontent.com/BoltzExchange/boltz-client/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "alby-hub",
+    "name": "Alby Hub",
+    "category": "lightning-management",
+    "catalogueEligible": true,
+    "website": "https://albyhub.com/",
+    "repository": "https://github.com/getAlby/hub",
+    "purpose": "A self-custodial Lightning wallet and node manager with Nostr Wallet Connect for apps; it runs its own LDK-based node or connects to an existing node such as LND.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v1.24.4 published on 2026-10-22; repository pushed on 2026-10-22 and not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.24.4",
+      "date": "2026-10-22",
+      "source": "https://github.com/getAlby/hub/releases/tag/v1.24.4"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64"
+      ],
+      "windowsDistribution": "Desktop (Wails) application albyhub-Desktop-Windows.zip; manifest.txt with signatures (manifest.txt.asc, manifest-rolznz.txt.asc).",
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Desktop builds for macOS (arm64) and Linux (amd64); server builds for Linux and macOS; Docker."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web interface in HTTP mode (PORT, default 8080); Nostr Wallet Connect for apps.",
+        "authentication": "Unlock password; NWC connection secrets.",
+        "documentation": "https://github.com/getAlby/hub/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Through Alby’s services or its web interface.",
+    "nodeCompatibility": "Its own LDK node, or LND and other backends.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "optional",
+        "notes": "As an alternative to its built-in LDK node."
+      }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Holds keys for its own node; NWC secrets grant spending to apps within budgets.",
+    "licence": "Apache-2.0",
+    "licenceNotes": "Apache License 2.0.",
+    "integrationMechanisms": [
+      "Launch the verified desktop application (not implemented)"
+    ],
+    "supportLevels": [
+      "external-launcher",
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Windows desktop build exists; it is a wallet with its own node rather than a tool for the user’s LND."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Alby Hub README",
+        "url": "https://raw.githubusercontent.com/getAlby/hub/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Alby Hub releases (GitHub API)",
+        "url": "https://api.github.com/repos/getAlby/hub/releases?per_page=5",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Alby Hub licence",
+        "url": "https://raw.githubusercontent.com/getAlby/hub/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The signature scheme of its manifest was not checked."
+    ]
+  },
+  {
+    "id": "ldk",
+    "name": "LDK (Lightning Dev Kit)",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": "https://lightningdevkit.org/",
+    "repository": "https://git.rust-bitcoin.org/lightningdevkit/rust-lightning",
+    "purpose": "Lightning implementation packaged as an SDK: a Rust library (the lightning crate) that handles the protocol while the application supplies its own wallet, chain source, storage and networking. LDK Node builds a ready-made node on it.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The lightning crate 0.2.7 was published on crates.io on 2026-10-02.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.2.7",
+      "date": "2026-10-02",
+      "source": "https://crates.io/crates/lightning/0.2.7"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Rust crate lightning on crates.io; the website describes a multi-language native API."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "Rust API of the lightning crate and its companion crates.",
+        "authentication": null,
+        "documentation": "https://lightningdevkit.org/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Not a node to connect to: applications embed it. ZEUS 13.2.3 ships LDK Node built with rust-lightning 0.2.7 for its security fixes.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Applications that embed it hold the keys themselves; 0.2.7 carries security fixes, according to ZEUS 13.2.3’s release notes.",
+    "licence": "MIT OR Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A library for building Lightning applications; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "The crate’s repository field points to git.rust-bitcoin.org; the GitHub repository lightningdevkit/rust-lightning lists no releases. LDK Node is recorded as ldk-node.",
+    "sources": [
+      {
+        "title": "lightning crate on crates.io",
+        "url": "https://crates.io/crates/lightning",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Lightning Dev Kit",
+        "url": "https://lightningdevkit.org/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "ZEUS v13.2.3 release notes",
+        "url": "https://github.com/ZeusLN/zeus/releases/tag/v13.2.3",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Why the GitHub repository lists no releases was not examined."
+    ]
+  },
+  {
+    "id": "faraday",
+    "name": "Faraday",
+    "category": "lightning-management",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/lightninglabs/faraday",
+    "purpose": "Lightning Labs’ suite of tools to help node operators and businesses run LND, with reports such as a node audit and channel close reports over its own gRPC interface.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The latest release with binaries is v0.2.14-alpha (2025-01-21); newer tags up to v0.2.19-alpha (2026-09-03) have no release of their own, and Faraday also ships inside Lightning Terminal (0.17.8 on 2026-10-22).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.2.14-alpha",
+      "date": "2025-01-21",
+      "source": "https://github.com/lightninglabs/faraday/releases/tag/v0.2.14-alpha"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64",
+        "x86"
+      ],
+      "windowsDistribution": "ZIP archives faraday-windows-amd64-v0.2.14-alpha.zip and faraday-windows-386-v0.2.14-alpha.zip, listed in manifest-v0.2.14-alpha.txt with its signature",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS and BSD archives in the same release; also part of Lightning Terminal."
+    },
+    "interfaces": [
+      {
+        "type": "grpc",
+        "description": "gRPC on localhost:8465 by default, protected by Faraday’s own macaroons, which are separate from LND’s.",
+        "authentication": "Faraday’s macaroons for its clients; towards LND, LND’s admin macaroon or a custom scoped one with LND’s TLS certificate.",
+        "documentation": "https://github.com/lightninglabs/faraday/blob/master/README.md"
+      },
+      {
+        "type": "cli",
+        "description": "frcli, the command-line client of its RPC server.",
+        "authentication": "Faraday’s macaroons.",
+        "documentation": "https://github.com/lightninglabs/faraday/blob/master/README.md"
+      }
+    ],
+    "cli": "faraday and frcli.",
+    "remoteManagement": "Its gRPC interface.",
+    "nodeCompatibility": "LND v0.11.1 or later built with all of its sub-servers. The CloseReport endpoint needs a connection to a Bitcoin node with txindex, NodeAudit strongly recommends one, and without it the fees of channel closes and sweeps are missing.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "requires",
+        "notes": "v0.11.1 or later, built with all sub-servers."
+      },
+      {
+        "ids": [
+          "bitcoin-core",
+          "bitcoin-knots"
+        ],
+        "relationship": "optional",
+        "notes": "With txindex, for close reports and the fees of closes and sweeps."
+      }
+    ],
+    "networking": "gRPC on localhost:8465.",
+    "storage": null,
+    "resources": null,
+    "security": "It reaches LND with LND’s admin macaroon or a custom scoped one, so it can do whatever that macaroon allows; its own macaroons protect its interface.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only",
+      "connected-application"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Its reports need LND’s admin macaroon or a custom one, while BTCortex reads LND with read-only access and has its own channel and routing views."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Lightning Terminal (recorded as lightning-terminal) bundles Faraday with Loop, Pool and Taproot Assets.",
+    "sources": [
+      {
+        "title": "Faraday README",
+        "url": "https://github.com/lightninglabs/faraday/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Faraday releases",
+        "url": "https://github.com/lightninglabs/faraday/releases",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Release 0.2.14-alpha",
+        "url": "https://github.com/lightninglabs/faraday/releases/tag/v0.2.14-alpha",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Running the Windows archive was not tried."
+    ]
+  },
+  {
+    "id": "boltz",
+    "name": "Boltz",
+    "category": "lightning-liquidity",
+    "catalogueEligible": false,
+    "website": "https://boltz.exchange/",
+    "repository": "https://github.com/BoltzExchange/boltz-backend",
+    "purpose": "Non-custodial swap service between Bitcoin layers (for example on chain and Lightning), whose backend is open source; Boltz Client automates swaps against it.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "boltz-backend v3.13.0 published on 2026-05-08; the repository was pushed on 2026-10-21.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.13.0",
+      "date": "2026-05-08",
+      "source": "https://github.com/BoltzExchange/boltz-backend/releases/tag/v3.13.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "A hosted service; its backend can be run by others."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "The Boltz API.",
+        "authentication": null,
+        "documentation": "https://docs.boltz.exchange/v/api"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Swaps settle on the Lightning node and wallet of the user’s client (for example Boltz Client with LND or Core Lightning).",
+    "dependencies": [],
+    "networking": "Reached over HTTPS.",
+    "storage": null,
+    "resources": null,
+    "security": "Swaps are non-custodial, but they move funds through a third-party service, which learns the amounts and both sides of each swap.",
+    "licence": "AGPL-3.0",
+    "licenceNotes": "The licence covers the backend; the service itself is operated by Boltz.",
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Swaps move funds through a service, which BTCortex does not do without an explicit, user-defined policy."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Boltz Client is recorded as boltz-client.",
+    "sources": [
+      {
+        "title": "boltz-backend README",
+        "url": "https://github.com/BoltzExchange/boltz-backend/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "boltz-backend LICENSE",
+        "url": "https://github.com/BoltzExchange/boltz-backend/blob/master/LICENSE",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "boltz-backend v3.13.0",
+        "url": "https://github.com/BoltzExchange/boltz-backend/releases/tag/v3.13.0",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "boltz.exchange, docs.boltz.exchange and api.boltz.exchange could not be resolved from this network on 2026-10-23, so the API documentation and the service’s fees and limits were not read."
+    ]
+  },
+  {
+    "id": "peerswap",
+    "name": "PeerSwap",
+    "category": "lightning-liquidity",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/ElementsProject/peerswap",
+    "purpose": "Balances Lightning channels with atomic swaps between direct peers, on chain in bitcoin or in Liquid L-BTC, as a Core Lightning plugin or as a stand-alone daemon and CLI next to LND.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v7.0.2 published on 2026-10-15 (security fixes); v7.0.0 on 2026-08-19.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "7.0.2",
+      "date": "2026-10-15",
+      "source": "https://github.com/ElementsProject/peerswap/releases/tag/v7.0.2"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Built from source (the release has no binaries); no official containers, for reasons the README gives, with community examples instead."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "Commands of the Core Lightning plugin, or the CLI of the stand-alone daemon with LND.",
+        "authentication": null,
+        "documentation": "https://github.com/ElementsProject/peerswap/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Core Lightning (as a plugin) or LND (stand-alone daemon, in the same container as LND when containerised). L-BTC swaps need an Elements or LWK back end that follows the post-ELIP 203 chain tip.",
+    "dependencies": [
+      {
+        "ids": [
+          "core-lightning",
+          "lnd"
+        ],
+        "relationship": "requires",
+        "notes": "A plugin for Core Lightning, or a daemon beside LND."
+      },
+      {
+        "ids": [
+          "elements"
+        ],
+        "relationship": "optional",
+        "notes": "For L-BTC swaps (LWK is the alternative)."
+      }
+    ],
+    "networking": "Swaps are negotiated with the channel peer over the Lightning connection.",
+    "storage": null,
+    "resources": null,
+    "security": "Beta-grade software: the README recommends it only with small balances or on signet and testnet. v7.0.2 fixes security issues in claim-payment deadlines and cooperative refunds. v7.0.1 turned off new L-BTC swap requests in both directions after a Liquid incident; recovery of existing swaps stays enabled but is not guaranteed.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Beta software that moves funds, without Windows builds; BTCortex does not run swaps."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "PeerSwap README",
+        "url": "https://github.com/ElementsProject/peerswap/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "PeerSwap v7.0.2",
+        "url": "https://github.com/ElementsProject/peerswap/releases/tag/v7.0.2",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "PeerSwap releases feed",
+        "url": "https://github.com/ElementsProject/peerswap/releases.atom",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "PeerSwap LICENSE",
+        "url": "https://github.com/ElementsProject/peerswap/blob/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Supported operating systems are not stated; building on Windows was not tried."
+    ]
+  },
+  {
+    "id": "balance-of-satoshis",
+    "name": "Balance of Satoshis",
+    "category": "lightning-management",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/alexbosworth/balanceofsatoshis",
+    "purpose": "Command-line tool (bos) for working with LND: accounting, rebalancing, fees, channel opening, forwarding reports, payments and a Telegram bot.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v25.3.1 tagged and published to npm on 2026-10-17, after several releases that week.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "25.3.1",
+      "date": "2026-10-17",
+      "source": "https://www.npmjs.com/package/balanceofsatoshis/v/25.3.1"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "npm package balanceofsatoshis (Node.js 22 or later according to its engines field; the README says Node 20+); Docker image alexbosworth/balanceofsatoshis."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "bos and its commands (accounting, rebalance, fees, open and others).",
+        "authentication": "LND’s TLS certificate and, by default, its admin macaroon; remote nodes in a credentials file with the certificate, the macaroon and host:port.",
+        "documentation": "https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md"
+      }
+    ],
+    "cli": "bos.",
+    "remoteManagement": "Remote LND nodes through a credentials file.",
+    "nodeCompatibility": "LND v0.20.0-beta to v0.20.5-beta and v0.21.0-beta to v0.21.4-beta, according to the README.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "requires",
+        "notes": "v0.20 or v0.21."
+      }
+    ],
+    "networking": "Connects to LND’s RPC; the Telegram bot talks to Telegram.",
+    "storage": null,
+    "resources": null,
+    "security": "Uses LND’s admin macaroon by default, so it can open channels and pay; a credentials file holds the macaroon of each remote node.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "An admin tool that moves funds through LND; BTCortex reads LND read-only and does not run it."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "balanceofsatoshis README",
+        "url": "https://github.com/alexbosworth/balanceofsatoshis/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "balanceofsatoshis 25.3.1 on npm",
+        "url": "https://registry.npmjs.org/balanceofsatoshis/25.3.1",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "balanceofsatoshis tags",
+        "url": "https://github.com/alexbosworth/balanceofsatoshis/tags",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Installing it on Windows was not tried; its dependencies include packages with install scripts (ssh2, protobufjs, cpu-features)."
+    ]
+  },
+  {
+    "id": "teos",
+    "name": "The Eye of Satoshi (teos)",
+    "category": "lightning-infrastructure",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/talaia-labs/rust-teos",
+    "purpose": "Lightning watchtower compliant with BOLT 13, which watches the chain for breaches of its users’ channels; its client is a Core Lightning plugin (watchtower-client).",
+    "maintenance": {
+      "status": "stale",
+      "evidence": "The latest release is v0.2.0 from 2023-02-07; the repository was last pushed on 2025-10-09.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.2.0",
+      "date": "2023-02-07",
+      "source": "https://github.com/talaia-labs/rust-teos/releases/tag/v0.2.0"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Built from source; the release has no binaries."
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "The tower’s API for its clients (defaults in teos/src/config.rs), optionally as an onion service with --torsupport.",
+        "authentication": null,
+        "documentation": "https://github.com/talaia-labs/rust-teos/blob/master/README.md"
+      }
+    ],
+    "cli": "teosd (the tower); --torsupport needs a Tor daemon on the same machine with its control port open.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Clients: the watchtower-client plugin for Core Lightning; the README names no LND client.",
+    "dependencies": [
+      {
+        "ids": [
+          "core-lightning"
+        ],
+        "relationship": "optional",
+        "notes": "Its client plugin."
+      },
+      {
+        "ids": [
+          "tor"
+        ],
+        "relationship": "optional",
+        "notes": "For --torsupport."
+      }
+    ],
+    "networking": "Not stated in the README.",
+    "storage": null,
+    "resources": null,
+    "security": "No release since 2023. A tower that fails to react cannot stop a peer from publishing an old channel state, so an unmaintained tower is a weak safeguard; with --torsupport it needs the control port of a local Tor daemon.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No release since 2023 and no Windows builds; LND has a watchtower of its own."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "rust-teos README",
+        "url": "https://github.com/talaia-labs/rust-teos/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "rust-teos v0.2.0",
+        "url": "https://github.com/talaia-labs/rust-teos/releases/tag/v0.2.0",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "rust-teos LICENSE",
+        "url": "https://github.com/talaia-labs/rust-teos/blob/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "Default ports, its node requirements and supported operating systems were not examined."
+    ]
+  },
+  {
+    "id": "breez-sdk",
+    "name": "Breez SDK",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": "https://sdk-doc-spark.breez.technology/",
+    "repository": "https://github.com/breez/spark-sdk",
+    "purpose": "Library for adding non-custodial bitcoin and stablecoin payments to applications without running a node, over Lightning and Spark with on-chain interoperability, with bindings for Kotlin, Swift, JavaScript, React Native, Flutter, Go, Python, C# and WebAssembly.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Breez SDK Spark 0.27.2 published on 2026-10-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.27.2",
+      "date": "2026-10-23",
+      "source": "https://github.com/breez/spark-sdk/releases/tag/0.27.2"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Bindings for application developers."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "SDK API in its supported languages.",
+        "authentication": "A Breez API key, free, requested from Breez.",
+        "documentation": "https://sdk-doc-spark.breez.technology/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Nodeless: it does not use the user’s node.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Non-custodial: its documentation says users can always withdraw to the Bitcoin blockchain without the Spark operators (unilateral exit). Applications need an API key from Breez.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "An SDK for building payment applications; nothing for BTCortex to install or connect to."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "sdk-doc.breez.technology now redirects to the Spark SDK’s documentation; the earlier Greenlight-based and Liquid-based variants were not examined.",
+    "sources": [
+      {
+        "title": "Breez SDK documentation",
+        "url": "https://sdk-doc-spark.breez.technology/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "spark-sdk README",
+        "url": "https://github.com/breez/spark-sdk/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "spark-sdk LICENSE",
+        "url": "https://github.com/breez/spark-sdk/blob/main/LICENSE",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Breez SDK Spark 0.27.2",
+        "url": "https://github.com/breez/spark-sdk/releases/tag/0.27.2",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "How the earlier Breez SDK variants relate to the Spark SDK (superseded or still maintained) was not checked."
+    ]
+  },
+  {
+    "id": "greenlight",
+    "name": "Greenlight",
+    "category": "lightning-infrastructure",
+    "catalogueEligible": false,
+    "website": "https://blockstream.github.io/greenlight/",
+    "repository": "https://github.com/Blockstream/greenlight",
+    "purpose": "Blockstream’s service of hosted, non-custodial Lightning nodes (Core Lightning, “the c-lightning instance” in its README) for developers and their users, controlled over gRPC while the seed stays on the user’s device.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "The repository (client libraries and tools) was pushed on 2026-10-21.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "A hosted service with client libraries; gl-cli on crates.io."
+    },
+    "interfaces": [
+      {
+        "type": "grpc",
+        "description": "The scheduler and each node are reached over gRPC with mutual TLS.",
+        "authentication": "A developer certificate (client.crt and client-key.pem, downloaded from the Greenlight Developer Console) authenticates the application to the scheduler and allows registering nodes.",
+        "documentation": "https://blockstream.github.io/greenlight/getting-started/certs/"
+      }
+    ],
+    "cli": "gl-cli (crates.io).",
+    "remoteManagement": null,
+    "nodeCompatibility": "Hosted nodes; not the user’s own node.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "The seed must be kept on the user’s device and never on an application server; the node itself runs on Blockstream’s infrastructure.",
+    "licence": "MIT",
+    "licenceNotes": "The licence covers the repository (client libraries and tools); the service is operated by Blockstream.",
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "A developer service for embedding hosted nodes in applications; nothing for a Windows user to install, and a hosted node is not the user’s own."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "Greenlight documentation",
+        "url": "https://blockstream.github.io/greenlight/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Developer certificates",
+        "url": "https://blockstream.github.io/greenlight/getting-started/certs/",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Greenlight README",
+        "url": "https://github.com/Blockstream/greenlight/blob/main/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "Greenlight LICENSE",
+        "url": "https://github.com/Blockstream/greenlight/blob/main/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "How client devices authenticate to their own nodes was not examined."
+    ]
+  },
+  {
+    "id": "zeus",
+    "name": "ZEUS",
+    "category": "mobile-wallet",
+    "catalogueEligible": true,
+    "website": "https://zeusln.com/",
+    "repository": "https://github.com/ZeusLN/zeus",
+    "purpose": "Mobile Bitcoin and Lightning wallet and remote node manager for LND and Core Lightning on Android and iOS, which can also run an embedded node (LND or LDK Node).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v13.2.3 published on 2026-10-12, with a signed manifest.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "13.2.3",
+      "date": "2026-10-12",
+      "source": "https://github.com/ZeusLN/zeus/releases/tag/v13.2.3"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Android (zeus-v13.2.3-arm64-v8a.apk, zeus-v13.2.3-universal.apk) and iOS (zeus-v13.2.3.ipa), with manifest-v13.2.3.txt and its signature."
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Connects to a remote LND or Core Lightning node, LNDHub instances and Lightning Node Connect, optionally over Tor; Nostr Wallet Connect as a service and as a client.",
+        "authentication": "The node’s own credentials (for example an LND macaroon).",
+        "documentation": "https://github.com/ZeusLN/zeus/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "It is itself a remote manager for LND and Core Lightning nodes.",
+    "nodeCompatibility": "Remote LND and Core Lightning; 13.2.3 embeds LND 0.21.4 and LDK Node 0.7.0 with rust-lightning 0.2.7.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd",
+          "core-lightning"
+        ],
+        "relationship": "optional",
+        "notes": "For remote-node mode; it can also run an embedded node."
+      },
+      {
+        "ids": [
+          "tor"
+        ],
+        "relationship": "optional",
+        "notes": "To connect over Tor."
+      }
+    ],
+    "networking": "Outbound connections from the phone to the node, directly, over Tor or through Lightning Node Connect.",
+    "storage": null,
+    "resources": null,
+    "security": "A remote connection gives the phone the node’s credentials, so a limited macaroon limits what a lost phone can do. 13.2.3 adds further security hardening and rust-lightning 0.2.7’s security fixes.",
+    "licence": "AGPL-3.0",
+    "licenceNotes": "The commercial fonts in assets/fonts and android/app/src/main/assets/fonts are not covered by the AGPL.",
+    "integrationMechanisms": [
+      "Show the user’s LND connection details as an lndconnect address or QR code for ZEUS to scan (not built)"
+    ],
+    "supportLevels": [
+      "research-only",
+      "connected-application"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "BTCortex could hand ZEUS a connection to the user’s LND (a QR code with a limited macaroon, reachable over Tor), but it does not export LND credentials yet."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "ZEUS README",
+        "url": "https://github.com/ZeusLN/zeus/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "ZEUS v13.2.3",
+        "url": "https://github.com/ZeusLN/zeus/releases/tag/v13.2.3",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "ZEUS LICENSE",
+        "url": "https://github.com/ZeusLN/zeus/blob/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The signing key of the release manifest was not identified."
+    ]
+  },
+  {
+    "id": "chantools",
+    "name": "chantools",
+    "category": "backup-tool",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/lightninglabs/chantools",
+    "purpose": "Rescue tool for funds locked in LND channels when LND itself cannot run properly, for example zombie channels or channels force-closed by the peer; some commands also support Core Lightning.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.14.3 published on 2026-09-29; v0.14.2 on 2026-03-04.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.14.3",
+      "date": "2026-09-29",
+      "source": "https://github.com/lightninglabs/chantools/releases/tag/v0.14.3"
+    },
+    "verifiedOn": "2026-10-23",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [
+        "x64"
+      ],
+      "windowsDistribution": "ZIP archive chantools-windows-amd64-v0.14.3.zip, with manifest-v0.14.3.txt and its signature",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux (386, amd64, arm64, armv6, armv7) and macOS (amd64, arm64) archives."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "Commands such as summary, rescueclosed, sweepremoteclosed, zombierecovery, triggerforceclose, sweeptimelock, forceclose and compactdb.",
+        "authentication": "Many commands need the wallet seed, typed in the terminal, or a root key or environment variable.",
+        "documentation": "https://github.com/lightninglabs/chantools/blob/master/README.md"
+      }
+    ],
+    "cli": "chantools; --apiurl points the commands that query a block explorer at the user’s own.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Works on LND’s channel.db and seed; summary, compactdb and dumpchannels need no seed; zombierecovery also works with Core Lightning.",
+    "dependencies": [
+      {
+        "ids": [
+          "lnd"
+        ],
+        "relationship": "requires",
+        "notes": "Its data (channel.db) and, for many commands, its seed."
+      }
+    ],
+    "networking": "Some commands query public block explorer APIs unless --apiurl is given.",
+    "storage": null,
+    "resources": null,
+    "security": "Many commands need the wallet seed; the README says it never leaves the computer and that typing it in the terminal is the safest way. Some commands query public block explorers, which costs privacy. forceclose publishes an old channel state and is only for peers that are gone for good. The README warns that it was built for particular rescue operations and should be reviewed before serious use.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": [
+      "research-only"
+    ],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "none",
+      "notes": "Its rescue commands need the wallet seed, and BTCortex never asks for or handles seeds; its documentation can point users to chantools for rescues outside BTCortex."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      {
+        "title": "chantools README",
+        "url": "https://github.com/lightninglabs/chantools/blob/master/README.md",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "chantools v0.14.3",
+        "url": "https://github.com/lightninglabs/chantools/releases/tag/v0.14.3",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "chantools LICENSE",
+        "url": "https://github.com/lightninglabs/chantools/blob/master/LICENSE",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": [
+      "The signing key of the release manifest was not identified."
+    ]
+  }
+]

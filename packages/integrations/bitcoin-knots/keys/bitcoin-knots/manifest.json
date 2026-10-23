@@ -1,0 +1,252 @@
+{
+  "source": "https://github.com/bitcoinknots/guix.sigs/tree/b5a8daaab328ba1d6e2d4af1613d4b42e0878481/builder-keys",
+  "commit": "b5a8daaab328ba1d6e2d4af1613d4b42e0878481",
+  "retrievedOn": "2026-10-23",
+  "keys": [
+    {
+      "builder": "0xb10c",
+      "primaries": [
+        {
+          "fingerprint": "982A193E3CE0EED535E09023188CBB2648416AD5",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [".0xB10C <0xb10c@gmail.com>", ".0xB10C <b10c@b10c.me>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "achow101",
+      "primaries": [
+        {
+          "fingerprint": "152812300785C96444D3334D17565732E08E5E41",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Andrew Chow <andrew@achow101.com>",
+            "Andrew Chow (Official New Key) <achow101@gmail.com>",
+            "Andrew Chow <achow101@yahoo.com>",
+            "Andrew Chow <achow101-lists@achow101.com>",
+            "Andrew Chow <achow101-github@achow101.com>",
+            "Andrew Chow <achow101@protonmail.com>",
+            "Andrew Chow <achow101@pm.me>",
+            "Andrew Chow <github@achow101.com>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "ataraxia",
+      "primaries": [
+        {
+          "fingerprint": "C1BCB7169AF1A07A0C5E471A047509FA0A6D7350",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["ataraxia009 <ataraxia.009.work@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "bigshiny90",
+      "primaries": [
+        {
+          "fingerprint": "2DEA254A2055EFD1DA82BB2315D2B66859703841",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["bigshiny90 <bigshiny90@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "bitcoinmechanic",
+      "primaries": [
+        {
+          "fingerprint": "95636F3538D9262765AB29BEE952E584CA8C0F45",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["bitcoinmechanic <bitcoinmechanic@ocean.xyz>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "chrisguida",
+      "primaries": [
+        {
+          "fingerprint": "658E64021E5793C6C4E15E45C2E581F5B998F30E",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["Chris Guida <chrisguida@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "Emzy",
+      "primaries": [
+        {
+          "fingerprint": "9EDAFF80E080659604F4A76B2EBB056FD847F8A7",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Stephan Oeste (it) <it@oeste.de>",
+            "Stephan Oeste (Master-key) <stephan@oeste.de>",
+            "Emzy E. (emzy) <emzy@emzy.de>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "greg-tonoski",
+      "primaries": [
+        {
+          "fingerprint": "714D731C6FA78DD1EB39C61667058F335E9FDCE4",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Greg Tonoski <greg.tonoski@gmail.com>", "greg-tonoski <greg.tonoski@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "guggero",
+      "primaries": [
+        {
+          "fingerprint": "F4FC70F07310028424EFC20A8E4256593F177720",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Oliver Gugger <gugger@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "hebasto",
+      "primaries": [
+        {
+          "fingerprint": "D1DBF2C4B96F2DEBF4C16654410108112E7EA81F",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Hennadii Stepanov (hebasto) <hebasto@gmail.com>",
+            "Hennadii Stepanov (GitHub key) <32963518+hebasto@users.noreply.github.com>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "innerhat-dev",
+      "primaries": [
+        {
+          "fingerprint": "314B8D611A0C0468498C35C52018C90B857A0571",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["innerhat-dev <justin.filip@outlook.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "kwsantiago",
+      "primaries": [
+        {
+          "fingerprint": "A47D99B6DB0D715D40C59A2023AE8A8EA7E24E38",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Kyle <kwsantiago@mail.usf.edu>", "Kyle Santiago <kyle@privkey.io>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "laanwj",
+      "primaries": [
+        {
+          "fingerprint": "71A3B16735405025D447E8F274810B012346C9A6",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Wladimir J. van der Laan <laanwj@gmail.com>",
+            "Wladimir J. van der Laan <laanwj@visucore.com>",
+            "Wladimir J. van der Laan <laanwj@protonmail.com>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "leo-haf",
+      "primaries": [
+        {
+          "fingerprint": "DAED928C727D3E613EC46635F5073C4F4882FFFC",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Léo Haf <leo@haf.ovh>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "luke-jr",
+      "primaries": [
+        {
+          "fingerprint": "1A3E761F19D2CC7785C5502EA291A2C45D0C504A",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["Luke Dashjr (Codesigning) <luke-jr+git@utopios.org>"]
+        },
+        {
+          "fingerprint": "93CB4961F69A65082D4410802CBA8253089655C3",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["Luke Dashjr <luke@dashjr.org>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "mhr6091",
+      "primaries": [
+        {
+          "fingerprint": "1D5889CB9E0564C154E18BB512EC9519DB43CC27",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Mark H Russell <mhr6091@tutamail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "nsvrn",
+      "primaries": [
+        {
+          "fingerprint": "55058E8947E136A64F9E8AD5C4512A878E4AC2BF",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["nsvrn (nsvrn main) <nsvrn@pm.me>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "oomahq",
+      "primaries": [
+        {
+          "fingerprint": "32FE1E61B1C711186CA378DEFD8981F1BC41ABB9",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Marcel Hernandez (1MA) <e6990620@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "shiny",
+      "primaries": [
+        {
+          "fingerprint": "1D70CBE4B42239445617D33DD316C8140185B647",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["shiny (Bitcoin Knots attestations) <bigshiny90@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "Sjors",
+      "primaries": [
+        {
+          "fingerprint": "ED9BDF7AD6A55E232E84524257FF9BDBCC301009",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Sjors Provoost <sjors@sprovoost.nl>", "Sjors Provoost <sjors@freedom.nl>"]
+        }
+      ],
+      "note": null
+    }
+  ]
+}

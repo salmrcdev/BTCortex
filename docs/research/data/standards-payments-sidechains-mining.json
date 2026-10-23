@@ -1,0 +1,23 @@
+[
+  {
+    "id": "nip-47",
+    "kind": "NIP",
+    "number": "47",
+    "title": "Nostr Wallet Connect (NWC)",
+    "status": "draft, optional",
+    "summary": "Lets an application use a Lightning wallet through Nostr relays: a nostr+walletconnect:// connection string, an info event (kind 13194), requests (kind 23194) and responses (kind 23195) encrypted with NIP-44 (NIP-04 only for backward compatibility), and methods such as pay_invoice, make_invoice, lookup_invoice, get_balance and get_info; further methods are defined in extension specifications.",
+    "relevance": "How wallet services such as Alby Hub are reached by applications; BTCortex does not offer NWC today.",
+    "implementedIn": [
+      "alby-hub",
+      "alby-js-sdk",
+      "zeus"
+    ],
+    "sources": [
+      {
+        "title": "NIP-47",
+        "url": "https://github.com/nostr-protocol/nips/blob/master/47.md",
+        "accessed": "2026-10-23"
+      }
+    ]
+  }
+]

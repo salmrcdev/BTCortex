@@ -1,0 +1,1372 @@
+[
+  {
+    "id": "bip-0174",
+    "kind": "BIP",
+    "number": "174",
+    "title": "Partially Signed Bitcoin Transaction Format",
+    "status": "Deployed",
+    "summary": "Defines the PSBT container: the magic bytes 0x70 0x73 0x62 0x74 0xFF, then a global map, one map per input and one per output, each a list of typed key-value pairs. It defines the roles that operate on it (Creator, Updater, Signer, Combiner, Input Finalizer, Transaction Extractor). Version 0 carries the unsigned transaction in PSBT_GLOBAL_UNSIGNED_TX and must omit PSBT_GLOBAL_VERSION or set it to 0. The document is at version 1.4.4. PSBTs travel as binary .psbt files or as Base64 text.",
+    "relevance": "The exchange format for every signing workflow BTCortex coordinates (spec sections 8.1, 9 and 14). BTCortex uses it to create PSBTs through Bitcoin Core (walletcreatefundedpsbt), to parse, validate and analyse them (decodepsbt, analyzepsbt), to combine them (combinepsbt), to finalise and extract them, and to move them by file, microSD, QR code or HWI. PSBTs are untrusted input. Analysis stays separate from signing, and broadcasting is always an explicit user action.",
+    "implementedIn": [
+      "bitcoin-core >= 0.17.0 (PSBT RPCs; 31.1 creates and parses version 0 only)",
+      "hwi (hwilib/psbt.py parses and serialises PSBTv0 and PSBTv2)",
+      "sparrow",
+      "electrum (version 0 only: 'Only PSBTs with version 0 are supported')",
+      "coldcard",
+      "jade (native PSBT signing, used by hwi >= 3.2.0)",
+      "seedsigner (PSBT review and signing over QR)",
+      "krux (offline signing via QR code or SD card)",
+      "specter-desktop",
+      "liana",
+      "nunchuk",
+      "bitcoin-safe",
+      "wasabi-wallet (PSBT workflow for Coldcard microSD)",
+      "caravan",
+      "trezor (signing over USB from a host-built PSBT)",
+      "ledger",
+      "bitbox02",
+      "keepkey",
+      "passport",
+      "keystone",
+      "specter-diy (base64 PSBT QR; signed result stripped to signatures)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 174",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/psbt.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/psbt.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/psbt.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/psbt.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI 3.2.0 release",
+        "url": "https://github.com/bitcoin-core/HWI/releases/tag/3.2.0",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Electrum electrum/transaction.py (master)",
+        "url": "https://github.com/spesmilo/electrum/blob/master/electrum/transaction.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "SeedSigner README",
+        "url": "https://github.com/SeedSigner/seedsigner/blob/dev/README.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Krux README",
+        "url": "https://github.com/selfcustody/krux/blob/main/README.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0370",
+    "kind": "BIP",
+    "number": "370",
+    "title": "PSBT Version 2",
+    "status": "Deployed",
+    "summary": "PSBTv2 drops PSBT_GLOBAL_UNSIGNED_TX (it must be excluded) and stores the transaction as separate fields. Global fields: PSBT_GLOBAL_TX_VERSION, PSBT_GLOBAL_FALLBACK_LOCKTIME, PSBT_GLOBAL_INPUT_COUNT, PSBT_GLOBAL_OUTPUT_COUNT and PSBT_GLOBAL_TX_MODIFIABLE. Input fields: PSBT_IN_PREVIOUS_TXID, PSBT_IN_OUTPUT_INDEX, PSBT_IN_SEQUENCE, PSBT_IN_REQUIRED_TIME_LOCKTIME and PSBT_IN_REQUIRED_HEIGHT_LOCKTIME. Output fields: PSBT_OUT_AMOUNT and PSBT_OUT_SCRIPT. A new Constructor role may add inputs and outputs after creation, as permitted by the modifiable flags. PSBT_GLOBAL_VERSION is 2, and the transaction version must be at least 2 when others may add inputs or outputs.",
+    "relevance": "An interoperability hazard for BTCortex's PSBT tools and wallet wizard. The draft release notes of Bitcoin Core 32.0 (release candidate on 2026-10-21) say that createpsbt, walletcreatefundedpsbt, converttopsbt and psbtbumpfee will default to version 2, with a new psbt_version argument. Electrum rejects every version above 0. BTCortex must detect the version and convert only where it is lossless. It should pass psbt_version=0 to Core 32+ when the destination only accepts version 0, and show the version in PSBT inspection.",
+    "implementedIn": [
+      "bitcoin-core >= 32.0 (release candidate; PR #21283 merged 2026-05-05; not in 31.1)",
+      "hwi (parses, serialises and converts between versions 0 and 2)",
+      "sparrow >= 2.4.0 (PSBTv2 is the default internal representation)",
+      "coldcard (Mk4 firmware >= 5.2.0; Q firmware 1.x)",
+      "ledger (Bitcoin app: SIGN_PSBT takes a PSBTv2; host libraries convert)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 370",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core PR #21283: Implement BIP 370 PSBTv2",
+        "url": "https://github.com/bitcoin/bitcoin/pull/21283",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core 32.0 release notes draft",
+        "url": "https://github.com/bitcoin-core/bitcoin-devwiki/wiki/32.0-Release-Notes-Draft",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core 32.0 download directory (test.rc2 to test.rc4 only)",
+        "url": "https://bitcoincore.org/bin/bitcoin-core-32.0/",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/psbt.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/psbt.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/psbt.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/psbt.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Sparrow release notes feed (2.4.0)",
+        "url": "https://github.com/sparrowwallet/sparrow/releases.atom",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "drongo PSBT.java",
+        "url": "https://github.com/sparrowwallet/drongo/blob/master/src/main/java/com/sparrowwallet/drongo/psbt/PSBT.java",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "COLDCARD Mk4/Mk5 release history",
+        "url": "https://github.com/Coldcard/firmware/blob/master/releases/History-Mk.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "COLDCARD Q release history",
+        "url": "https://github.com/Coldcard/firmware/blob/master/releases/History-Q.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Ledger Bitcoin app protocol (doc/bitcoin.md)",
+        "url": "https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Electrum electrum/transaction.py (master)",
+        "url": "https://github.com/spesmilo/electrum/blob/master/electrum/transaction.py",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0371",
+    "kind": "BIP",
+    "number": "371",
+    "title": "Taproot Fields for PSBT",
+    "status": "Deployed",
+    "summary": "Adds Taproot (BIP 341/342) data to PSBTs. Input fields: PSBT_IN_TAP_KEY_SIG, PSBT_IN_TAP_SCRIPT_SIG, PSBT_IN_TAP_LEAF_SCRIPT, PSBT_IN_TAP_BIP32_DERIVATION, PSBT_IN_TAP_INTERNAL_KEY and PSBT_IN_TAP_MERKLE_ROOT. Output fields: PSBT_OUT_TAP_INTERNAL_KEY, PSBT_OUT_TAP_TREE and PSBT_OUT_TAP_BIP32_DERIVATION. Taproot derivation records carry x-only public keys together with the leaf hashes they apply to.",
+    "relevance": "Needed for Taproot inspection (spec section 14), for signing Taproot inputs on hardware devices and for verifying Taproot change outputs. Coverage differs between tools. Electrum parses only two of the input fields. Sparrow's library handles the key-path fields but not script-path leaves or PSBT_OUT_TAP_TREE. BTCortex should warn before routing a script-path PSBT to a wallet that cannot process it.",
+    "implementedIn": [
+      "bitcoin-core >= 24.0",
+      "hwi (all BIP 371 input and output fields in hwilib/psbt.py)",
+      "sparrow (key-path fields only: PSBT_IN_TAP_KEY_SIG, PSBT_IN_TAP_BIP32_DERIVATION, PSBT_IN_TAP_INTERNAL_KEY, PSBT_OUT_TAP_INTERNAL_KEY, PSBT_OUT_TAP_BIP32_DERIVATION)",
+      "electrum (partial: PSBT_IN_TAP_KEY_SIG and PSBT_IN_TAP_MERKLE_ROOT only)",
+      "jade >= 1.0.34 (BIP 86 single-key Taproot inputs)",
+      "ledger (Bitcoin app >= 2.2.0, miniscript on Taproot wallet policies)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 371",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0371.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/psbt.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/psbt.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "drongo PSBTInput.java",
+        "url": "https://github.com/sparrowwallet/drongo/blob/master/src/main/java/com/sparrowwallet/drongo/psbt/PSBTInput.java",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "drongo PSBTOutput.java",
+        "url": "https://github.com/sparrowwallet/drongo/blob/master/src/main/java/com/sparrowwallet/drongo/psbt/PSBTOutput.java",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Electrum electrum/transaction.py (master)",
+        "url": "https://github.com/spesmilo/electrum/blob/master/electrum/transaction.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Blockstream Jade CHANGELOG",
+        "url": "https://github.com/Blockstream/Jade/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Ledger Bitcoin app CHANGELOG",
+        "url": "https://github.com/LedgerHQ/app-bitcoin-new/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0373",
+    "kind": "BIP",
+    "number": "373",
+    "title": "MuSig2 PSBT Fields",
+    "status": "Complete",
+    "summary": "Adds MuSig2 (BIP 327) data to PSBTs of any version: PSBT_IN_MUSIG2_PARTICIPANT_PUBKEYS, PSBT_IN_MUSIG2_PUB_NONCE and PSBT_IN_MUSIG2_PARTIAL_SIG per input, and PSBT_OUT_MUSIG2_PARTICIPANT_PUBKEYS per output. Participants exchange public nonces and partial signatures in the PSBT before the aggregate BIP 340 signature is formed. It requires BIPs 32, 174, 327, 328 and 370.",
+    "relevance": "Required to inspect and route PSBTs for MuSig2 key-path wallets (Bitcoin Core 30+ musig() descriptors, Ledger musig() wallet policies). MuSig2 signing takes two rounds: each signer first contributes a nonce and later a partial signature. BTCortex's PSBT inspector must show these steps and must never generate nonces itself.",
+    "implementedIn": [
+      "bitcoin-core >= 30.0",
+      "hwi >= 3.2.0 (parses and serialises the MuSig2 fields)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 373",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0373.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI 3.2.0 release",
+        "url": "https://github.com/bitcoin-core/HWI/releases/tag/3.2.0",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/psbt.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/psbt.py",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0327",
+    "kind": "BIP",
+    "number": "327",
+    "title": "MuSig2 for BIP340-compatible Multi-Signatures",
+    "status": "Deployed",
+    "summary": "A two-round multi-signature scheme. n signers produce one BIP 340 Schnorr signature valid for an aggregate public key (KeyAgg, with the KeySort ordering option). On chain the result is indistinguishable from a single-key Taproot key-path spend. It specifies nonce generation, nonce aggregation, partial signing, partial-signature verification and signature aggregation (document version 1.0.4).",
+    "relevance": "The basis of n-of-n key-path multisig in musig() descriptors (BIP 390) and in Ledger and Bitcoin Core MuSig2 wallets. Nonce handling is stateful: reusing a nonce leaks the private key. BTCortex must not implement MuSig2 signing itself. It may display MuSig2 policies and route PSBTs to Bitcoin Core or hardware signers.",
+    "implementedIn": [
+      "bitcoin-core >= 30.0 (key aggregation in musig() descriptors); >= 31.0 (signing)",
+      "ledger (Bitcoin app >= 2.4.0, musig() in Taproot wallet policies)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 327",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Ledger Bitcoin app CHANGELOG",
+        "url": "https://github.com/LedgerHQ/app-bitcoin-new/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0328",
+    "kind": "BIP",
+    "number": "328",
+    "title": "Derivation Scheme for MuSig2 Aggregate Keys",
+    "status": "Complete",
+    "summary": "Turns a BIP 327 aggregate public key into a synthetic xpub: depth 0, child number 0 and the fixed chain code 868087ca02a6f974c4598924c36b57762d32cb45717167e300622c7167e38965 (SHA-256 of 'MuSig2MuSig2MuSig2'). Unhardened children can then be derived from the aggregate key, for example musig(...)/0/*, instead of aggregating freshly derived participant keys for every address.",
+    "relevance": "Needed to derive and verify addresses of MuSig2 descriptor wallets in BTCortex's descriptor inspector and in watch-only wallets imported into Bitcoin Core.",
+    "implementedIn": [
+      "bitcoin-core >= 30.0 (musig() descriptors)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 328",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0328.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0379",
+    "kind": "BIP",
+    "number": "379",
+    "title": "Miniscript",
+    "status": "Draft",
+    "summary": "A language for writing a subset of Bitcoin Script in a structured form that supports analysis, composition and generic signing. It defines fragments (pk_k, pk_h, older, after, hash locks, and_v, or_d, andor, thresh, multi, multi_a and others), wrappers (a:, s:, c:, d:, v:, j:, n:, l:, u:, t:), a type system with correctness and malleability properties, and resource limits. It applies to P2WSH and Tapscript; multi is P2WSH-only and multi_a is Tapscript-only.",
+    "relevance": "The policy language behind timelocked recovery wallets (Liana) and advanced multisig. It is used inside wsh() and tr() descriptors in Bitcoin Core watch-only wallets and in hardware-wallet policy registration. Spec section 14 calls for miniscript utilities from maintained libraries. BTCortex should parse, analyse and display policies (spending paths, timelocks), never compile them ad hoc, and check that each target device supports the policy before registration.",
+    "implementedIn": [
+      "bitcoin-core >= 24.0 (partial); >= 26.0 (full, including Tapscript)",
+      "ledger (Bitcoin app >= 2.1.0 SegWit miniscript; >= 2.2.0 Taproot miniscript)",
+      "bitbox02 (firmware >= 9.15.0 wsh() miniscript policies; >= 9.21.0 miniscript on Taproot)",
+      "liana (rust-miniscript 12.0 dependency on master)",
+      "rust-miniscript"
+    ],
+    "sources": [
+      {
+        "title": "BIP 379",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0379.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/descriptors.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/descriptors.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Ledger Bitcoin app CHANGELOG",
+        "url": "https://github.com/LedgerHQ/app-bitcoin-new/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "BitBox02 firmware CHANGELOG",
+        "url": "https://github.com/BitBoxSwiss/bitbox02-firmware/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Liana workspace Cargo.toml",
+        "url": "https://github.com/wizardsardine/liana/blob/master/Cargo.toml",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "rust-miniscript README",
+        "url": "https://github.com/rust-bitcoin/rust-miniscript/blob/master/README.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0380",
+    "kind": "BIP",
+    "number": "380",
+    "title": "Output Script Descriptors General Operation",
+    "status": "Deployed",
+    "summary": "Defines the general descriptor syntax (SCRIPT expressions containing KEY expressions with optional [fingerprint/path] key origins, hex public keys, WIF private keys, xpub/xprv with derivation steps, /* wildcards and hardened markers ' or h) and the optional 8-character #CHECKSUM. In Bitcoin Core's implementation the checksum always detects up to 4 errors in descriptors of up to 501 characters, and up to 3 in longer ones.",
+    "relevance": "Foundation of descriptor checksum validation and inspection (spec section 14), watch-only import into Bitcoin Core (importdescriptors requires the checksum; getdescriptorinfo computes it), HWI getdescriptors output and descriptor exchange with Sparrow, Specter, Liana and Nunchuk. BTCortex must reject descriptors containing private keys (xprv or WIF) in any workflow that does not explicitly need them, and must redact them from logs.",
+    "implementedIn": [
+      "bitcoin-core >= 0.17.0",
+      "hwi (getdescriptors returns BIP 44/49/84/86 descriptors with key origins)",
+      "sparrow",
+      "electrum >= 4.4.0 (descriptors used internally to sign)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 380",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/descriptors.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/descriptors.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/commands.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/commands.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Electrum RELEASE-NOTES",
+        "url": "https://github.com/spesmilo/electrum/blob/master/RELEASE-NOTES",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0381",
+    "kind": "BIP",
+    "number": "381",
+    "title": "Non-Segwit Output Script Descriptors",
+    "status": "Deployed",
+    "summary": "Specifies pk() (P2PK), pkh() (P2PKH) and sh() (P2SH) descriptors.",
+    "relevance": "Needed to inspect legacy and nested-SegWit descriptors (sh(wpkh()), sh(wsh()), sh(multi())) when importing old wallets or hardware-wallet exports.",
+    "implementedIn": [
+      "bitcoin-core >= 0.17.0",
+      "hwi",
+      "sparrow"
+    ],
+    "sources": [
+      {
+        "title": "BIP 381",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0381.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0382",
+    "kind": "BIP",
+    "number": "382",
+    "title": "Segwit Output Script Descriptors",
+    "status": "Deployed",
+    "summary": "Specifies wpkh() (P2WPKH) and wsh() (P2WSH) descriptors, including their key restrictions (compressed keys only in SegWit v0).",
+    "relevance": "The descriptors behind the most common single-signature (wpkh) and multisig or miniscript (wsh) wallets that BTCortex imports into Bitcoin Core watch-only wallets and inspects.",
+    "implementedIn": [
+      "bitcoin-core >= 0.17.0",
+      "hwi",
+      "sparrow"
+    ],
+    "sources": [
+      {
+        "title": "BIP 382",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0382.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0383",
+    "kind": "BIP",
+    "number": "383",
+    "title": "Multisig Output Script Descriptors",
+    "status": "Deployed",
+    "summary": "Specifies multi() (keys in the given order) and sortedmulti() (keys sorted lexicographically when the script is produced). Limits: at most 3 keys at top level (bare multisig); inside sh(), the 520-byte script element limit allows at most 15 compressed keys; otherwise at most 20.",
+    "relevance": "Multisig configuration inspection and coordination (spec sections 8.1 and 9). BTCortex must keep multi() and sortedmulti() distinct, because swapping them changes every address. Sparrow 2.5.4/2.5.5 added warnings about key-sorting reinterpretations in imported descriptors and BSMS records.",
+    "implementedIn": [
+      "bitcoin-core >= 0.17.0 (most script expressions per doc/bips.md; sortedmulti supported in 31.1)",
+      "sparrow",
+      "hwi"
+    ],
+    "sources": [
+      {
+        "title": "BIP 383",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0383.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/descriptors.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/descriptors.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Sparrow release notes feed (2.5.4, 2.5.5)",
+        "url": "https://github.com/sparrowwallet/sparrow/releases.atom",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0384",
+    "kind": "BIP",
+    "number": "384",
+    "title": "combo() Output Script Descriptors",
+    "status": "Deployed",
+    "summary": "Specifies combo(KEY), a top-level-only descriptor that produces P2PK and P2PKH scripts for any key, plus P2WPKH and P2SH-P2WPKH for compressed keys.",
+    "relevance": "Needed for completeness in descriptor inspection; mostly found in descriptors migrated from legacy wallets (for example output of listdescriptors after migratewallet).",
+    "implementedIn": [
+      "bitcoin-core >= 0.17.0"
+    ],
+    "sources": [
+      {
+        "title": "BIP 384",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0384.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0385",
+    "kind": "BIP",
+    "number": "385",
+    "title": "raw() and addr() Output Script Descriptors",
+    "status": "Deployed",
+    "summary": "Specifies raw(HEX), which wraps an arbitrary output script, and addr(ADDRESS), which wraps an address, as top-level descriptors.",
+    "relevance": "Lets BTCortex express watch-only address lists and arbitrary scripts as descriptors, for example with scantxoutset or a watch-only import of individual addresses (the replacement for importaddress, removed in Bitcoin Core 30.0).",
+    "implementedIn": [
+      "bitcoin-core >= 0.17.0"
+    ],
+    "sources": [
+      {
+        "title": "BIP 385",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0385.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0386",
+    "kind": "BIP",
+    "number": "386",
+    "title": "tr() Output Script Descriptors",
+    "status": "Deployed",
+    "summary": "Specifies tr(KEY) and tr(KEY, TREE), which produce a P2TR output from an internal key and an optional tree of scripts written as nested {A,B} pairs.",
+    "relevance": "Needed to inspect and import Taproot wallets: BIP 86 single-key accounts, miniscript and MuSig2 policies. Wallet support varies; Sparrow 2.5.5 rejects Taproot descriptors that contain a script tree. The wizard must check what each target wallet accepts before handing it a tr() descriptor.",
+    "implementedIn": [
+      "bitcoin-core >= 22.0",
+      "hwi (tr() descriptors for the Taproot address type)",
+      "sparrow (single-key tr() only; script trees rejected since 2.5.5)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 386",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0386.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/key.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/key.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Sparrow release notes feed (2.5.5)",
+        "url": "https://github.com/sparrowwallet/sparrow/releases.atom",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0387",
+    "kind": "BIP",
+    "number": "387",
+    "title": "Tapscript Multisig Output Script Descriptors",
+    "status": "Deployed",
+    "summary": "Specifies multi_a() and sortedmulti_a(), threshold multisig scripts built with OP_CHECKSIG/OP_CHECKSIGADD/OP_NUMEQUAL. They are allowed only inside tr(), with at most 999 keys.",
+    "relevance": "Needed to inspect Taproot script-path multisig wallets and their registration on hardware signers.",
+    "implementedIn": [
+      "bitcoin-core >= 24.0",
+      "ledger (Bitcoin app; multi_a in Taproot wallet policies; musig() inside multi_a since 2.5.1)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 387",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0387.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Ledger Bitcoin app CHANGELOG",
+        "url": "https://github.com/LedgerHQ/app-bitcoin-new/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0388",
+    "kind": "BIP",
+    "number": "388",
+    "title": "Wallet Policies for Descriptor Wallets",
+    "status": "Complete",
+    "summary": "A compact form of descriptors for hardware signers. A descriptor template uses key placeholders (@0, @1 and so on, with /** meaning /<0;1>/*, or musig(@i,@j) inside tr() since version 1.1.0) plus a separate vector of key information ([fingerprint/path]xpub). The user registers the policy on the device once, after inspecting it. Stateful signers persist it; stateless signers return a proof of registration, for example an HMAC, that the host must store and present later. Document version 1.1.0.",
+    "relevance": "The registration model BTCortex must respect for multisig and miniscript accounts on Ledger, BitBox02 and Jade. Registration is a deliberate on-device user action. The host stores the returned proof (the Ledger app returns a 32-byte HMAC-SHA256; losing it means registering again). Registered policies stop malicious hosts from substituting change addresses. HWI master can optionally pass a BIP 388 policy to signtx (merged 2026-08-25, not yet in a release).",
+    "implementedIn": [
+      "ledger (Bitcoin app >= 2.1.0)",
+      "bitbox02 (firmware >= 9.15.0)",
+      "jade (firmware >= 1.0.24, registered descriptor wallets)",
+      "btcpay-server >= 2.1.1 (limited subset of single-signature and multisig policies)",
+      "hwi (master only, unreleased on 2026-10-21: registerdescriptor and signtx/displayaddress --registration; not in 3.2.0)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 388",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0388.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Ledger Bitcoin app protocol (doc/bitcoin.md)",
+        "url": "https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Ledger Bitcoin app wallet policies (doc/wallet.md)",
+        "url": "https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/wallet.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Blockstream Jade CHANGELOG",
+        "url": "https://github.com/Blockstream/Jade/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI recent commits (HWI#792: Optionally pass BIP388 policy to signtx)",
+        "url": "https://api.github.com/repos/bitcoin-core/HWI/commits?per_page=3",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI command-line usage (latest, master)",
+        "url": "https://hwi.readthedocs.io/en/latest/usage/cli-usage.html",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI 3.2.0 command-line usage",
+        "url": "https://hwi.readthedocs.io/en/3.2.0/usage/cli-usage.html",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0389",
+    "kind": "BIP",
+    "number": "389",
+    "title": "Multipath Descriptor Key Expressions",
+    "status": "Draft",
+    "summary": "Allows one /<NUM;NUM;...> step in a key expression, so that one descriptor string expands into several descriptors, typically /<0;1>/* for receive and change. All multipath tuples in a descriptor must have the same length and are derived in lockstep. Duplicate values in a tuple are not allowed.",
+    "relevance": "Lets BTCortex import and display a whole account (receive and change) as one descriptor. Bitcoin Core 31.1 documents importing a multisig wallet as 'a single multipath descriptor'. Older software that does not understand <0;1> must receive the two expanded descriptors instead.",
+    "implementedIn": [
+      "bitcoin-core >= 29.0 (PR #22838, milestone 29.0; not listed in doc/bips.md but documented in doc/descriptors.md)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 389",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core PR #22838 (multipath descriptors)",
+        "url": "https://github.com/bitcoin/bitcoin/pull/22838",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/descriptors.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/descriptors.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0390",
+    "kind": "BIP",
+    "number": "390",
+    "title": "musig() Descriptor Key Expression",
+    "status": "Draft",
+    "summary": "Defines musig(KEY,KEY,...), a key expression for the BIP 327 aggregate of the given keys. It is allowed only inside tr(), rawtr() or sp() and cannot be nested. Keys are sorted with KeySort after derivation and before aggregation. Unhardened derivation after the aggregate (musig(...)/0/*) follows BIP 328. Document version 0.2.0.",
+    "relevance": "Needed to inspect and import MuSig2 wallets (spec section 9, multisignature coordination) and to recognise which signers participate.",
+    "implementedIn": [
+      "bitcoin-core >= 30.0 (parsing); >= 31.0 (signing)",
+      "ledger (Bitcoin app >= 2.4.0, musig() in Taproot wallet policies)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 390",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0390.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/descriptors.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/descriptors.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Ledger Bitcoin app CHANGELOG",
+        "url": "https://github.com/LedgerHQ/app-bitcoin-new/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0129",
+    "kind": "BIP",
+    "number": "129",
+    "title": "Bitcoin Secure Multisig Setup (BSMS)",
+    "status": "Complete",
+    "summary": "A two-round protocol between a Coordinator and the Signers for setting up a multisig wallet. Round 1: each Signer returns a key record. Line 1 is 'BSMS 1.0', line 2 the TOKEN, line 3 the KEY with its key origin, line 4 a description of at most 80 characters, and line 5 a BIP 322 (or legacy) signature over the first four lines. Round 2: the Coordinator checks the records and distributes a descriptor record, and each Signer verifies that its key is included and that the first address matches. Optional encryption uses a 64-bit (STANDARD) or 128-bit (EXTENDED) TOKEN with PBKDF2-SHA512 key derivation, AES-256-CTR, and an HMAC-SHA256 MAC whose first 16 bytes form the IV. A TOKEN of 0x00 disables encryption. Records can travel as files or as UR QR codes.",
+    "relevance": "A vendor-neutral way to exchange multisig configurations by file, microSD or QR. It is an alternative to BIP 388 registration for devices that persist descriptors. BTCortex can verify a BSMS descriptor record (signatures, first address) before importing the watch-only descriptor into Bitcoin Core. It should not act as a Coordinator that handles encryption tokens unless that is separately designed.",
+    "implementedIn": [
+      "sparrow (BSMS import with header and first-address validation; 2.5.0 to 2.5.5 improvements)",
+      "coldcard (EDGE firmware only, as coordinator or signer; preview)",
+      "nunchuk (wallet configurations export as BSMS, per Nunchuk blog 2025-08-27)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 129",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0129.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Sparrow release notes feed (2.5.0, 2.5.4, 2.5.5)",
+        "url": "https://github.com/sparrowwallet/sparrow/releases.atom",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "COLDCARD BSMS documentation",
+        "url": "https://coldcard.com/docs/bsms/",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Nunchuk: Miniscript, programmable bitcoin",
+        "url": "https://nunchuk.io/blog/miniscript-programmable-bitcoin",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0329",
+    "kind": "BIP",
+    "number": "329",
+    "title": "Wallet Labels Export Format",
+    "status": "Draft",
+    "summary": "A UTF-8 JSON Lines file with one record per line. Each record has type (tx, addr, pubkey, input, output, xpub or spscan), ref (a txid, an address, a public key, txid:index, an xpub, or a silent-payments scan key expression as in BIP 392), and optional label, origin (an abbreviated descriptor identifying the account) and spendable (output records only). Optional extra fields describe transactions and outputs: height, time, fee, value, rate, keypath, fmv and heights. Importers ignore unknown types and may truncate labels; 255 characters is the suggested maximum.",
+    "relevance": "The 'wallet labels' and 'safe settings export' features of spec sections 8 and 8.1. Labels can be moved between Sparrow and other wallets without access to keys. Label exports are privacy-sensitive, so BTCortex should treat them as secrets: store them encrypted, never send them anywhere, and delete temporary unencrypted exports.",
+    "implementedIn": [
+      "sparrow (export and import; spendable is written only for frozen coins since 2.5.3)",
+      "liana >= 10.0 (export via getlabelsbip329; import through the JSON wallet backup)",
+      "bitcoin-safe (BIP 329 label import and export)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 329",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0329.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Sparrow release notes feed (2.5.3, 2.5.5)",
+        "url": "https://github.com/sparrowwallet/sparrow/releases.atom",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Liana export.rs (BIP 329 export)",
+        "url": "https://github.com/wizardsardine/liana/blob/master/liana-gui/src/export.rs",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin-Safe README",
+        "url": "https://github.com/andreasgriffin/bitcoin-safe/blob/main/README.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0138",
+    "kind": "BIP",
+    "number": "138",
+    "title": "Compact Encryption Scheme for Non-seed Wallet Data",
+    "status": "Draft",
+    "summary": "Encrypts output descriptors, wallet policies and other wallet metadata (never private keys) with CHACHA20_POLY1305 (96-bit random nonce, 128-bit tag). The key comes from a BIP 340-style tagged hash ('BIP138_DECRYPTION_SECRET') over the lexicographically sorted public keys in the descriptor. Any designated keyholder can therefore decrypt the backup with their xpub, while public keys revealed on chain cannot. Version 0.1.3, assigned 2026-05-11. It requires BIPs 32, 340, 380, 388, 389 and 390.",
+    "relevance": "A candidate format for BTCortex's descriptor and multisig-configuration backups (spec 8.1, backup and recovery). The backups can sit on untrusted media without revealing addresses or cosigner counts, and no seed is involved. It is still a draft, so BTCortex should read it only for interoperability until it stabilises.",
+    "implementedIn": [
+      "liana (master 15.0.0 depends on the bip138 crate 0.2.0 with the descriptor_backup feature; inclusion in a release not verified)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 138",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0138.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Liana workspace Cargo.toml",
+        "url": "https://github.com/wizardsardine/liana/blob/master/Cargo.toml",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0021",
+    "kind": "BIP",
+    "number": "21",
+    "title": "URI Scheme",
+    "status": "Closed",
+    "summary": "The bitcoin: URI: bitcoin:<address>?amount=<BTC decimal>&label=&message=, where req- parameters must be understood or the URI rejected. The scheme is case-insensitive and the rest of the URI case-sensitive. It is marked Closed under the BIP 3 process, with BIP 321 as its proposed replacement.",
+    "relevance": "BIP21 URI generation and parsing (spec section 14) and payment QR codes. BTCortex should parse according to BIP 321, its compatible successor, and must never broadcast or sign as a side effect of opening a URI.",
+    "implementedIn": [
+      "bitcoin-core >= 0.6.0",
+      "electrum (electrum/bip21.py parse_bip21_URI)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 21",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Electrum electrum/bip21.py (master)",
+        "url": "https://github.com/spesmilo/electrum/blob/master/electrum/bip21.py",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0321",
+    "kind": "BIP",
+    "number": "321",
+    "title": "URI Scheme",
+    "status": "Complete",
+    "summary": "Successor to BIP 21 (Replaces: 21). It allows bech32 and bech32m addresses and an empty address field, makes query keys case-insensitive, and standardises payment-instruction parameters: lightning (BOLT 11), lno (BOLT 12 offers), pay (BIP 351) and sp (BIP 352). It adds pop/req-pop proof-of-payment callbacks, which must not open http, https, file, javascript or mailto schemes. Amounts are decimal BTC with a period separator.",
+    "relevance": "The current rules for BTCortex's URI generator and parser (spec section 14). Payment QR codes from BTCPay Server, Lightning and silent-payment wallets increasingly use these parameters. A pop callback must never be opened without user confirmation.",
+    "implementedIn": [
+      "sparrow >= 2.5.5 (prefers the sp silent-payment address of a BIP 321 URI when the sending wallet can pay it, with the body address as fallback)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 321",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0321.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "BIP 21 (Proposed-Replacement: 321)",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Sparrow releases feed (2.5.5 notes)",
+        "url": "https://github.com/sparrowwallet/sparrow/releases.atom",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0173",
+    "kind": "BIP",
+    "number": "173",
+    "title": "Base32 address format for native v0-16 witness outputs",
+    "status": "Deployed",
+    "summary": "Defines bech32: a human-readable part (bc for mainnet, tb for testnet), a separator 1, base32 data and a 6-character BCH checksum. It is used for SegWit version 0 addresses (P2WPKH, P2WSH). Its checksum is weak against certain insertions for version 1+ outputs, so BIP 350 replaces it for those (Proposed-Replacement: 350).",
+    "relevance": "Address decoding and validation (spec section 14) and choosing the right checksum variant when generating or checking addresses.",
+    "implementedIn": [
+      "bitcoin-core >= 0.16.0 (supported); default since 0.20.0",
+      "electrum (electrum/segwit_addr.py)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 173",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Electrum electrum/segwit_addr.py (master)",
+        "url": "https://github.com/spesmilo/electrum/blob/master/electrum/segwit_addr.py",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0350",
+    "kind": "BIP",
+    "number": "350",
+    "title": "Bech32m format for v1+ witness addresses",
+    "status": "Deployed",
+    "summary": "Bech32m changes the bech32 checksum constant (to 0x2bc830a3) and is required for witness version 1 and later addresses (Taproot bc1p...). Version 0 addresses keep bech32.",
+    "relevance": "Needed to decode and validate Taproot addresses and to reject a version 1 address encoded with the old bech32 checksum.",
+    "implementedIn": [
+      "bitcoin-core >= 22.0",
+      "electrum (electrum/segwit_addr.py BECH32M)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 350",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0350.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Electrum electrum/segwit_addr.py (master)",
+        "url": "https://github.com/spesmilo/electrum/blob/master/electrum/segwit_addr.py",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0032",
+    "kind": "BIP",
+    "number": "32",
+    "title": "Hierarchical Deterministic Wallets",
+    "status": "Deployed",
+    "summary": "Derives a tree of keys from one seed with HMAC-SHA512. It defines extended keys (xprv/xpub: version, depth, parent fingerprint, child number, chain code, key), hardened (index >= 2^31) and unhardened derivation, and the 4-byte key fingerprint used in key-origin information. Extended public keys can derive unhardened child public keys without private keys.",
+    "relevance": "The basis of xpub import, watch-only wallets, key-origin fingerprints in descriptors and PSBTs, and hardware-wallet identification (master fingerprint). An xpub reveals the whole address history of its branch, so BTCortex must treat xpubs as privacy-sensitive.",
+    "implementedIn": [
+      "bitcoin-core >= 0.13.0",
+      "hwi (getmasterxpub, getxpub)",
+      "sparrow",
+      "electrum"
+    ],
+    "sources": [
+      {
+        "title": "BIP 32",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/commands.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/commands.py",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0044",
+    "kind": "BIP",
+    "number": "44",
+    "title": "Multi-Account Hierarchy for Deterministic Wallets",
+    "status": "Deployed",
+    "summary": "Defines the path m / 44' / coin_type' / account' / change / address_index (coin type 0' for mainnet, 1' for testnets), account discovery and an address gap limit of 20. In practice it marks legacy P2PKH accounts.",
+    "relevance": "Needed to recognise legacy accounts and set default derivation paths when importing hardware-wallet xpubs or descriptors.",
+    "implementedIn": [
+      "bitcoin-core >= 0.21.0 (descriptor wallet default)",
+      "hwi (purpose 44 for the legacy address type)",
+      "sparrow (P2PKH default m/44'/0'/0')"
+    ],
+    "sources": [
+      {
+        "title": "BIP 44",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/key.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/key.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "drongo ScriptType.java",
+        "url": "https://github.com/sparrowwallet/drongo/blob/master/src/main/java/com/sparrowwallet/drongo/protocol/ScriptType.java",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0048",
+    "kind": "BIP",
+    "number": "48",
+    "title": "Multi-Script Hierarchy for Multi-Sig Wallets",
+    "status": "Deployed",
+    "summary": "Defines m / 48' / coin_type' / account' / script_type' / change / address_index for multisig cosigner keys, with script_type 1' for nested SegWit (P2SH-P2WSH) and 2' for native SegWit (P2WSH). The recommended default is m/48'/0'/0'/2'. The BIP defines no Taproot script type.",
+    "relevance": "The de facto derivation for multisig xpubs exported by hardware wallets and expected by coordinators. BTCortex's multisig wizard uses it for defaults and for warnings about mismatched paths.",
+    "implementedIn": [
+      "sparrow (P2WSH default m/48'/0'/0'/2'; P2SH-P2WSH m/48'/0'/0'/1')"
+    ],
+    "sources": [
+      {
+        "title": "BIP 48",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0048.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "drongo ScriptType.java",
+        "url": "https://github.com/sparrowwallet/drongo/blob/master/src/main/java/com/sparrowwallet/drongo/protocol/ScriptType.java",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0049",
+    "kind": "BIP",
+    "number": "49",
+    "title": "Derivation scheme for P2WPKH-nested-in-P2SH based accounts",
+    "status": "Deployed",
+    "summary": "Defines m / 49' / coin_type' / account' / change / address_index for P2SH-P2WPKH (nested SegWit) single-signature accounts.",
+    "relevance": "Needed to recognise nested SegWit accounts when importing descriptors, xpubs or ypubs.",
+    "implementedIn": [
+      "bitcoin-core >= 0.21.0 (descriptor wallet default)",
+      "hwi (purpose 49 for the nested SegWit address type)",
+      "sparrow (P2SH-P2WPKH default m/49'/0'/0')"
+    ],
+    "sources": [
+      {
+        "title": "BIP 49",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/key.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/key.py",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0084",
+    "kind": "BIP",
+    "number": "84",
+    "title": "Derivation scheme for P2WPKH based accounts",
+    "status": "Deployed",
+    "summary": "Defines m / 84' / coin_type' / account' / change / address_index for native SegWit P2WPKH single-signature accounts.",
+    "relevance": "The most common single-signature account type; the default when BTCortex imports a hardware wallet into a Bitcoin Core watch-only wallet with wpkh().",
+    "implementedIn": [
+      "bitcoin-core >= 0.21.0 (descriptor wallet default)",
+      "hwi (purpose 84 for the native SegWit address type)",
+      "sparrow (P2WPKH default m/84'/0'/0')"
+    ],
+    "sources": [
+      {
+        "title": "BIP 84",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/key.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/key.py",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0086",
+    "kind": "BIP",
+    "number": "86",
+    "title": "Key Derivation for Single Key P2TR Outputs",
+    "status": "Deployed",
+    "summary": "Defines m / 86' / coin_type' / account' / change / address_index for single-key Taproot accounts. The output key is the internal key tweaked with no script tree, so only key-path spends are possible.",
+    "relevance": "Needed to recognise and import single-signature Taproot accounts (tr() descriptors) from hardware wallets.",
+    "implementedIn": [
+      "bitcoin-core >= 23.0 (descriptor wallet default)",
+      "hwi (purpose 86 for the Taproot address type)",
+      "sparrow (P2TR default m/86'/0'/0')",
+      "bitbox02 (firmware >= 9.10.0)",
+      "jade (firmware >= 1.0.34)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 86",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/bips.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/bips.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "HWI hwilib/key.py (3.2.0)",
+        "url": "https://github.com/bitcoin-core/HWI/blob/3.2.0/hwilib/key.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "BitBox02 firmware CHANGELOG",
+        "url": "https://github.com/BitBoxSwiss/bitbox02-firmware/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Blockstream Jade CHANGELOG",
+        "url": "https://github.com/Blockstream/Jade/blob/master/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0087",
+    "kind": "BIP",
+    "number": "87",
+    "title": "Hierarchy for Deterministic Multisig Wallets",
+    "status": "Complete",
+    "summary": "Defines m / 87' / coin_type' / account' / change / address_index for multisig cosigner keys, without the script_type level of BIP 48. The script type is meant to come from the descriptor, and sorting from sortedmulti (BIP 67).",
+    "relevance": "An alternative multisig path that BTCortex may meet in descriptor imports; the wizard should accept it without assuming BIP 48.",
+    "implementedIn": [
+      "ledger (Bitcoin app >= 2.5.0 exports standard BIP 87 xpubs without on-device confirmation)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 87",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0087.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Ledger Bitcoin app CHANGELOG",
+        "url": "https://github.com/LedgerHQ/app-bitcoin/blob/develop/CHANGELOG.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0067",
+    "kind": "BIP",
+    "number": "67",
+    "title": "Deterministic Pay-to-script-hash multi-signature addresses through public key sorting",
+    "status": "Complete",
+    "summary": "Sorts the public keys of a multisig script lexicographically (compressed encoding), so that all cosigners derive the same script whatever order the keys were exchanged in.",
+    "relevance": "Defines the ordering behind sortedmulti(). BTCortex's multisig inspector must state whether keys are sorted, because the same keys produce different addresses with multi() and with sortedmulti().",
+    "implementedIn": [
+      "bitcoin-core (sortedmulti() descriptors; doc/descriptors.md cites BIP 67)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 67",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0067.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core doc/descriptors.md (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/descriptors.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bip-0322",
+    "kind": "BIP",
+    "number": "322",
+    "title": "Generic Signed Message Format",
+    "status": "Complete",
+    "summary": "Signs messages for any script type using two virtual transactions: to_spend commits to a BIP 340 tagged hash of the message and the address's scriptPubKey, and to_sign spends it. It defines the legacy format (P2PKH only), simple (the witness stack), full (the whole to_sign transaction) and a full proof-of-funds variant (a finalised PSBT spending real UTXOs). Document version 2.0.0.",
+    "relevance": "Address-ownership proofs and message signing for SegWit and Taproot addresses, and the signature format in BIP 129 key records. Bitcoin Core 31.1 does not implement it (verifymessage accepts only P2PKH addresses: 'Address does not refer to key'), so BTCortex needs a library or an external wallet to verify these proofs. Signing always happens on the user's wallet or device and must be user-initiated.",
+    "implementedIn": [
+      "sparrow >= 2.4.2 (message signing via PSBT over QR and file); >= 2.5.1 (aligned with the Complete specification)",
+      "coldcard (Mk firmware >= 5.5.0 and Q >= 1.4.0Q proof-of-reserves PSBTs; message signing >= 5.5.1 / 1.4.1Q)"
+    ],
+    "sources": [
+      {
+        "title": "BIP 322",
+        "url": "https://github.com/bitcoin/bips/blob/master/bip-0322.mediawiki",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Bitcoin Core src/common/signmessage.cpp (v31.1)",
+        "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/common/signmessage.cpp",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Sparrow release notes feed (2.4.2, 2.5.0, 2.5.1)",
+        "url": "https://github.com/sparrowwallet/sparrow/releases.atom",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "COLDCARD Mk4/Mk5 release history",
+        "url": "https://github.com/Coldcard/firmware/blob/master/releases/History-Mk.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "COLDCARD Q release history",
+        "url": "https://github.com/Coldcard/firmware/blob/master/releases/History-Q.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "slip-0132",
+    "kind": "SLIP",
+    "number": "132",
+    "title": "Registered HD version bytes for BIP-0032",
+    "status": "Active",
+    "summary": "A SatoshiLabs registry of BIP 32 version bytes that encode the script type in the extended key prefix: ypub 0x049d7cb2 (P2WPKH in P2SH), zpub 0x04b24746 (P2WPKH), Ypub 0x0295b43f (multisig P2WSH in P2SH), Zpub 0x02aa7ed3 (multisig P2WSH), and the testnet upub, vpub, Upub and Vpub.",
+    "relevance": "Electrum and Sparrow accept and display these prefixes, and hardware wallets often export them. BTCortex must convert them to plain xpub/tpub plus an explicit descriptor before importing into Bitcoin Core. Descriptors make the prefixes redundant (BIP 380 calls them a layer violation).",
+    "implementedIn": [
+      "electrum (XPUB_HEADERS in electrum/constants.py)",
+      "sparrow (drongo ExtendedKey headers)"
+    ],
+    "sources": [
+      {
+        "title": "SLIP-0132",
+        "url": "https://github.com/satoshilabs/slips/blob/master/slip-0132.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Electrum electrum/constants.py (master)",
+        "url": "https://github.com/spesmilo/electrum/blob/master/electrum/constants.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "drongo ExtendedKey.java",
+        "url": "https://github.com/sparrowwallet/drongo/blob/master/src/main/java/com/sparrowwallet/drongo/ExtendedKey.java",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bcr-2020-005",
+    "kind": "BCR",
+    "number": "2020-005",
+    "title": "Uniform Resources (UR): Encoding Structured Binary Data for Transport in URIs and QR Codes",
+    "status": "Multiple Implementations (two stars in the Blockchain Commons index); document version 2.1.0, revised 2023-08-21",
+    "summary": "Encodes typed dCBOR (deterministic CBOR) messages as ur:<type>/<bytewords> strings that suit the QR alphanumeric mode. Long messages are split into multi-part URs (ur:<type>/<seqNum>-<seqLen>/...) carrying a CRC-32 of the whole message. A rateless fountain-code sequence lets a receiver rebuild the message from any sufficient subset of animated frames.",
+    "relevance": "One of the two animated-QR transports for air-gapped PSBT signing and account export (spec section 9). BTCortex's QR module must decode and encode UR to exchange PSBTs and descriptors with QR signers. A maintained UR library should be used (developer-tools scope), not a home-grown implementation.",
+    "implementedIn": [
+      "sparrow (hummingbird library)",
+      "krux (native bc-ur module)",
+      "seedsigner (UR2 decoder)",
+      "jade (QR mode: crypto-psbt, crypto-account/crypto-hdkey and bytes; main/qrmode.c)",
+      "passport (Passport Core: UR 2.0 animated QR, per Foundation documentation)",
+      "keystone (animated UR QR, per Keystone documentation)",
+      "caravan >= 1.19.0 (BCUR2 keystore)",
+      "bitcoin-safe (animated UR QR)"
+    ],
+    "sources": [
+      {
+        "title": "BCR-2020-005 Uniform Resources",
+        "url": "https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-005-ur.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Blockchain Commons Research index (statuses)",
+        "url": "https://github.com/BlockchainCommons/Research/blob/master/README.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "hummingbird RegistryType.java (Sparrow)",
+        "url": "https://github.com/sparrowwallet/hummingbird/blob/master/src/main/java/com/sparrowwallet/hummingbird/registry/RegistryType.java",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Krux README",
+        "url": "https://github.com/selfcustody/krux/blob/main/README.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "SeedSigner decode_qr.py",
+        "url": "https://github.com/SeedSigner/seedsigner/blob/dev/src/seedsigner/models/decode_qr.py",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Jade qrmode.c",
+        "url": "https://github.com/Blockstream/Jade/blob/master/main/qrmode.c",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Foundation Passport device features",
+        "url": "https://docs.foundation.xyz/passport/device-features/",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Keystone: connecting software wallets",
+        "url": "https://guide.keyst.one/docs/connecting-software-wallets-to-keystone",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "@caravan/wallets index.ts",
+        "url": "https://github.com/caravan-bitcoin/caravan/blob/main/packages/caravan-wallets/src/index.ts",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bcr-2020-006",
+    "kind": "BCR",
+    "number": "2020-006",
+    "title": "Registry of Uniform Resource (UR) Types",
+    "status": "Multiple Implementations (two stars in the Blockchain Commons index); revised 2025-04-26",
+    "summary": "Registers UR types and their CBOR tags. The current (version 2) types relevant to wallets are psbt (tag 40310), output-descriptor (40308), account-descriptor (40311), hdkey (40303), eckey (40306) and seed (40300). The version 1 names crypto-psbt (310), crypto-output (308), crypto-account (311), crypto-hdkey (303) and crypto-seed (300) are deprecated: software should still read them but write the version 2 types.",
+    "relevance": "Tells BTCortex which UR payloads to accept: PSBTs and account or descriptor exports from QR signers. Many devices still emit the deprecated crypto-* types, so the decoder must accept both generations. BTCortex must refuse seed-bearing types (seed, crypto-seed, crypto-bip39) and never process seed material.",
+    "implementedIn": [
+      "sparrow (hummingbird reads both crypto-* and version 2 types)",
+      "seedsigner (crypto-psbt, crypto-output and crypto-account via urtypes)"
+    ],
+    "sources": [
+      {
+        "title": "BCR-2020-006 Registry of UR Types",
+        "url": "https://github.com/BlockchainCommons/Research/blob/master/papers/bcr-2020-006-urtypes.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "Blockchain Commons Research index (statuses)",
+        "url": "https://github.com/BlockchainCommons/Research/blob/master/README.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "hummingbird RegistryType.java (Sparrow)",
+        "url": "https://github.com/sparrowwallet/hummingbird/blob/master/src/main/java/com/sparrowwallet/hummingbird/registry/RegistryType.java",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "SeedSigner decode_qr.py",
+        "url": "https://github.com/SeedSigner/seedsigner/blob/dev/src/seedsigner/models/decode_qr.py",
+        "accessed": "2026-10-21"
+      }
+    ]
+  },
+  {
+    "id": "bbqr",
+    "kind": "specification",
+    "number": null,
+    "title": "BBQr - Better Bitcoin QR",
+    "status": "Deployed Widely (README); public domain (Coinkite)",
+    "summary": "Splits a file across up to 1295 QR codes. Each frame starts with an 8-character header: B$, an encoding character (H hex, 2 Base32 per RFC 4648 without padding, Z zlib with wbits=10 and no header then Base32), a file-type character (P PSBT, T signed transaction, J JSON, C CBOR, U UTF-8 text, B binary, X executable), then two base-36 digits for the total count and two for the frame index. Receivers must implement all three encodings. The format uses QR alphanumeric mode and adds no checksum beyond the QR code's own error correction.",
+    "relevance": "The second animated-QR transport. It is native to COLDCARD Q and supported by Sparrow, Nunchuk Desktop, Krux, Bitcoin Safe and BTCPay Server; SeedSigner decodes only. BTCortex's QR module should support BBQr alongside UR for PSBT import and export and enforce a size limit before decompressing Z-encoded data.",
+    "implementedIn": [
+      "coldcard (COLDCARD Q: display and scan)",
+      "sparrow",
+      "nunchuk (desktop)",
+      "krux",
+      "bitcoin-safe",
+      "btcpay-server",
+      "seedsigner (decode only, from 0.8.7)"
+    ],
+    "sources": [
+      {
+        "title": "BBQr README (supporting projects verified 2026-07-27)",
+        "url": "https://github.com/coinkite/BBQr/blob/master/README.md",
+        "accessed": "2026-10-21"
+      },
+      {
+        "title": "BBQr specification (BBQr.md)",
+        "url": "https://github.com/coinkite/BBQr/blob/master/BBQr.md",
+        "accessed": "2026-10-21"
+      }
+    ]
+  }
+]

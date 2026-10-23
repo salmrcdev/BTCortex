@@ -1,0 +1,172 @@
+/* BTCortex design tokens. Source of truth: design-system/btcortex/MASTER.md.
+   Values are OKLCH conversions of the palette whose contrast ratios are
+   documented there. Components use the semantic names only. */
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --radius: 0.375rem;
+
+  --background: oklch(0.984 0.003 247.86);
+  --foreground: oklch(0.208 0.04 265.75);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.208 0.04 265.75);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.208 0.04 265.75);
+  --muted: oklch(0.968 0.007 247.9);
+  --muted-foreground: oklch(0.446 0.037 257.28);
+  --accent: oklch(0.968 0.007 247.9);
+  --accent-foreground: oklch(0.208 0.04 265.75);
+  --border: oklch(0.929 0.013 255.51);
+  --input: oklch(0.554 0.041 257.42);
+  --primary: oklch(0.553 0.174 38.4);
+  --primary-foreground: oklch(1 0 0);
+  --ring: oklch(0.553 0.174 38.4);
+  --destructive: oklch(0.577 0.215 27.33);
+  --destructive-foreground: oklch(1 0 0);
+  --danger: oklch(0.505 0.19 27.52);
+  --success: oklch(0.527 0.137 150.07);
+  --warning: oklch(0.555 0.146 49);
+  --info: oklch(0.5 0.119 242.75);
+  --brand: oklch(0.752 0.166 62.59);
+
+  --network-mainnet: oklch(0.553 0.174 38.4);
+  --network-testnet: oklch(0.511 0.086 186.39);
+  --network-signet: oklch(0.491 0.241 292.58);
+  --network-regtest: oklch(0.457 0.215 277.02);
+
+  /* Chart series (dataviz reference slot 1, validated against --card: contrast, lightness band, chroma). */
+  --chart-1: #2a78d6;
+
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.208 0.04 265.75);
+  --sidebar-border: oklch(0.929 0.013 255.51);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: oklch(0.208 0.04 265.75);
+  --foreground: oklch(0.984 0.003 247.86);
+  --card: oklch(0.258 0.038 266.31);
+  --card-foreground: oklch(0.984 0.003 247.86);
+  --popover: oklch(0.258 0.038 266.31);
+  --popover-foreground: oklch(0.984 0.003 247.86);
+  --muted: oklch(0.306 0.036 266.64);
+  --muted-foreground: oklch(0.711 0.035 256.79);
+  --accent: oklch(0.306 0.036 266.64);
+  --accent-foreground: oklch(0.984 0.003 247.86);
+  --border: oklch(0.372 0.039 257.29);
+  --input: oklch(0.554 0.041 257.42);
+  --primary: oklch(0.752 0.166 62.59);
+  --primary-foreground: oklch(0.208 0.04 265.75);
+  --ring: oklch(0.752 0.166 62.59);
+  --destructive: oklch(0.577 0.215 27.33);
+  --destructive-foreground: oklch(1 0 0);
+  --danger: oklch(0.711 0.166 22.22);
+  --success: oklch(0.723 0.192 149.58);
+  --warning: oklch(0.837 0.164 84.43);
+  --info: oklch(0.754 0.139 232.66);
+  --brand: oklch(0.752 0.166 62.59);
+
+  --network-mainnet: oklch(0.752 0.166 62.59);
+  --network-testnet: oklch(0.785 0.133 181.91);
+  --network-signet: oklch(0.709 0.159 293.54);
+  --network-regtest: oklch(0.785 0.104 274.71);
+
+  --chart-1: #3987e5;
+
+  --sidebar: oklch(0.19 0.04 265.75);
+  --sidebar-foreground: oklch(0.984 0.003 247.86);
+  --sidebar-border: oklch(0.306 0.036 266.64);
+}
+
+@theme inline {
+  --font-sans: 'Fira Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Fira Code', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-chart-1: var(--chart-1);
+  --color-brand: var(--brand);
+  --color-network-mainnet: var(--network-mainnet);
+  --color-network-testnet: var(--network-testnet);
+  --color-network-signet: var(--network-signet);
+  --color-network-regtest: var(--network-regtest);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans text-sm antialiased;
+    line-height: 1.5;
+    overflow: hidden;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Fira Code's ligatures would show 0x as 0× and != as ≠; technical values are shown as typed. */
+  .font-mono,
+  code,
+  kbd,
+  pre {
+    font-variant-ligatures: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

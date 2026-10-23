@@ -1,0 +1,22 @@
+{
+  "name": "@btcortex/integration-sparrow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sparrow Wallet integration: verified installation, safe pre-configuration and launching.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "update-key": "node scripts/update-signing-key.mjs"
+  },
+  "dependencies": {
+    "@btcortex/contracts": "0.1.0",
+    "@btcortex/installation-manager": "0.1.0"
+  },
+  "devDependencies": {
+    "openpgp": "^6.3.2"
+  }
+}

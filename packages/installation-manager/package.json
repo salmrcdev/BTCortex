@@ -1,0 +1,21 @@
+{
+  "name": "@btcortex/installation-manager",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Verified installation of third-party releases: signatures, checksums, resumable downloads, safe extraction.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "openpgp": "^6.3.2",
+    "yauzl": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/yauzl": "^3.4.0"
+  }
+}

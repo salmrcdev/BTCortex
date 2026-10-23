@@ -1,0 +1,21 @@
+{
+  "name": "@btcortex/integration-bitcoin-knots",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bitcoin Knots: verified installation of the pgpverifiable Windows release against the builder keys pinned from bitcoinknots/guix.sigs, and its release rules.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "update-keys": "node scripts/update-builder-keys.mjs"
+  },
+  "dependencies": {
+    "@btcortex/installation-manager": "0.1.0"
+  },
+  "devDependencies": {
+    "openpgp": "^6.3.2"
+  }
+}

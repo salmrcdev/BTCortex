@@ -1,0 +1,17 @@
+{
+  "name": "@btcortex/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Typed communication contracts shared by the BTCortex interface, native shell and orchestrator.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

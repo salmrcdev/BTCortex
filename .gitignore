@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+coverage/
+*.tsbuildinfo
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/
+apps/desktop/src-tauri/binaries/
+# Written by the orchestrator build: OpenPGP.js ships as a file of its own (LGPL).
+apps/desktop/src-tauri/resources/openpgp/
+# Written by scripts/release/third-party-licences.mjs before every build.
+apps/desktop/src-tauri/resources/THIRD_PARTY_LICENCES.txt
+
+# Disposable test environments (regtest data, downloaded test binaries)
+.cache/
+.test-env/
+
+# Local tooling
+.claude/
+.codex/
+.idea/
+.vite/
+__pycache__/
+*.py[cod]
+*.log
+.DS_Store
+Thumbs.db
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.template
+*.p12
+*.pfx

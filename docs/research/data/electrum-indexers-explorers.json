@@ -1,0 +1,1980 @@
+[
+  {
+    "id": "fulcrum",
+    "name": "Fulcrum",
+    "category": "electrum-server",
+    "catalogueEligible": true,
+    "website": "https://fulcrumserver.org/",
+    "repository": "https://github.com/cculianu/Fulcrum",
+    "purpose": "Fast, multi-threaded C++20 Electrum-protocol (SPV) server for Bitcoin, Bitcoin Cash and Litecoin. It indexes the whole chain from a txindex-enabled full node and serves script-hash history, balances, UTXOs, headers and merkle proofs to Electrum-protocol wallets such as Sparrow and Electrum.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Release 2.1.4 published 2026-10-18 (2.1.3 on 2026-10-02, 2.1.2 on 2026-08-20, 2.1.1 on 2026-05-07, 2.1.0 on 2025-11-19). Latest master commit 2026-10-18 ('Refreshed servers*.json for BCH and BTC'). Repository not archived. Docker Hub image cculianu/fulcrum:v2.1.4 pushed 2026-10-18.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.1.4",
+      "date": "2026-10-18",
+      "source": "https://github.com/cculianu/Fulcrum/releases/tag/v2.1.4"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "Windows 10 or later, 64-bit (release notes: it should 'just work' on any Windows 10 or above 64-bit system)",
+      "windowsArchitectures": ["x64"],
+      "windowsDistribution": "Portable ZIP only: Fulcrum-2.1.4-win64.zip (17 168 090 bytes) with a statically linked Fulcrum.exe (jemalloc, libzmq, libminiupnpc, Qt 6.10, OpenSSL 3.3.0, gcc 15.2.0) and FulcrumAdmin.exe (the Python admin script packed as a PyInstaller one-file executable). No installer. Checksums in Fulcrum-2.1.4-shasums.txt, signed in Fulcrum-2.1.4-shasums.txt.asc. MSVC builds are unsupported; MinGW is used.",
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Linux x86_64 (built on Ubuntu 18.04) and arm64 tarballs with Qt, OpenSSL, libzmq and jemalloc statically linked (they still need the system bzip2 library and a compatible glibc); Docker image cculianu/fulcrum for linux/amd64 and linux/arm64; macOS from source only ('Binary builds for macOS coming soon'); BSDs from source."
+    },
+    "interfaces": [
+      {
+        "type": "electrum-protocol",
+        "description": "Electrum protocol versions 1.4 to 1.6 (MinProtocolVersion 1.4.0, MaxProtocolVersion 1.6.0 in src/ServerMisc.h), as newline-delimited JSON-RPC over TCP (tcp=), TLS (ssl=), WebSocket (ws=) and secure WebSocket (wss=). Conventional mainnet ports 50001 TCP, 50002 SSL, 50003 WS, 50004 WSS (testnet 60001-60004). Client ports are only bound once the initial synchronisation has finished; before that connections are refused. Extra methods include blockchain.scripthash.get_status and blockchain.address.get_status (2.1.1).",
+        "authentication": "None at protocol level. TLS with PEM certificate and private key (cert=, key=; optional separate wss_cert/wss_key for CA-signed WebSocket certificates). Per-IP limits (max_clients_per_ip 12, max_subs_per_ip 75000) do not apply to 127.0.0.1/::1 by default.",
+        "documentation": "https://electrum-cash-protocol.readthedocs.io/en/latest/"
+      },
+      {
+        "type": "json-rpc",
+        "description": "Admin RPC on admin= (a bare port means 127.0.0.1, for example 127.0.0.1:8000): newline-delimited JSON-RPC 2.0 over plain TCP, used by FulcrumAdmin. Methods match its sub-commands: addpeer, ban, banpeer, bitcoind_throttle, clients, getinfo, kick, listbanned, loglevel, maxbuffer, peers, query, rmpeer, simdjson, stop, unban, unbanpeer. The admin servers are started together with the client servers after the first 'up to date' state, so they are not available during initial sync.",
+        "authentication": "None. Fulcrum logs a warning if the admin port is bound to a non-loopback interface.",
+        "documentation": "https://github.com/cculianu/Fulcrum/blob/master/README.md"
+      },
+      {
+        "type": "http",
+        "description": "Stats HTTP server on stats= (for example 127.0.0.1:8080) serving /stats (JSON: Bitcoin daemon, storage, server manager, subscriptions, jemalloc and simdjson sections) and /debug. It is started during application start-up, before synchronisation, so it is the only machine-readable progress source during the initial index.",
+        "authentication": "None. The example configuration says not to expose this port to the public.",
+        "documentation": "https://github.com/cculianu/Fulcrum/blob/master/doc/fulcrum-example-config.conf"
+      },
+      {
+        "type": "zmq",
+        "description": "ZeroMQ subscriber (client side). Fulcrum asks bitcoind for its endpoints with getzmqnotifications and subscribes to hashblock, and to hashtx only when zmq_allow_hashtx=true. Without ZMQ it polls every polltime seconds (default 2.0).",
+        "authentication": null,
+        "documentation": "https://github.com/cculianu/Fulcrum/blob/master/doc/fulcrum-example-config.conf"
+      },
+      {
+        "type": "cli",
+        "description": "Fulcrum.exe [options] [config]. The CLI overrides the configuration file. Passing _ENV_ as the config argument reads the options from environment variables.",
+        "authentication": "RPC password via -p, the RPCPASSWORD environment variable or the config file; -K/--rpccookie for cookie authentication.",
+        "documentation": "https://github.com/cculianu/Fulcrum/blob/master/doc/unix-man-page.md"
+      },
+      {
+        "type": "file",
+        "description": "Plain 'key = value' configuration file (doc/fulcrum-example-config.conf, doc/fulcrum-quick-config.conf) using native path separators (Windows example: datadir = D:\\FulcrumData\\mainnet). There is no default config path on Windows. Logs go to stdout/stderr; the syslog option has no effect on Windows.",
+        "authentication": null,
+        "documentation": "https://github.com/cculianu/Fulcrum/blob/master/doc/fulcrum-example-config.conf"
+      }
+    ],
+    "cli": "Fulcrum.exe <config> or flags: -D/--datadir, -b/--bitcoind host:port, -u/--rpcuser, -p/--rpcpassword, -K/--rpccookie <file>, --bitcoind-tls, -t/--tcp, -s/--ssl, -w/--ws, -W/--wss, -c/--cert, -k/--key, --wss-cert, --wss-key, -a/--admin, -z/--stats, -T/--polltime, --db_mem <MiB>, --db-upgrade (one-time 1.x to 2.x conversion), --compact-dbs, -C/--checkdb, --pidfile, --ts-format, --tls-disallow-deprecated, --upnp/--no-upnp, --bd-timeout, --bd-clients, --dump-sh, -d/--debug, -q/--quiet, -v/--version, -h/--help. FulcrumAdmin.exe -p <adminport> getinfo|stop|clients|peers|ban|kick|loglevel|query ...",
+    "remoteManagement": "Admin RPC and the /stats endpoint are plain TCP/HTTP without authentication or TLS, so remote management needs an SSH tunnel, WireGuard/Tailscale or similar private channel. On Linux hosts and node platforms the process is managed through SSH and systemd or the platform. The Docker image passes the data directory and certificate paths through its entrypoint.",
+    "nodeCompatibility": "Bitcoin Core 0.17.0 or later; 28.0 or later recommended for full Electrum protocol 1.6 (for example the submitpackage-based broadcast_package). Requirements: txindex=1 (verified at start-up by fetching the first transaction after genesis; otherwise 'txindex verification failed'), RPC enabled, and an unpruned node ('The node must not be a pruning node'). RPC authentication with rpcuser/rpcpassword (or the RPCUSER/RPCPASSWORD environment variables) or rpccookie=<path to .cookie>. The cookie file is 're-parsed each time we (re)connect to bitcoind', which handles cookie rotation on node restart. bitcoind_tls for HTTPS RPC proxies. ZMQ is optional but recommended (zmqpubhashblock), and is discovered automatically through getzmqnotifications. Networks: main, test (testnet3), testnet4, signet and regtest. The README's statement that Bitcoin Knots 'is also known to work perfectly well' predates the Knots 29.4.1 hard fork; against a post-fork Knots node Fulcrum would index the Knots chain, not Bitcoin.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Unpruned node with txindex=1 and RPC. zmqpubhashblock recommended. Enabling txindex on an existing node starts a background index build; getindexinfo reports synced=false until it finishes. Keep rpcthreads above bitcoind_clients (default 3) plus the other RPC clients."
+      },
+      {
+        "ids": ["tor"],
+        "relationship": "optional",
+        "notes": "Onion service for remote wallets (HiddenServicePort to 127.0.0.1:50001/50002) and tor_proxy (default 127.0.0.1:9050) for discovering .onion peers. tor_hostname and tor_*_port only matter when announcing to the public server network."
+      },
+      {
+        "ids": ["electrs", "electrumx"],
+        "relationship": "conflicts",
+        "notes": "All three use the conventional ports 50001/50002 and the same client-facing role. Run only one Electrum server per port set and per wallet profile."
+      }
+    ],
+    "networking": "Listening defaults: the documented TCP default is 0.0.0.0:50001 (all interfaces), so BTCortex must set tcp = 127.0.0.1:50001 and ssl = 127.0.0.1:50002 explicitly. SSL, WS, WSS, admin and stats have no default and are disabled unless configured. Outbound: bitcoind RPC (default 127.0.0.1:8332) and its ZMQ endpoint. Peer discovery (peering, default true) connects to other public Electrum servers. From 2.1.0 'Good' peers are refreshed every 30 minutes instead of being held open. announce advertises the server when hostname is set. Disable both for a private server. UPnP is off by default (upnp=true asks the router to forward the listening ports). A non-loopback bind is expected to trigger a Windows Defender Firewall prompt.",
+    "storage": "Mainnet index (Fulcrum datadir): the README says about 133 GB for BTC as of August 2023. A user reported a Fulcrum 2.0 datadir of 166 GB on 2025-10-14 (GitHub issue #304; scripthash_history 86 GB, txhash2txnum 23 GB, utxoset 14 GB, scripthash_unspent 6.4 GB). It also needs txindex in Bitcoin Core: the ElectrumX 2.0 changelog measured .bitcoin/indexes/txindex at 66 GiB and blocks at 788 GiB around height 950 000 (July 2026). The 1.x to 2.x --db-upgrade needed about 14.7 GB to 24 GB of extra free space in that report. The testnet datadir comment says about 8 GB (undated). SSD strongly recommended.",
+    "resources": "README minimum: 1 GB RAM and a 64-bit CPU. db_mem defaults to 2048 MiB or 25 % of physical RAM, whichever is smaller (2.0 release notes and example config; the man page still says 1024). Other defaults: txhash_cache 128 MB, worker_threads = number of CPU cores, history_lookup_threads 8 (2.1.4), bitcoind_clients 3. Initial mainnet sync takes 'anywhere from 4 hours to 20+ hours' on an SSD depending on hardware, and 'days' on an HDD (README, undated). A larger temporary db_mem speeds up the initial sync. Fulcrum 2.x databases survive crashes and power loss: at most the last few blocks are rolled back and re-synchronised.",
+    "security": "The server learns every address its clients query, so only a self-hosted server preserves wallet privacy. Admin RPC and /stats are unauthenticated and must stay on loopback. The 0.0.0.0 default TCP bind would expose the server to the LAN unless BTCortex writes loopback binds. Disable peering and announce on private servers to avoid outbound connections and advertising the host. TLS: RSA keys are fully supported, EC/DH/DSA keys are 'experimental'. Certificates can be replaced without a restart (SSLCertMonitor). Release verification: SHA-256 checksums in Fulcrum-<version>-shasums.txt, signed by Calin Culianu's DSA-2048 OpenPGP key D465 135F 97D0 047E 18E9 9DC3 2181 0A54 2031 C02C (signature verified for 2.1.4 on 2026-10-21; key published in Electron-Cash/keys-n-hashes). Antivirus heuristics have flagged FulcrumAdmin.exe (PyInstaller one-file) as a false positive (issue #203), so BTCortex should talk to the admin port directly rather than launch FulcrumAdmin.exe. Prefer cookie authentication to bitcoind. No GitHub security advisories published as of 2026-10-21. Use 2.1.1 or later on Windows: it fixes spammy Win32 API handle exhaustion messages with BTC (issue #324).",
+    "licence": "GPL-3.0-or-later",
+    "licenceNotes": "GPLv3 or later (LICENSE.txt and source headers). If BTCortex redistributes the binaries it must also offer the corresponding source. Downloading the official ZIP from the GitHub release at install time avoids bundling. No trademark policy for the Fulcrum name was found.",
+    "integrationMechanisms": [
+      "Download Fulcrum-<version>-win64.zip plus Fulcrum-<version>-shasums.txt and .asc from the GitHub release; verify the OpenPGP signature against the pinned key fingerprint D465135F97D0047E18E99DC321810A542031C02C, then the SHA-256 of the ZIP",
+      "Extract to a per-user versioned directory under %LOCALAPPDATA% (portable, no administrator rights, no installer or registry entries)",
+      "Generate fulcrum.conf: datadir on the selected volume, bitcoind=127.0.0.1:8332, rpccookie=<Core network data directory>\\.cookie, tcp=127.0.0.1:50001, ssl=127.0.0.1:50002, cert/key, peering=false, announce=false, admin=127.0.0.1:<port>, stats=127.0.0.1:<port>, db_mem sized to available RAM",
+      "Generate and keep a long-lived self-signed RSA certificate and key (PEM) for the SSL/WSS ports, and record its SHA-256 fingerprint for client pinning",
+      "Adjust the managed node's bitcoin.conf: txindex=1, zmqpubhashblock=tcp://127.0.0.1:<port>, prune=0; restart the node and wait for getindexinfo txindex synced=true",
+      "Spawn Fulcrum.exe <conf> as a supervised child process; capture and rotate stdout/stderr; poll /stats during initial sync and admin getinfo afterwards",
+      "Graceful stop through the admin RPC 'stop' once synchronised; during the initial sync rely on Fulcrum 2.x crash safety if no console control event can be delivered",
+      "Electrum-protocol health probe: server.version, server.features (genesis_hash must match the node), blockchain.headers.subscribe height compared with bitcoind getblockcount",
+      "Generate client connection settings for Sparrow and Electrum (127.0.0.1:50002:s plus certificate file or SHA-256 fingerprint) and an optional Tor onion endpoint",
+      "Detect existing installations by process name (Fulcrum.exe), listening ports and config files passed on the command line",
+      "Connect to Fulcrum on node platforms or remote hosts through an SSH tunnel, Tor or a private network (connected application)",
+      "Run the official cculianu/fulcrum image or the Linux tarball when the node itself runs in Docker or WSL2"
+    ],
+    "supportLevels": ["fully-managed", "connected-application", "remote-managed", "managed-docker", "managed-wsl2"],
+    "recommendedSupportLevel": "fully-managed",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Fulcrum is the only maintained Electrum server with official, statically linked x64 Windows binaries. The portable ZIP runs without elevation and uses a documented flat configuration file. Cookie authentication is re-read on reconnect. /stats is machine-readable during sync and the admin RPC is available afterwards. Hard requirements: an unpruned, txindex-enabled node, about 1 TB of disk for mainnet (blocks, txindex and the Fulcrum index), which rules out the 73 GB test machine. Windows caveats: logs only on stdout, graceful stop needs the admin port, and there is no Windows service mode."
+    },
+    "priority": "P1",
+    "implementationStatus": "researched",
+    "notes": "The 2.x database format (2.0, 2025) is not backward compatible. Upgrading a 1.x datadir requires the one-time, irreversible --db-upgrade, which must not be interrupted (signals are ignored during the conversion; it takes about an hour or more on BTC mainnet). --utxo-cache was removed in 2.0. The Docker entrypoint generates a self-signed RSA-2048 certificate valid for 365 days if none exists; the native Windows binary does not generate certificates. history_lookup_threads (2.1.4) speeds uncached history lookups 5 to 10 times. Open bug on 2026-10-18: issue #336 reports 2.1.3 silently stalling on macOS with Qt 5.15 (not the Windows build).",
+    "sources": [
+      { "title": "Fulcrum 2.1.4 release", "url": "https://github.com/cculianu/Fulcrum/releases/tag/v2.1.4", "accessed": "2026-10-21" },
+      { "title": "Fulcrum releases (GitHub API)", "url": "https://api.github.com/repos/cculianu/Fulcrum/releases?per_page=4", "accessed": "2026-10-21" },
+      { "title": "Fulcrum releases feed (2.1.0 and 2.0 notes)", "url": "https://github.com/cculianu/Fulcrum/releases.atom", "accessed": "2026-10-21" },
+      { "title": "Fulcrum commit feed", "url": "https://github.com/cculianu/Fulcrum/commits.atom", "accessed": "2026-10-21" },
+      { "title": "Fulcrum README", "url": "https://github.com/cculianu/Fulcrum/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "Fulcrum example configuration", "url": "https://github.com/cculianu/Fulcrum/blob/master/doc/fulcrum-example-config.conf", "accessed": "2026-10-21" },
+      { "title": "Fulcrum manual page", "url": "https://github.com/cculianu/Fulcrum/blob/master/doc/unix-man-page.md", "accessed": "2026-10-21" },
+      { "title": "Fulcrum src/Controller.cpp (txindex check, deferred server start)", "url": "https://github.com/cculianu/Fulcrum/blob/master/src/Controller.cpp", "accessed": "2026-10-21" },
+      { "title": "Fulcrum src/BitcoinD.cpp (getnetworkinfo, getzmqnotifications)", "url": "https://github.com/cculianu/Fulcrum/blob/master/src/BitcoinD.cpp", "accessed": "2026-10-21" },
+      { "title": "Fulcrum src/App.cpp (rpccookie, stats server, signals)", "url": "https://github.com/cculianu/Fulcrum/blob/master/src/App.cpp", "accessed": "2026-10-21" },
+      { "title": "Fulcrum src/ServerMisc.h (protocol versions)", "url": "https://github.com/cculianu/Fulcrum/blob/master/src/ServerMisc.h", "accessed": "2026-10-21" },
+      { "title": "Fulcrum src/SrvMgr.cpp (admin servers)", "url": "https://github.com/cculianu/Fulcrum/blob/master/src/SrvMgr.cpp", "accessed": "2026-10-21" },
+      { "title": "Fulcrum src/BTC.cpp (supported networks)", "url": "https://github.com/cculianu/Fulcrum/blob/master/src/BTC.cpp", "accessed": "2026-10-21" },
+      { "title": "FulcrumAdmin script", "url": "https://github.com/cculianu/Fulcrum/blob/master/FulcrumAdmin", "accessed": "2026-10-21" },
+      { "title": "Fulcrum Docker entrypoint", "url": "https://github.com/cculianu/Fulcrum/blob/master/contrib/docker/docker-entrypoint.sh", "accessed": "2026-10-21" },
+      { "title": "Fulcrum issue #304 (2.0 datadir size, db-upgrade space)", "url": "https://github.com/cculianu/Fulcrum/issues/304", "accessed": "2026-10-21" },
+      { "title": "Docker Hub cculianu/fulcrum", "url": "https://hub.docker.com/r/cculianu/fulcrum", "accessed": "2026-10-21" },
+      { "title": "Calin Culianu signing key (calinkey.txt)", "url": "https://github.com/Electron-Cash/keys-n-hashes/blob/master/pubkeys/calinkey.txt", "accessed": "2026-10-21" },
+      { "title": "Fulcrum official website", "url": "https://fulcrumserver.org/", "accessed": "2026-10-21" },
+      { "title": "ElectrumX 2.0.0 changelog (txindex size measurement)", "url": "https://github.com/spesmilo/electrumx/blob/master/docs/changelog.rst", "accessed": "2026-10-21" },
+      { "title": "Sparrow server performance comparison (2022)", "url": "https://www.sparrowwallet.com/docs/server-performance.html", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether Fulcrum.exe in the Windows ZIP carries an Authenticode signature was not checked.",
+      "The Fulcrum 2.1.x mainnet index size on 2026-10-21 was not measured; 166 GB is a single user report from 2025-10-14, and the network (BTC mainnet) is inferred from the component sizes.",
+      "Graceful shutdown of Fulcrum.exe on Windows through console control events (CTRL_C_EVENT mapped to SIGINT) when it is spawned without a visible console was not tested.",
+      "OpenPGP.js (or the verifier BTCortex chooses) support for the DSA-2048 signature used on Fulcrum checksum files was not tested.",
+      "Behaviour against a post-fork Bitcoin Knots node (29.4.1 or later) was not tested; that Electrum clients would reject its headers is inferred from Electrum's SHA256d proof-of-work check.",
+      "The README's '4 hours to 20+ hours' mainnet sync figure is undated and was not measured on Windows hardware."
+    ]
+  },
+  {
+    "id": "electrs",
+    "name": "electrs (Electrum Rust Server)",
+    "category": "electrum-server",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/romanz/electrs",
+    "purpose": "Efficient Electrum-protocol server in Rust for personal and small-scale use. It keeps a compact index (about 7 % of the block data) and fetches transactions from the local Bitcoin Core node on demand. Since 0.12.0 it is built on the bindex library and reads blocks through Bitcoin Core's REST interface.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.12.0 published 2026-09-13 (0.11.1 on 2026-02-22, 0.11.0 on 2025-11-17, 0.10.10 on 2025-07-19). Latest master commit 2026-10-17. Repository not archived. Cargo.toml version 0.12.0 depends on bindex 0.1.2 (bindex-rs v0.1.3 tagged 2026-09-28).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.12.0",
+      "date": "2026-09-13",
+      "source": "https://github.com/romanz/electrs/releases/tag/v0.12.0"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "No official binaries for any platform ('There are currently no official/stable binary packages'). Source build only (Rust 1.85 or later, libclang for rust-rocksdb). Windows-specific code exists: the ctrlc crate replaces signal-hook on Windows since 0.10.8 (PR #1123, December 2024, which also added a Windows CI build without the Prometheus metrics feature). The current CI workflow only builds on ubuntu-latest.",
+      "wsl2": "likely",
+      "docker": "community-image",
+      "other": "Linux from source (Debian 13 and Ubuntu 25.04 documented; dynamic linking needs RocksDB 9.10.0), a beta Debian repository maintained by a contributor (deb.ln-ask.me), macOS and other Unix-like systems from source, documented ARM cross-compilation. The repository Dockerfile is 'provided for demonstration purposes'. Community image getumbrel/electrs (v0.12.0 tag pushed 2026-09-17)."
+    },
+    "interfaces": [
+      {
+        "type": "electrum-protocol",
+        "description": "Electrum protocol 1.4 only: server.version returns ['electrs/0.12.0', '1.4']; protocol_min = protocol_max = 1.4 in server.features. Plain TCP only (no TLS, no WebSocket), default 127.0.0.1:50001 mainnet, 60001 testnet3, 40001 testnet4, 60401 regtest, 60601 signet. Supports blockchain.transaction.broadcast_package (0.11.0) and blockchain.scripthash.unsubscribe; blockchain.scripthash.get_mempool is not implemented; no peer discovery.",
+        "authentication": "None. Binds to loopback by default; upstream recommends tunnelling for remote access and an nginx stream proxy or Tor for encryption.",
+        "documentation": "https://github.com/romanz/electrs/blob/master/doc/usage.md"
+      },
+      {
+        "type": "http",
+        "description": "Prometheus metrics endpoint (default feature 'metrics'): 127.0.0.1:4224 mainnet, 14224 testnet3, 44224 testnet4, 24224 regtest, 34224 signet; for example index_height. A contributor stated in PR #1123 that the Prometheus feature does not work on Windows.",
+        "authentication": "None.",
+        "documentation": "https://github.com/romanz/electrs/blob/master/doc/monitoring.md"
+      },
+      {
+        "type": "cli",
+        "description": "electrs [--conf <toml>] [--conf-dir <dir>] [--skip-default-conf-files] --network bitcoin|testnet|testnet4|regtest|signet --db-dir <dir> --daemon-dir <dir> [--cookie-file <path>] [--daemon-rpc-addr host:port] [--electrum-rpc-addr host:port] [--monitoring-addr host:port] [--log-filters INFO] [--index-lookup-limit N] [--ignore-mempool] [--disable-electrum-rpc] [--sync-once] [--no-auto-reindex] [--version]. Every option also exists as an ELECTRS_<NAME> environment variable.",
+        "authentication": "The auth=USER:PASSWORD option can only be set in a config file, for security; cookie_file is allowed on the command line.",
+        "documentation": "https://github.com/romanz/electrs/blob/master/doc/config.md"
+      },
+      {
+        "type": "file",
+        "description": "TOML configuration loaded from /etc/electrs/config.toml, ~/.electrs/config.toml and ./electrs.toml (in that priority order), then environment variables, then arguments; --conf and --conf-dir override everything given before them. The db_dir must be empty or already owned by electrs.",
+        "authentication": null,
+        "documentation": "https://github.com/romanz/electrs/blob/master/doc/config.md"
+      }
+    ],
+    "cli": "electrs (no subcommands). Typical managed invocation: electrs --skip-default-conf-files --conf <path>\\electrs.toml. Key options: network, db_dir, daemon_dir, cookie_file or auth, daemon_rpc_addr, electrum_rpc_addr, monitoring_addr, log_filters, db_parallelism (default 1), wait_duration_secs (10), jsonrpc_timeout_secs (15), index_lookup_limit (0 = unlimited), auto_reindex (default true), server_banner. Release builds: cargo build --locked --release (static RocksDB) or with system librocksdb 9.10.0.",
+    "remoteManagement": "No admin API. Only the Electrum protocol and the Prometheus endpoint are exposed. Installations on node platforms or Linux hosts are managed through SSH/systemd or the platform; BTCortex can health-check them over the Electrum protocol and scrape metrics through a tunnel.",
+    "nodeCompatibility": "0.12.0 requires Bitcoin Core 31.0 or later with the REST interface enabled (-rest=1): bindex reads /rest/blockhashbyheight, /rest/headers, /rest/block, /rest/spenttxouts (added in Core 30.0) and /rest/blockpart (added in Core 31.0). JSON-RPC (server=1) is used with the cookie (default <daemon_dir>/.cookie, or cookie_file) or auth=USER:PASSWORD. Pruning must be disabled (-prune=0). txindex is 'allowed but unnecessary'. No ZMQ. Versions 0.9 to 0.11 fetched blocks over P2P instead (daemon_p2p_addr, default 127.0.0.1:8333), which needed a listening node. Bitcoin Knots releases based on Core 29 are not expected to provide the Core 31 REST endpoints, and upstream states that hard forks are not supported.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Core 31.0 or later, rest=1, server=1, prune=0. The REST interface is unauthenticated and shares the RPC listener."
+      },
+      {
+        "ids": ["tor"],
+        "relationship": "optional",
+        "notes": "Onion service (HiddenServicePort 50001 127.0.0.1:50001) gives remote wallets an encrypted, authenticated-by-address path without a TLS proxy."
+      },
+      {
+        "ids": ["nginx", "caddy"],
+        "relationship": "optional",
+        "notes": "TLS termination for SSL clients (upstream documents an nginx stream block on port 50002)."
+      },
+      {
+        "ids": ["fulcrum", "electrumx"],
+        "relationship": "conflicts",
+        "notes": "Same default client port 50001 and the same role."
+      }
+    ],
+    "networking": "Listens only on 127.0.0.1:50001 (Electrum) and 127.0.0.1:4224 (metrics) by default on mainnet. Connects to bitcoind RPC/REST at 127.0.0.1:8332 by default (18332 testnet3, 48332 testnet4, 38332 signet, 18443 regtest). No outbound internet connections of its own. Electrum clients must use plain TCP (host:50001:t) unless a TLS proxy or Tor is added. Under WSL2 NAT networking (the only mode on Windows 10), a Windows-hosted bitcoind must be reachable on the WSL virtual network, not on 127.0.0.1.",
+    "storage": "Usage guide for 0.12.0: index about 56 GB for about 802 GB of blocks/*.dat as of July 2026. The final database is about 7 % of the block files but may reach about 14 % just before the final compaction. Upgrading to 0.12.0 needs at least 120 GB free for the mandatory reindex. The block files must stay on disk (unpruned node).",
+    "resources": "Low CPU and memory use after the initial index. Initial index of mainnet about 2 hours on a 6-core CPU with 32 GB RAM and a 2 TB NVMe drive (July 2026, 0.12.0); about 18 hours on an ODROID-HC1 (8 cores at 2 GHz, 2 GB RAM, SSD). Large or popular addresses are slower because electrs reads the relevant transactions from bitcoind for each query (index_lookup_limit caps 'too popular' addresses).",
+    "security": "Optimised for personal or family use. SECURITY.md: 'Denial-of-Service attacks are excluded from the threat model - DO NOT share your electrs instance with untrusted users!'. No TLS of its own. 0.12.0 requires Bitcoin Core's REST interface, which is unauthenticated and served wherever the RPC listener is bound, so RPC/REST must stay on loopback (or a host-only WSL network) and never be exposed to the LAN. Upstream recommends cookie authentication. auto_reindex (default true) silently rebuilds an inconsistent or old-format database, which takes hours. Default daemon_dir is ~/.bitcoin even on Windows, so a wrong guess silently points at the wrong node; always pass daemon_dir and cookie_file. No GitHub security advisories published as of 2026-10-21.",
+    "licence": "MIT",
+    "licenceNotes": "MIT; redistribution of self-built binaries is allowed with the notice. RocksDB is statically linked by default (RocksDB is dual-licensed GPL-2.0 or Apache-2.0).",
+    "integrationMechanisms": [
+      "Connect to electrs on node platforms (Umbrel, StartOS, RaspiBlitz, MiniBolt and others) or remote Linux hosts: health-check over the Electrum protocol and generate wallet connection settings",
+      "Provision a BTCortex-owned WSL2 distribution, install a pinned electrs build inside it and run it as a supervised process",
+      "Generate electrs.toml (network, db_dir, daemon_dir, daemon_rpc_addr, cookie_file or auth, electrum_rpc_addr, monitoring_addr, log_filters) and start with --skip-default-conf-files so no stray config files apply",
+      "Adjust bitcoin.conf: rest=1, prune=0; for WSL2 NAT mode also an rpcbind on the WSL virtual adapter and rpcallowip limited to the WSL subnet, with a dedicated rpcauth user",
+      "Health probe: server.version (expect 'electrs/<version>', '1.4'), blockchain.headers.subscribe height compared with getblockcount, and Prometheus index_height",
+      "Generate client settings: host:50001:t for local or tunnelled use, or an onion address through Tor",
+      "Research spike: a BTCortex-built x86_64-pc-windows-msvc binary without the metrics feature, built and signed in BTCortex CI"
+    ],
+    "supportLevels": ["connected-application", "managed-wsl2", "remote-managed", "managed-docker"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Upstream targets Linux and ships no binaries. On Windows, BTCortex can either use WSL2 (on Windows 10 the NAT networking mode means bitcoind RPC and the unauthenticated REST endpoint must be reachable from the WSL virtual network) or build its own unsupported Windows binary. 0.12.0 needs Bitcoin Core 31 or later with REST and an unpruned node. Its index is much smaller than Fulcrum's (about 56 GB, without txindex, versus 166 GB or more plus a 66 GiB txindex), which makes it the better choice when a full node fits on a disk of about 1 TB."
+    },
+    "priority": "P1",
+    "implementationStatus": "researched",
+    "notes": "0.12.0 is a breaking upgrade: it requires Core 31 or later, rest=1 and a full reindex (the 0.11.0 RocksDB change already forced one). On 2026-10-21 the Umbrel app store still shipped 0.11.1 ('0.11.1-patch.1'). Upstream recommends the Blockstream fork for public servers. Sparrow enables request batching for electrs 0.9.0 and later, based on the server.version string. The signet RPC default in config_specification.toml (18554) is stale; the code uses 38332.",
+    "sources": [
+      { "title": "electrs v0.12.0 release", "url": "https://github.com/romanz/electrs/releases/tag/v0.12.0", "accessed": "2026-10-21" },
+      { "title": "electrs releases (GitHub API)", "url": "https://api.github.com/repos/romanz/electrs/releases?per_page=4", "accessed": "2026-10-21" },
+      { "title": "electrs RELEASE-NOTES.md", "url": "https://github.com/romanz/electrs/blob/master/RELEASE-NOTES.md", "accessed": "2026-10-21" },
+      { "title": "electrs README", "url": "https://github.com/romanz/electrs/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "electrs configuration guide", "url": "https://github.com/romanz/electrs/blob/master/doc/config.md", "accessed": "2026-10-21" },
+      { "title": "electrs usage guide", "url": "https://github.com/romanz/electrs/blob/master/doc/usage.md", "accessed": "2026-10-21" },
+      { "title": "electrs installation guide", "url": "https://github.com/romanz/electrs/blob/master/doc/install.md", "accessed": "2026-10-21" },
+      { "title": "electrs binaries page", "url": "https://github.com/romanz/electrs/blob/master/doc/binaries.md", "accessed": "2026-10-21" },
+      { "title": "electrs upgrading guide", "url": "https://github.com/romanz/electrs/blob/master/doc/upgrading.md", "accessed": "2026-10-21" },
+      { "title": "electrs monitoring guide", "url": "https://github.com/romanz/electrs/blob/master/doc/monitoring.md", "accessed": "2026-10-21" },
+      { "title": "electrs config_specification.toml", "url": "https://github.com/romanz/electrs/blob/master/internal/config_specification.toml", "accessed": "2026-10-21" },
+      { "title": "electrs src/config.rs (default ports and paths)", "url": "https://github.com/romanz/electrs/blob/master/src/config.rs", "accessed": "2026-10-21" },
+      { "title": "electrs src/electrum.rs (protocol version, methods)", "url": "https://github.com/romanz/electrs/blob/master/src/electrum.rs", "accessed": "2026-10-21" },
+      { "title": "electrs SECURITY.md", "url": "https://github.com/romanz/electrs/blob/master/SECURITY.md", "accessed": "2026-10-21" },
+      { "title": "electrs Cargo.toml", "url": "https://github.com/romanz/electrs/blob/master/Cargo.toml", "accessed": "2026-10-21" },
+      { "title": "electrs CI workflow", "url": "https://github.com/romanz/electrs/blob/master/.github/workflows/rust.yml", "accessed": "2026-10-21" },
+      { "title": "electrs PR #1123 (Windows ctrlc and CI)", "url": "https://github.com/romanz/electrs/pull/1123", "accessed": "2026-10-21" },
+      { "title": "bindex-rs repository", "url": "https://github.com/romanz/bindex-rs", "accessed": "2026-10-21" },
+      { "title": "bindex-lib client.rs (REST endpoints)", "url": "https://github.com/romanz/bindex-rs/blob/master/bindex-lib/src/client.rs", "accessed": "2026-10-21" },
+      { "title": "Docker Hub getumbrel/electrs", "url": "https://hub.docker.com/r/getumbrel/electrs", "accessed": "2026-10-21" },
+      { "title": "Umbrel electrs app manifest", "url": "https://github.com/getumbrel/umbrel-apps/blob/master/electrs/umbrel-app.yml", "accessed": "2026-10-21" },
+      { "title": "Microsoft Learn: Accessing network applications with WSL", "url": "https://learn.microsoft.com/en-us/windows/wsl/networking", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "A native Windows build of 0.12.0 (including bindex and rust-rocksdb) was not attempted; the Windows CI job added in PR #1123 no longer appears in the CI workflow.",
+      "That the Prometheus metrics feature does not work on Windows is a contributor statement in PR #1123, not tested.",
+      "Whether electrs re-reads the cookie file after bitcoind restarts was not verified.",
+      "That Bitcoin Knots 29.x lacks the Core 31 REST endpoints is inferred from its Core 29 base, not tested.",
+      "The 56 GB index figure comes from the upstream usage guide (July 2026); the size on 2026-10-21 was not measured."
+    ]
+  },
+  {
+    "id": "electrumx",
+    "name": "ElectrumX",
+    "category": "electrum-server",
+    "catalogueEligible": true,
+    "website": "https://electrumx-spesmilo.readthedocs.io/",
+    "repository": "https://github.com/spesmilo/electrumx",
+    "purpose": "Python (asyncio) Electrum-protocol server maintained by the Electrum developers (the spesmilo fork of Neil Booth's original). Widely used for public Electrum servers, multi-coin, and the first server to implement Electrum protocol 1.7.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "2.0.0 released 2026-07-03 (changelog date; GitHub release entry and PyPI package e-x 2.0.0 uploaded the same day); 1.20.0 on 2026-06-03, 1.19.0 on 2025-11-11, 1.18.0 on 2025-06-14, 1.17.0 on 2025-04-16. Latest master commit 2026-07-03. The original kyuupichan/electrumx last released 1.20.2 on 2021-10-28 and is not the maintained Bitcoin line.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.0.0",
+      "date": "2026-07-03",
+      "source": "https://github.com/spesmilo/electrumx/releases/tag/2.0.0"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "community-image",
+      "other": "Unix-like systems ('should run on any flavour of unix'; tested on macOS and DragonFlyBSD). Python 3.10 or later (PyPI package e-x), database engine LevelDB (plyvel) or RocksDB (rocksdb-ng); experimental free-threaded CPython (for example 3.14t). Example Dockerfiles in contrib/; community image lukechilds/electrumx (latest tag v1.18.0, 2025-08-24, not yet 2.0)."
+    },
+    "interfaces": [
+      {
+        "type": "electrum-protocol",
+        "description": "Electrum protocol 1.4 to 1.7 (2.0.0 added 1.7: blockchain.scriptpubkey.*, blockchain.outpoint.subscribe/get_status/unsubscribe, blockchain.transaction.testmempoolaccept, mempool.recent). Transports are declared in SERVICES as tcp://, ssl://, ws://, wss:// (example tcp://:50001,ssl://:50002,wss://:50004). No incoming connections are served until the server has caught up. 1.18.0 added traffic-analysis countermeasures (padding, small delays).",
+        "authentication": "None at protocol level; TLS with SSL_CERTFILE and SSL_KEYFILE (self-signed is fine; Electrum pins it on first use). Session resource limits (COST_SOFT_LIMIT, COST_HARD_LIMIT, MAX_SESSIONS).",
+        "documentation": "https://github.com/spesmilo/electrumx/blob/master/docs/environment.rst"
+      },
+      {
+        "type": "json-rpc",
+        "description": "LocalRPC (service rpc://, default localhost:8000) used by electrumx_rpc: add_peer, daemon_url, disconnect, getinfo, groups, log, peers, query, reorg, sessions, stop, plus inspect_session (2.0.0).",
+        "authentication": "None; bind to localhost only.",
+        "documentation": "https://github.com/spesmilo/electrumx/blob/master/docs/rpc-interface.rst"
+      },
+      {
+        "type": "cli",
+        "description": "electrumx_server (configured entirely through environment variables) and electrumx_rpc [-p PORT] <command>.",
+        "authentication": null,
+        "documentation": "https://github.com/spesmilo/electrumx/blob/master/docs/HOWTO.rst"
+      }
+    ],
+    "cli": "electrumx_server with environment variables COIN=Bitcoin, NET (mainnet, testnet, testnet4, signet, regtest; mutinynet coin added in 1.20.0), DB_DIRECTORY, DB_ENGINE (mandatory in 2.0: leveldb or rocksdb), DAEMON_URL=http://user:pass@host:port/ (comma-separated failover list), SERVICES, REPORT_SERVICES, SSL_CERTFILE, SSL_KEYFILE, CACHE_MB (default 1200), PEER_DISCOVERY (on|off|self, default on), PEER_ANNOUNCE, TOR_PROXY_HOST/PORT, MAX_SESSIONS, LOG_LEVEL. electrumx_rpc getinfo|sessions|peers|stop ...",
+    "remoteManagement": "LocalRPC on localhost only (tunnel for remote hosts). On Linux it is normally supervised by systemd, daemontools or runit; remote installations are managed over SSH.",
+    "nodeCompatibility": "2.0.0 for COIN=Bitcoin requires Bitcoin Core 31.0 or later (MIN_REQUIRED_DAEMON_VERSION) with txindex=1 and txospenderindex=1 (REQUIRED_DAEMON_INDEXES, checked with getindexinfo), and a non-pruning node. 1.19.0 to 1.20.0 required Bitcoin Core 28.0 ('or Knots 28') with txindex. RPC authentication only via user:password in DAEMON_URL (no cookie-file support found in the docs or daemon code), so BTCortex must create an rpcauth user. Knots compatibility statements predate the Knots 29.4.1 hard fork, and Knots 29.x lacks txospenderindex, so ElectrumX 2.0 cannot run on it.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Core 31.0 or later, txindex=1, txospenderindex=1, unpruned; rpcauth credentials."
+      },
+      {
+        "ids": ["tor"],
+        "relationship": "optional",
+        "notes": "Onion service for clients; TOR_PROXY_HOST/PORT (autodetects 9050, 9150, 1080) for onion peers; FORCE_PROXY to route peer discovery through Tor."
+      },
+      {
+        "ids": ["fulcrum", "electrs"],
+        "relationship": "conflicts",
+        "notes": "Same conventional ports 50001/50002 and the same role."
+      }
+    ],
+    "networking": "Nothing listens unless SERVICES is set; with SERVICES, an omitted host means all interfaces (except rpc://, which defaults to localhost:8000), so BTCortex must specify 127.0.0.1. Peer discovery is on by default and contacts other public servers over the clear internet, and the server announces itself unless PEER_ANNOUNCE is empty; set PEER_DISCOVERY=self (or off) for a private server. Outbound to bitcoind RPC (DAEMON_URL).",
+    "storage": "2.0.0 changelog, measured on Bitcoin mainnet around height 950 000 (July 2026): ElectrumX DB about 122 GiB with LevelDB (about 106 GiB with RocksDB 9), plus .bitcoin/blocks 788 GiB, chainstate 12 GiB, indexes/txindex 66 GiB and indexes/txospenderindex 88 GiB (new in Core 31). 2.0 changed the on-disk schema: the old database must be deleted and the index rebuilt from genesis (no migration path). Switching between LevelDB and RocksDB also requires a full resync.",
+    "resources": "With the GIL, initial sync uses about 2 GB RAM; with free-threaded Python about 8 GB, but it takes a bit under half the time on a modern multi-core machine (2.0.0 changelog). RocksDB is about 25 % faster than LevelDB on an SSD. CACHE_MB defaults to 1200 (not recommended above 2000). Needs a large open-file limit (about 1024 during sync, more when serving). A 2022 Sparrow benchmark on a Raspberry Pi 4 (ElectrumX 1.16) took about a week for the initial index.",
+    "security": "Public-server features (peer discovery and self-announcement) are enabled by default and leak the host's existence and IP unless disabled. LocalRPC is unauthenticated. 1.19.0 fixed a denial-of-service vector (new sessions refused after MAX_SESSIONS on Python 3.12+); 1.16.0 fixed a remote crash when peer discovery was enabled. The DAEMON_URL embeds the RPC password in an environment variable, so keep the process environment private and use a dedicated, whitelisted rpcauth user. No GitHub security advisories published as of 2026-10-21.",
+    "licence": "MIT",
+    "licenceNotes": "MIT (PyPI e-x licence expression MIT). Distributed on PyPI as 'e-x' because kyuupichan owns the 'electrumx' name there.",
+    "integrationMechanisms": [
+      "Connect to existing ElectrumX servers (self-hosted on Linux or node platforms): Electrum-protocol health checks and wallet connection settings",
+      "Provision inside a BTCortex-managed WSL2 distribution with a pinned Python virtual environment (pip install e-x[rocksdb] at a pinned version) and generated environment variables",
+      "Run a container built from the upstream contrib Dockerfile (no official image)",
+      "Use electrumx_rpc getinfo or the LocalRPC JSON-RPC port for status; stop with the LocalRPC 'stop' command"
+    ],
+    "supportLevels": ["connected-application", "managed-wsl2", "managed-docker", "remote-managed"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Well documented and actively maintained, but not supported on Windows, configured only through environment variables, without cookie authentication, and from 2.0 it needs Core 31 or later with txindex and txospenderindex (about 154 GiB of extra node indexes on top of its own 106-122 GiB database). On Windows desktops, Fulcrum or electrs are better local choices; ElectrumX matters mainly as a remote or public server that BTCortex connects to."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": "Version history worth surfacing in compatibility diagnostics: 1.17.0 dropped COIN=BitcoinSegwit and added signet and testnet4; 1.19.0 added protocol 1.6 and made rejecting unknown clients mandatory (DROP_CLIENT_UNKNOWN removed); 2.0.0 added protocol 1.7, a new database schema and mandatory DB_ENGINE.",
+    "sources": [
+      { "title": "ElectrumX 2.0.0 release", "url": "https://github.com/spesmilo/electrumx/releases/tag/2.0.0", "accessed": "2026-10-21" },
+      { "title": "ElectrumX README", "url": "https://github.com/spesmilo/electrumx/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "ElectrumX documentation (2.0.0)", "url": "https://electrumx-spesmilo.readthedocs.io/en/latest/", "accessed": "2026-10-21" },
+      { "title": "ElectrumX releases feed", "url": "https://github.com/spesmilo/electrumx/releases.atom", "accessed": "2026-10-21" },
+      { "title": "ElectrumX changelog", "url": "https://github.com/spesmilo/electrumx/blob/master/docs/changelog.rst", "accessed": "2026-10-21" },
+      { "title": "ElectrumX HOWTO", "url": "https://github.com/spesmilo/electrumx/blob/master/docs/HOWTO.rst", "accessed": "2026-10-21" },
+      { "title": "ElectrumX environment variables", "url": "https://github.com/spesmilo/electrumx/blob/master/docs/environment.rst", "accessed": "2026-10-21" },
+      { "title": "ElectrumX RPC interface", "url": "https://github.com/spesmilo/electrumx/blob/master/docs/rpc-interface.rst", "accessed": "2026-10-21" },
+      { "title": "ElectrumX daemon.py (version and index checks)", "url": "https://github.com/spesmilo/electrumx/blob/master/src/electrumx/server/daemon.py", "accessed": "2026-10-21" },
+      { "title": "ElectrumX coins.py (Bitcoin requirements)", "url": "https://github.com/spesmilo/electrumx/blob/master/src/electrumx/lib/coins.py", "accessed": "2026-10-21" },
+      { "title": "PyPI package e-x", "url": "https://pypi.org/project/e-x/", "accessed": "2026-10-21" },
+      { "title": "Docker Hub lukechilds/electrumx", "url": "https://hub.docker.com/r/lukechilds/electrumx", "accessed": "2026-10-21" },
+      { "title": "kyuupichan/electrumx (original)", "url": "https://github.com/kyuupichan/electrumx", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Absence of cookie-file authentication is based on the environment documentation and daemon.py; a hidden mechanism was not searched for exhaustively.",
+      "WSL2 operation was not tested."
+    ]
+  },
+  {
+    "id": "electrum-personal-server",
+    "name": "Electrum Personal Server (EPS)",
+    "category": "electrum-server",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/chris-belcher/electrum-personal-server",
+    "purpose": "Lightweight single-user Electrum server that imports the user's master public keys and addresses as watch-only into a Bitcoin Core wallet instead of indexing the whole chain; it worked with pruned nodes, blocksonly and txindex=0.",
+    "maintenance": {
+      "status": "stale",
+      "evidence": "Last release 0.2.4 on 2022-06-16 and last commit the same day. Repository not archived. Issue #309 (opened 2025-05-18) asks whether Bitcoin Core 30's removal of legacy wallets ends EPS; it has no maintainer reply. PR #313 (2025-12-07) adding descriptor-wallet support is open, unreviewed and unmerged.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.2.4",
+      "date": "2022-06-16",
+      "source": "https://github.com/chris-belcher/electrum-personal-server/releases/tag/eps-v0.2.4"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "electrum-personal-server-windows-release-v0.2.4.zip with an OpenPGP signature (.asc) on the GitHub release; the README tells Windows users to drag config.ini onto the packaged executable.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Python package for Linux and macOS (pip install from the source release)."
+    },
+    "interfaces": [
+      {
+        "type": "electrum-protocol",
+        "description": "Electrum protocol 1.1 to 1.4 (SERVER_PROTOCOL_VERSION_MIN 1.1, MAX 1.4) over TLS on 127.0.0.1:50002 by default, one client connection at a time; no Lightning support.",
+        "authentication": "IP whitelist (ip_whitelist); TLS with a bundled default certificate (certs/cert.crt), which upstream says must be replaced if the connection crosses the internet.",
+        "documentation": "https://github.com/chris-belcher/electrum-personal-server/blob/master/README.md"
+      },
+      {
+        "type": "file",
+        "description": "config.ini with [master-public-keys], [bitcoin-rpc] (host, port, datadir, wallet_filename, poll intervals, initial_import_count, gap_limit), [electrum-server] (host, port, ip_whitelist, certfile, keyfile, broadcast_method tor-or-own-node, tor_host/port), [watch-only-addresses] and [logging].",
+        "authentication": null,
+        "documentation": "https://github.com/chris-belcher/electrum-personal-server/blob/master/config.ini_sample"
+      }
+    ],
+    "cli": "electrum-personal-server <config.ini> [--version]; electrum-personal-server-rescan for historical rescans.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Incompatible with Bitcoin Core 30.0 and later, and therefore with the current 31.1. Its setup creates a legacy wallet (createwallet electrumpersonalserver true true \"\" false false true, that is descriptors=false), and deterministicwallet.py imports addresses with importmulti. Bitcoin Core 30.0 can no longer create or load BDB legacy wallets and removed the legacy-only RPCs importaddress, importmulti, importprivkey, importpubkey and others. Historically worked with Core 0.17 to 29.x, including pruned nodes.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Only versions before 30.0 (legacy wallet and importmulti); wallet enabled, server=1."
+      }
+    ],
+    "networking": "TLS on 127.0.0.1:50002 by default; optional transaction broadcast through Tor (127.0.0.1:9050).",
+    "storage": "Negligible: no chain index, only the watch-only wallet in Bitcoin Core.",
+    "resources": "Very low CPU and RAM (polls Bitcoin Core every 30 s when idle and every 1 s while a client is connected, by default).",
+    "security": "Ships a default TLS certificate whose private key is public, so connections can be decrypted unless the user generates their own. Single client at a time. The watch-only wallet reveals the user's addresses to anyone with RPC access to the node. Unmaintained since 2022. Its legacy-wallet design cannot work with supported Bitcoin Core versions.",
+    "licence": "MIT",
+    "licenceNotes": "MIT (setup.py); no LICENSE file was found at the repository root.",
+    "integrationMechanisms": [
+      "Detect an existing installation and explain the incompatibility with Bitcoin Core 30 or later; offer Sparrow's direct Bitcoin Core connection (sparrow) or a full Electrum server instead"
+    ],
+    "supportLevels": ["unsupported"],
+    "recommendedSupportLevel": "unsupported",
+    "feasibility": {
+      "rating": "none",
+      "notes": "Verified incompatibility: EPS 0.2.4 relies on legacy wallets and importmulti, both removed in Bitcoin Core 30.0, and the descriptor-wallet PR is unmerged. Pinning Bitcoin Core 29.x (end of life when 32.0 ships) only to keep EPS working is not acceptable."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "EPS was the classic answer for 'Electrum server on a pruned node'. For BTCortex's pruned test machine, the replacement is Sparrow connecting directly to Bitcoin Core (Sparrow's Cormorant layer creates a descriptor watch-only wallet; see the sparrow entry). Revisit EPS only if PR #313 is merged and released.",
+    "sources": [
+      { "title": "EPS 0.2.4 release", "url": "https://github.com/chris-belcher/electrum-personal-server/releases/tag/eps-v0.2.4", "accessed": "2026-10-21" },
+      { "title": "EPS README", "url": "https://github.com/chris-belcher/electrum-personal-server/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "EPS config.ini_sample", "url": "https://github.com/chris-belcher/electrum-personal-server/blob/master/config.ini_sample", "accessed": "2026-10-21" },
+      { "title": "EPS deterministicwallet.py (importmulti)", "url": "https://github.com/chris-belcher/electrum-personal-server/blob/master/electrumpersonalserver/server/deterministicwallet.py", "accessed": "2026-10-21" },
+      { "title": "EPS electrumprotocol.py (protocol versions)", "url": "https://github.com/chris-belcher/electrum-personal-server/blob/master/electrumpersonalserver/server/electrumprotocol.py", "accessed": "2026-10-21" },
+      { "title": "EPS issue #309 (Bitcoin Core legacy wallet removal)", "url": "https://github.com/chris-belcher/electrum-personal-server/issues/309", "accessed": "2026-10-21" },
+      { "title": "EPS PR #313 (descriptor wallets)", "url": "https://github.com/chris-belcher/electrum-personal-server/pull/313", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 30.0 release notes", "url": "https://bitcoincore.org/en/releases/30.0/", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The CPU architecture of the Windows release build was not verified.",
+      "Whether the unmerged PR #313 works with Bitcoin Core 31.1 was not tested."
+    ]
+  },
+  {
+    "id": "bwt",
+    "name": "Bitcoin Wallet Tracker (bwt)",
+    "category": "electrum-server",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/bwt-dev/bwt",
+    "purpose": "Rust wallet tracker that uses a Bitcoin Core wallet to follow the user's descriptors, xpubs and addresses and exposes them through a personal Electrum server and an HTTP API ('EPS + Rust + Modern HTTP API'); it supported pruned nodes.",
+    "maintenance": {
+      "status": "stale",
+      "evidence": "Last release v0.2.4 on 2021-03-24; last commit 2022-03-31. Repository not archived and no deprecation notice in the README, but there has been no activity for more than four years.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.2.4",
+      "date": "2021-03-24",
+      "source": "https://github.com/bwt-dev/bwt/releases/tag/v0.2.4"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64"],
+      "windowsDistribution": "bwt-0.2.4-x86_64-windows.zip and bwt-0.2.4-electrum_only-x86_64-windows.zip with SHA256SUMS.asc (2021).",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux x86_64, arm32v7 and arm64v8, and macOS x86_64 builds; an Electrum plugin variant."
+    },
+    "interfaces": [
+      {
+        "type": "electrum-protocol",
+        "description": "Personal Electrum server on port 50001 (mainnet; 60001 testnet, 60401 regtest), plain TCP. With a pruned node, Electrum needs --skipmerklecheck.",
+        "authentication": "None ('unauthenticated and unencrypted by default').",
+        "documentation": "https://github.com/bwt-dev/bwt/blob/master/README.md"
+      },
+      {
+        "type": "rest",
+        "description": "HTTP API on port 3060 (/wallets, /wallet/:id, /sync and others) with server-sent events.",
+        "authentication": "None by default.",
+        "documentation": "https://github.com/bwt-dev/bwt/blob/master/README.md"
+      }
+    ],
+    "cli": "bwt --descriptor/--xpub/--address ..., --rescan-since, --prune-until, --electrum-addr, --http-addr, --bitcoind-url, --bitcoind-auth, --bitcoind-cookie, --bitcoind-wallet, --create-wallet-if-missing.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Incompatible with Bitcoin Core 30.0 and later: wallet.rs imports addresses with importmulti (ImportMultiRequest), a legacy-only RPC removed in Core 30.0 together with legacy wallets. It was designed for Core 0.17 to 0.19 and later; txindex not required; pruning supported for wallets newer than the prune height.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Only versions before 30.0 (importmulti)."
+      }
+    ],
+    "networking": "Electrum server on 50001 and HTTP API on 3060, both unauthenticated.",
+    "storage": "Negligible (uses the Bitcoin Core wallet).",
+    "resources": "Low.",
+    "security": "Both servers are unauthenticated and unencrypted by default. Unmaintained since 2022 and incompatible with supported Bitcoin Core versions.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Detect existing installations and explain the incompatibility with Bitcoin Core 30 or later"
+    ],
+    "supportLevels": ["unsupported"],
+    "recommendedSupportLevel": "unsupported",
+    "feasibility": {
+      "rating": "none",
+      "notes": "Verified incompatibility with Bitcoin Core 30.0 and later (importmulti removed); no maintenance since 2022."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Listed because it is still referenced by older pruned-node guides. Sparrow's direct Bitcoin Core connection (sparrow) covers the same use case with descriptor wallets.",
+    "sources": [
+      { "title": "bwt v0.2.4 release", "url": "https://github.com/bwt-dev/bwt/releases/tag/v0.2.4", "accessed": "2026-10-21" },
+      { "title": "bwt README", "url": "https://github.com/bwt-dev/bwt/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "bwt src/wallet.rs (importmulti)", "url": "https://github.com/bwt-dev/bwt/blob/master/src/wallet.rs", "accessed": "2026-10-21" },
+      { "title": "bwt commit feed", "url": "https://github.com/bwt-dev/bwt/commits.atom", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 30.0 release notes", "url": "https://bitcoincore.org/en/releases/30.0/", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Runtime failure against Bitcoin Core 31.1 was not reproduced; the incompatibility is derived from the code path and the Core 30.0 release notes."
+    ]
+  },
+  {
+    "id": "electrum-server-legacy",
+    "name": "Electrum-server (original Python server)",
+    "category": "electrum-server",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/spesmilo/electrum-server",
+    "purpose": "Original Electrum server by Thomas Voegtlin (Python, LevelDB, Patricia-tree UTXO index by address), replaced by ElectrumX.",
+    "maintenance": {
+      "status": "discontinued",
+      "evidence": "README: 'This code is now unmaintained. The replacement code for electrum server is ElectrumX'. Last commit 2021-03-08 (a documentation merge); no GitHub releases.",
+      "supersededBy": "electrumx"
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Unix-like systems (historical)."
+    },
+    "interfaces": [
+      {
+        "type": "electrum-protocol",
+        "description": "Pre-1.0 Electrum protocol versions (historical).",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Historical bitcoind versions; not maintained for current Bitcoin Core.",
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Unmaintained; must not be deployed.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": ["unsupported"],
+    "recommendedSupportLevel": "unsupported",
+    "feasibility": {
+      "rating": "none",
+      "notes": "Officially unmaintained; replaced by ElectrumX."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Recorded only so that old guides referring to 'electrum-server' map to the supported successors (electrumx, fulcrum, electrs).",
+    "sources": [
+      { "title": "spesmilo/electrum-server README", "url": "https://github.com/spesmilo/electrum-server", "accessed": "2026-10-21" },
+      { "title": "electrum-server commit feed", "url": "https://github.com/spesmilo/electrum-server/commits.atom", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Supported protocol versions and platforms were not researched further because the project is discontinued."
+    ]
+  },
+  {
+    "id": "blockstream-electrs",
+    "name": "Esplora electrs (Blockstream/electrs)",
+    "category": "indexer",
+    "catalogueEligible": true,
+    "website": "https://blockstream.info/",
+    "repository": "https://github.com/Blockstream/electrs",
+    "purpose": "Blockstream's fork of electrs (branch new-index) that builds extended indexes (full transaction store, address index, spendable outputs, block metadata) and serves the Esplora HTTP REST API plus the Electrum protocol. It is the backend of the Esplora explorer and blockstream.info, and supports Liquid/Elements.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Latest commit on new-index 2026-10-19. No releases for the new-index line: the GitHub releases v0.2.0 to v0.4.1 (2018-07 to 2018-10) are pre-fork tags of romanz/electrs. Repository not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Linux from source (Rust, clang, cmake; 'ulimit -n 100000' recommended); shipped inside the official blockstream/esplora Docker image."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "Esplora HTTP API (transactions, addresses and script hashes, blocks, mempool, fee estimates, optional /block-template with --enable-mining-rest, Liquid assets) on --http-addr (default 127.0.0.1:3000) or a Unix socket (--http-socket-file).",
+        "authentication": "None; CORS disabled unless --cors is set.",
+        "documentation": "https://github.com/Blockstream/esplora/blob/master/API.md"
+      },
+      {
+        "type": "electrum-protocol",
+        "description": "Electrum protocol 1.4 (PROTOCOL_VERSION 1.4) on --electrum-rpc-addr, with response-size, write-timeout and global response budget limits; optional electrum-discovery feature (--electrum-hosts, --electrum-announce).",
+        "authentication": "None.",
+        "documentation": "https://github.com/Blockstream/electrs/blob/new-index/README.md"
+      },
+      {
+        "type": "http",
+        "description": "Prometheus metrics on --monitoring-addr: 127.0.0.1:4224 mainnet, 14224 testnet3, 44224 testnet4, 24224 regtest, 54224 signet.",
+        "authentication": "None.",
+        "documentation": "https://github.com/Blockstream/electrs/blob/new-index/src/config.rs"
+      }
+    ],
+    "cli": "electrs (cargo run --release --bin electrs --) --daemon-dir <dir> [--blocks-dir <dir>] [--jsonrpc-import] [--cookie USER:PASSWORD] [--daemon-rpc-addr] [--network mainnet|testnet3|testnet4|signet|regtest|liquid...] [--db-dir] [--http-addr] [--electrum-rpc-addr] [--monitoring-addr] [--lightmode] [--address-search] [--index-unspendables] [--utxos-limit] [--electrum-txs-limit] [--zmq-addr] [--tor-proxy] [--cors].",
+    "remoteManagement": "No admin interface; HTTP API, Electrum protocol and Prometheus metrics only.",
+    "nodeCompatibility": "Bitcoin Core without txindex ('no txindex needed'). By default it reads blk*.dat files directly from --daemon-dir/--blocks-dir, so it needs filesystem access to the node's block files; --jsonrpc-import fetches blocks over RPC instead (for remote or low-memory setups). It builds a full index of every block, so it needs an unpruned node. --cookie takes 'USER:PASSWORD' (default: read ~/.bitcoin/.cookie). Elements/Liquid with --features liquid. Its indexes are incompatible with romanz/electrs.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Unpruned; local block files or --jsonrpc-import."
+      },
+      {
+        "ids": ["elements"],
+        "relationship": "optional",
+        "notes": "Liquid and Elements networks with the liquid feature."
+      }
+    ],
+    "networking": "HTTP API 127.0.0.1:3000 and metrics 127.0.0.1:4224 by default (mainnet); the Electrum port is set with --electrum-rpc-addr (the Esplora image exposes 50001). Outbound only to bitcoind (RPC, optional ZMQ) and, optionally, Tor for discovery.",
+    "storage": "README: the indexes needed 610 GB after compaction as of June 2020, with about double that free during compaction; --lightmode cuts roughly 50 % by querying raw transactions and block metadata from bitcoind on demand. No current figure is published; mempool's fork reported 1.3 TB in October 2023.",
+    "resources": "Indexing takes 'a few hours on a beefy machine with SSD' (README, undated); a high open-file limit is required. RAM needs not documented.",
+    "security": "Designed for public, high-load use (Blockstream recommends it over romanz/electrs for public servers). The HTTP API is unauthenticated; enable CORS only for known origins. --address-search entries are not removed after reorgs (best effort). Needs read access to the node's block files.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Run as part of the official blockstream/esplora Docker image",
+      "Consume its Esplora HTTP API from BTCortex's native explorer when an instance exists locally or remotely",
+      "Use as the 'esplora' backend of mempool (MEMPOOL_BACKEND=esplora)"
+    ],
+    "supportLevels": ["connected-application", "managed-docker", "remote-managed"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Huge index (hundreds of GB to more than 1 TB), no releases, no Windows support and direct block-file access. Only sensible on large Linux servers; BTCortex should consume its API rather than manage it on a Windows desktop."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "The old 2018 GitHub releases must not be presented as current versions; BTCortex should track the commit or Docker image digest instead.",
+    "sources": [
+      { "title": "Blockstream/electrs README (new-index)", "url": "https://github.com/Blockstream/electrs/blob/new-index/README.md", "accessed": "2026-10-21" },
+      { "title": "Blockstream/electrs src/config.rs", "url": "https://github.com/Blockstream/electrs/blob/new-index/src/config.rs", "accessed": "2026-10-21" },
+      { "title": "Blockstream/electrs src/electrum/server.rs", "url": "https://github.com/Blockstream/electrs/blob/new-index/src/electrum/server.rs", "accessed": "2026-10-21" },
+      { "title": "Blockstream/electrs releases feed", "url": "https://github.com/Blockstream/electrs/releases.atom", "accessed": "2026-10-21" },
+      { "title": "Blockstream/electrs commit feed", "url": "https://github.com/Blockstream/electrs/commits.atom", "accessed": "2026-10-21" },
+      { "title": "Esplora HTTP API", "url": "https://github.com/Blockstream/esplora/blob/master/API.md", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Windows buildability was not investigated.",
+      "Current mainnet index size was not published or measured.",
+      "That pruned nodes cannot be used is inferred from the full-index design; upstream does not state it explicitly."
+    ]
+  },
+  {
+    "id": "mempool-electrs",
+    "name": "mempool/electrs",
+    "category": "indexer",
+    "catalogueEligible": true,
+    "website": "https://mempool.space/",
+    "repository": "https://github.com/mempool/electrs",
+    "purpose": "The Mempool project's fork of Blockstream's esplora-electrs that powers mempool.space: Esplora-style REST API plus Electrum protocol with full transaction and address indexes, tuned for mempool deployments.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v3.3.0 released 2026-01-01 'for use with mempool/mempool v3.3'; v3.4.0-dev1 tagged 2026-02-01; latest commit on branch mempool 2026-10-14. Official Docker image mempool/electrs:v3.3.0 pushed 2026-01-01.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.3.0",
+      "date": "2026-01-01",
+      "source": "https://github.com/mempool/electrs/releases/tag/v3.3.0"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Linux and FreeBSD (FreeBSD CI job added in v3.3.0); Rust build with clang and cmake; Docker image for linux/amd64 and linux/arm64."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "Esplora-style HTTP API on --http-addr (default 127.0.0.1:3000); v3.3.0 adds an X-Bitcoin-Version header to all REST responses.",
+        "authentication": "None.",
+        "documentation": "https://mempool.space/docs/api/rest"
+      },
+      {
+        "type": "electrum-protocol",
+        "description": "Electrum protocol 1.4 (PROTOCOL_VERSION 1.4); blockchain.scripthash.unsubscribe added in v3.3.0. Sparrow batches requests to mempool-electrs above 3.1.0.",
+        "authentication": "None.",
+        "documentation": "https://github.com/mempool/electrs/blob/mempool/README.md"
+      }
+    ],
+    "cli": "electrs (cargo run --release --bin electrs --) --daemon-dir <dir> [--lightmode] [--address-search] [--index-unspendables] [--utxos-limit] [--electrum-txs-limit] [--http-addr] [--cors] [--network ...].",
+    "remoteManagement": "No admin interface.",
+    "nodeCompatibility": "Bitcoin Core without txindex ('no txindex needed'), reading blocks from --daemon-dir; it builds a full index from genesis, so an unpruned node is required. Indexes are incompatible with romanz/electrs.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Unpruned; local block files."
+      }
+    ],
+    "networking": "HTTP API 127.0.0.1:3000 by default; Electrum port configurable; outbound only to bitcoind.",
+    "storage": "README: indexes require 1.3 TB after compaction (as of October 2023), with about double that free during compaction; --lightmode reduces storage by roughly 50 %.",
+    "resources": "Creating the indexes takes 'a few hours on a beefy machine with high speed NVMe SSD(s)' (README). RAM needs not documented.",
+    "security": "Unauthenticated HTTP API; intended to sit behind the mempool back end or nginx.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Run the official mempool/electrs image next to the mempool containers (MEMPOOL_BACKEND=esplora)",
+      "Connect to an existing instance's REST API from BTCortex's explorer"
+    ],
+    "supportLevels": ["managed-docker", "connected-application", "remote-managed"],
+    "recommendedSupportLevel": "managed-docker",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Official image, but more than 1 TB of index on top of the node. Mempool's own FAQ points personal deployments to romanz/electrs or Fulcrum and reserves mempool/electrs for stronger hardware."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "mempool/electrs v3.3.0 release", "url": "https://github.com/mempool/electrs/releases/tag/v3.3.0", "accessed": "2026-10-21" },
+      { "title": "mempool/electrs README", "url": "https://github.com/mempool/electrs/blob/mempool/README.md", "accessed": "2026-10-21" },
+      { "title": "mempool/electrs src/electrum/server.rs", "url": "https://github.com/mempool/electrs/blob/mempool/src/electrum/server.rs", "accessed": "2026-10-21" },
+      { "title": "Docker Hub mempool/electrs", "url": "https://hub.docker.com/r/mempool/electrs", "accessed": "2026-10-21" },
+      { "title": "mempool FAQ source (address lookup issues)", "url": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs.component.html", "accessed": "2026-10-21" },
+      { "title": "Sparrow ElectrumServer.java (server capability detection)", "url": "https://github.com/sparrowwallet/sparrow/blob/master/src/main/java/com/sparrowwallet/sparrow/net/ElectrumServer.java", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Windows buildability was not investigated.",
+      "Unpruned-node requirement inferred from the full-index design.",
+      "Current index size not measured; the 1.3 TB figure dates from October 2023."
+    ]
+  },
+  {
+    "id": "esplora",
+    "name": "Esplora",
+    "category": "block-explorer",
+    "catalogueEligible": true,
+    "website": "https://blockstream.info/",
+    "repository": "https://github.com/Blockstream/esplora",
+    "purpose": "Blockstream's block explorer web interface (reactive single-page app with an optional pre-rendering server for noscript users) for Bitcoin and Liquid, built on the esplora-electrs HTTP API; it powers blockstream.info.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "esplora_v3.0.1 released 2026-08-25 ('patch base image') after esplora_v3.0.0 on 2026-08-24 ('Updated UI and new metrics'), the first tags since esplora_v2.10 (2019-03-06). Latest commit 2026-10-21. Docker image blockstream/esplora:v3.0.1 (linux/amd64, linux/arm64) pushed 2026-08-25; latest pushed 2026-09-04.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.0.1",
+      "date": "2026-08-25",
+      "source": "https://github.com/Blockstream/esplora/releases/tag/esplora_v3.0.1"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Official Docker image bundling bitcoind (or elementsd), esplora-electrs, nginx, a pre-renderer, a WebSocket service, Tor and socat under runit. The front end alone builds with Node.js/npm (npm run dist) into static files that any web server can serve against an Esplora-compatible API_URL."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web explorer served by nginx on container port 80 (README examples map 8080:80 for mainnet); pre-rendering server on 5001 and development server on 5000 when run from source.",
+        "authentication": "None.",
+        "documentation": "https://github.com/Blockstream/esplora/blob/master/README.md"
+      },
+      {
+        "type": "rest",
+        "description": "Esplora HTTP API (served by esplora-electrs through nginx under /api in the image).",
+        "authentication": "None.",
+        "documentation": "https://github.com/Blockstream/esplora/blob/master/API.md"
+      },
+      {
+        "type": "electrum-protocol",
+        "description": "Electrum protocol from the bundled esplora-electrs, published on 50001 in the README examples.",
+        "authentication": "None.",
+        "documentation": "https://github.com/Blockstream/esplora/blob/master/README.md"
+      },
+      {
+        "type": "cli",
+        "description": "Container command /srv/explorer/run.sh <flavour> explorer, with flavours bitcoin-mainnet, bitcoin-testnet, bitcoin-testnet4, bitcoin-signet, bitcoin-regtest, liquid-mainnet, liquid-testnet, liquid-regtest; environment options DEBUG=verbose, NO_PRECACHE=1, NO_ADDRESS_SEARCH=1, ENABLE_LIGHTMODE=1, ONION_URL, NO_REGTEST_MINING=1.",
+        "authentication": null,
+        "documentation": "https://github.com/Blockstream/esplora/blob/master/run.sh"
+      }
+    ],
+    "cli": "docker run -p 50001:50001 -p 8080:80 --volume <data>:/data blockstream/esplora bash -c \"/srv/explorer/run.sh bitcoin-mainnet explorer\"; front end: npm install, npm run dist (API_URL, BASE_HREF, SITE_TITLE and other build options).",
+    "remoteManagement": "Container lifecycle through the Docker API; no explorer-specific admin interface.",
+    "nodeCompatibility": "The official image runs its own Bitcoin Core (configuration generated from contrib/bitcoin-<network>-<mode>.conf.in into /data/.bitcoin.conf) and esplora-electrs inside the container. Using an external, BTCortex-managed node is not documented. Requires the full, unpruned chain for the esplora-electrs index.",
+    "dependencies": [
+      {
+        "ids": ["blockstream-electrs"],
+        "relationship": "requires",
+        "notes": "HTTP API backend (bundled in the image)."
+      },
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Bundled inside the image; a second, independent full node next to a BTCortex-managed one."
+      },
+      {
+        "ids": ["tor"],
+        "relationship": "optional",
+        "notes": "Bundled Tor service and ONION_URL for the Onion-Location header."
+      }
+    ],
+    "networking": "Container ports 80 (web) and 50001 (Electrum) in the documented examples; the bundled bitcoind makes its own P2P connections.",
+    "storage": "Full Bitcoin block data plus the esplora-electrs index (610 GB after compaction as of June 2020, about half with ENABLE_LIGHTMODE=1); current totals not published.",
+    "resources": "Not documented; dominated by bitcoind and esplora-electrs.",
+    "security": "The image runs services as root inside the container (run.sh sets nginx to 'user root'). The web UI and API are unauthenticated. Running a second full node doubles disk and bandwidth use and is not covered by BTCortex's node management.",
+    "licence": "MIT",
+    "licenceNotes": "MIT (Copyright Blockstream Corp). 'Blockstream' branding in the default flavour must not be reused by BTCortex.",
+    "integrationMechanisms": [
+      "Use the Esplora HTTP API (local esplora-electrs, mempool/electrs or a remote Esplora) as a data source in BTCortex's native explorer",
+      "Run the official blockstream/esplora image for large-disk 'maximum stack' profiles, accepting its bundled node",
+      "Serve a self-built static front end against an existing Esplora-compatible API"
+    ],
+    "supportLevels": ["connected-application", "managed-docker", "remote-managed"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "low",
+      "notes": "The all-in-one image duplicates the full node and needs well over 1 TB. The API is valuable to BTCortex's native explorer, so connecting to an Esplora API is the realistic integration."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "The public instance is blockstream.info (see blockstream-info-api).",
+    "sources": [
+      { "title": "Esplora v3.0.1 release", "url": "https://github.com/Blockstream/esplora/releases/tag/esplora_v3.0.1", "accessed": "2026-10-21" },
+      { "title": "Esplora releases feed", "url": "https://github.com/Blockstream/esplora/releases.atom", "accessed": "2026-10-21" },
+      { "title": "Esplora README", "url": "https://github.com/Blockstream/esplora/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "Esplora run.sh", "url": "https://github.com/Blockstream/esplora/blob/master/run.sh", "accessed": "2026-10-21" },
+      { "title": "Esplora HTTP API", "url": "https://github.com/Blockstream/esplora/blob/master/API.md", "accessed": "2026-10-21" },
+      { "title": "Docker Hub blockstream/esplora", "url": "https://hub.docker.com/r/blockstream/esplora", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether run.sh can be pointed at an external bitcoind was not tested.",
+      "Resource needs of the full image were not measured."
+    ]
+  },
+  {
+    "id": "mempool",
+    "name": "The Mempool Open Source Project (mempool)",
+    "category": "block-explorer",
+    "catalogueEligible": true,
+    "website": "https://mempool.space/",
+    "repository": "https://github.com/mempool/mempool",
+    "purpose": "Mempool visualiser, block explorer, fee estimator, mining dashboard, Lightning explorer and REST/WebSocket API behind mempool.space; self-hostable with an Angular front end, a Node.js/TypeScript back end and MariaDB.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v3.3.1 released 2026-04-21 (a hotfix the same day as v3.3.0); v3.4.0-alpha1 on 2026-06-18; latest master commit 2026-10-15. Official images mempool/backend:v3.3.1 and mempool/frontend:v3.3.1 pushed 2026-04-21.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.3.1",
+      "date": "2026-04-21",
+      "source": "https://github.com/mempool/mempool/releases/tag/v3.3.1"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Docker images mempool/frontend and mempool/backend (linux/amd64, linux/arm64) with a reference docker-compose.yml (MariaDB 10.5.21); manual installation for developers (Node.js 20.x and npm 9 or later, Rust for the native block-template module, MariaDB 10.5 or later, nginx); FreeBSD production guide (Node.js v24.13.0); one-click apps on Umbrel, RaspiBlitz, RoninDojo, myNode, StartOS and nix-bitcoin. No Windows instructions or packages."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web UI served by the front-end container's nginx on 8080 (published as 80:8080 in the reference compose file).",
+        "authentication": "None.",
+        "documentation": "https://github.com/mempool/mempool/blob/master/docker/README.md"
+      },
+      {
+        "type": "rest",
+        "description": "Back-end REST API on HTTP_PORT 8999 under /api/v1/ (for example /api/v1/fees/recommended, /api/v1/fees/mempool-blocks, /api/v1/backend-info used by the compose health check) plus Esplora-style paths (/api/tx/:txid, /api/address/:address, /api/blocks/tip/height); v3.3.0 adds /api/tx/:txId/merkle-proof for non-Esplora back ends.",
+        "authentication": "None for public endpoints (the accelerator and enterprise APIs have their own authentication).",
+        "documentation": "https://mempool.space/docs/api/rest"
+      },
+      {
+        "type": "websocket",
+        "description": "WebSocket service at /api/v1/ws (ws:// or wss:// on the same host) for live blocks, mempool blocks, statistics and address or transaction tracking.",
+        "authentication": "None.",
+        "documentation": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs.component.ts"
+      },
+      {
+        "type": "file",
+        "description": "backend mempool-config.json (sections MEMPOOL, CORE_RPC, ELECTRUM, ESPLORA, SECOND_CORE_RPC, DATABASE, SYSLOG, STATISTICS, MAXMIND, LIGHTNING, LND, CLIGHTNING, SOCKS5PROXY, EXTERNAL_DATA_SERVER, REDIS, REPLICATION, MEMPOOL_SERVICES, STRATUM, FIAT_PRICE), overridable with environment variables in the Docker images; frontend mempool-frontend-config.json.",
+        "authentication": null,
+        "documentation": "https://github.com/mempool/mempool/blob/master/backend/mempool-config.sample.json"
+      }
+    ],
+    "cli": "Docker: docker compose up with the reference docker-compose.yml (services web, api, db). Manual back end: npm install --no-install-links, npm run build, npm run start (flags such as --update-pools).",
+    "remoteManagement": "Container lifecycle through Docker or Podman; no admin API beyond the public REST endpoints.",
+    "nodeCompatibility": "Bitcoin Core with txindex=1 and server=1 is required even without an Electrum server (docker/README and backend/README), so mempool cannot run on a pruned node. RPC with username/password (the reference compose file uses mempool/mempool) or cookie (CORE_RPC.COOKIE and COOKIE_PATH). MEMPOOL_BACKEND: 'none' (Core only; address lookups disabled), 'electrum' (romanz/electrs or Fulcrum; ELECTRUM_HOST, ELECTRUM_PORT, ELECTRUM_TLS_ENABLED) or 'esplora' (Blockstream or mempool electrs REST at 127.0.0.1:3000 or a Unix socket). Optional second Core RPC node, LND or Core Lightning for the Lightning explorer, Redis, and MaxMind GeoIP databases.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "txindex=1, server=1, unpruned; reachable from the containers (the reference compose file uses the Docker gateway 172.27.0.1)."
+      },
+      {
+        "ids": ["mariadb"],
+        "relationship": "requires",
+        "notes": "MariaDB 10.5 or later (statistics, block and mining indexing); mariadb:10.5.21 in the reference compose file."
+      },
+      {
+        "ids": ["fulcrum", "electrs", "mempool-electrs", "blockstream-electrs"],
+        "relationship": "optional",
+        "notes": "Needed for address lookups. The mempool FAQ: romanz/electrs is lightweight but struggles with heavy addresses, Fulcrum handles heavy queries much better, mempool/electrs suits stronger hardware."
+      },
+      {
+        "ids": ["lnd", "core-lightning"],
+        "relationship": "optional",
+        "notes": "Lightning network explorer (LIGHTNING, LND, CLIGHTNING sections)."
+      },
+      {
+        "ids": ["tor"],
+        "relationship": "optional",
+        "notes": "SOCKS5PROXY section (127.0.0.1:9050) to route external data fetches over Tor."
+      }
+    ],
+    "networking": "Front end 8080 in the container (80 on the host in the reference compose file), back end 8999, MariaDB 3306 on the internal network. Default outbound connections from the back end: fiat price feeds (FIAT_PRICE.ENABLED true by default; price-updater uses Bitflyer, Kraken, Coinbase, Bitfinex and Gemini, plus FreeCurrencyAPI when an API key is set) and the MEMPOOL_SERVICES API; mining-pool definitions from GitHub when AUTOMATIC_POOLS_UPDATE is enabled (false by default). EXTERNAL_DATA_SERVER points at https://mempool.space/api/v1 and the onion http://mempoolhqx4isw62xs7abwphsq7ldayuidyx2v2oethdhhj6mlo2r6ad.onion/api/v1.",
+    "storage": "No upstream sizing. Needs the full node with txindex (blocks 788 GiB plus txindex 66 GiB around height 950 000 per the ElectrumX 2.0 changelog), the Electrum server index if address lookups are wanted (Fulcrum about 166 GB, electrs about 56 GB), and a MariaDB database that grows with indexing options.",
+    "resources": "Not documented upstream; dominated by the node, the Electrum back end and MariaDB.",
+    "security": "Web UI and API are unauthenticated; publish only on loopback or behind authentication. The reference compose file uses weak default database and RPC credentials (mempool/mempool, root password 'admin') that BTCortex must replace with generated secrets. The back end contacts exchanges for prices by default (IP leak, no wallet data) unless FIAT_PRICE is disabled or routed through SOCKS5PROXY. Every address a user searches is visible to whichever Electrum or Esplora back end is configured, so keep it local. No GitHub security advisories published as of 2026-10-21.",
+    "licence": "AGPL-3.0-or-later",
+    "licenceNotes": "GNU AGPL version 3 'or any later version approved by a proxy statement published on mempool.space/about'. The licence grants no trademark rights: 'The Mempool Open Source Project®', 'mempool.space®', 'Mempool Goggles®', the logos and others are trademarks of Mempool Holdings S.A. de C.V. (trademark policy at mempool.space/trademark-policy). BTCortex may name the project factually but must not use its logos or imply endorsement; modifying and serving it over a network triggers AGPL source obligations.",
+    "integrationMechanisms": [
+      "Deploy the official mempool/frontend, mempool/backend and mariadb images with a generated docker-compose file (generated secrets, loopback-only port bindings, FIAT_PRICE disabled or proxied) inside a BTCortex-managed container runtime",
+      "Generate bitcoin.conf changes (txindex=1, an rpcauth user, rpcbind/rpcallowip for the container network) and point MEMPOOL_BACKEND at the managed Fulcrum or electrs",
+      "Health checks: GET /api/v1/backend-info on the back end and an HTML check on the front end (as in the reference compose file)",
+      "Open the self-hosted UI in the user's browser or a BTCortex window (external launcher)",
+      "Connect to mempool instances on node platforms (Umbrel, StartOS and others) as a connected application"
+    ],
+    "supportLevels": ["managed-docker", "managed-wsl2", "connected-application", "remote-managed", "external-launcher"],
+    "recommendedSupportLevel": "managed-docker",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Official multi-arch images and a reference compose file make container deployment straightforward. Windows needs a Linux container runtime (Docker Desktop or an engine inside a BTCortex-managed WSL2 distribution), Bitcoin Core with txindex on an unpruned node, and RPC reachable from the container network. Not possible on the pruned test machine."
+    },
+    "priority": "P1",
+    "implementationStatus": "researched",
+    "notes": "v3.3.0 highlights: regtest support, Taproot script-tree visualisation, sub-1 sat/vB support, ephemeral dust, decimal fee recommendations, Angular 16 to 20. Umbrel ships 3.3.1-hotfix-1 with electrs as its address back end.",
+    "sources": [
+      { "title": "mempool v3.3.1 release", "url": "https://github.com/mempool/mempool/releases/tag/v3.3.1", "accessed": "2026-10-21" },
+      { "title": "mempool v3.3.0 release", "url": "https://github.com/mempool/mempool/releases/tag/v3.3.0", "accessed": "2026-10-21" },
+      { "title": "mempool README", "url": "https://github.com/mempool/mempool/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "mempool Docker README", "url": "https://github.com/mempool/mempool/blob/master/docker/README.md", "accessed": "2026-10-21" },
+      { "title": "mempool docker-compose.yml", "url": "https://github.com/mempool/mempool/blob/master/docker/docker-compose.yml", "accessed": "2026-10-21" },
+      { "title": "mempool back-end README", "url": "https://github.com/mempool/mempool/blob/master/backend/README.md", "accessed": "2026-10-21" },
+      { "title": "mempool back-end config sample", "url": "https://github.com/mempool/mempool/blob/master/backend/mempool-config.sample.json", "accessed": "2026-10-21" },
+      { "title": "mempool price updater", "url": "https://github.com/mempool/mempool/blob/master/backend/src/tasks/price-updater.ts", "accessed": "2026-10-21" },
+      { "title": "mempool production README", "url": "https://github.com/mempool/mempool/blob/master/production/README.md", "accessed": "2026-10-21" },
+      { "title": "mempool LICENSE", "url": "https://github.com/mempool/mempool/blob/master/LICENSE", "accessed": "2026-10-21" },
+      { "title": "mempool API docs component (FAQ, rate limits)", "url": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs.component.html", "accessed": "2026-10-21" },
+      { "title": "mempool API docs component (WebSocket URL)", "url": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs.component.ts", "accessed": "2026-10-21" },
+      { "title": "Docker Hub mempool/backend", "url": "https://hub.docker.com/r/mempool/backend", "accessed": "2026-10-21" },
+      { "title": "Umbrel mempool app manifest", "url": "https://github.com/getumbrel/umbrel-apps/blob/master/mempool/umbrel-app.yml", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "A native Windows build of the back end (including its Rust module) and MariaDB was not attempted.",
+      "RAM and disk needs of the mempool containers and database were not measured.",
+      "Full compatibility of mempool's REST paths with the Esplora API was not verified endpoint by endpoint.",
+      "The /api/v1/ws subscription message formats were not reviewed in detail."
+    ]
+  },
+  {
+    "id": "btc-rpc-explorer",
+    "name": "BTC RPC Explorer",
+    "category": "block-explorer",
+    "catalogueEligible": true,
+    "website": "https://bitcoinexplorer.org/",
+    "repository": "https://github.com/janoside/btc-rpc-explorer",
+    "purpose": "Self-hosted Node.js Bitcoin explorer driven by RPC calls to the user's own node: network summary, block, transaction and address pages, mempool analysis, mining and UTXO-set tools, a JSON REST API and an RPC browser/terminal, with optional address history from an Electrum server.",
+    "maintenance": {
+      "status": "maintenance-only",
+      "evidence": "v3.5.1 tagged on GitHub 2025-07-02 (v3.5.0 on 2025-06-23, 'Fix for node details page display on 28.0+'); latest commit 2025-08-24 (dependency updates); nothing since. The npm registry still lists 3.4.0 (2023-06-14) as latest, so 3.5.x is GitHub-only. Repository not archived.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.5.1",
+      "date": "2025-07-02",
+      "source": "https://github.com/janoside/btc-rpc-explorer/releases/tag/v3.5.1"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64", "arm64"],
+      "windowsDistribution": "No Windows package. Node.js application (Node 18 or later, 22 or later recommended) installed with npm from the registry (npm install -g btc-rpc-explorer gives 3.4.0) or from the GitHub source tag; there is no package-lock.json. The only native dependency, zeromq 6.5.0, ships prebuilt win32 x64 and arm64 addons. Two dependencies are GitHub references (@janoside/app-utils, electrum-client).",
+      "wsl2": "likely",
+      "docker": "community-image",
+      "other": "Any platform with Node.js; repository Dockerfile (build locally); community image getumbrel/btc-rpc-explorer v3.5.1 (2025-07-07); AUR package; Umbrel app 3.5.1."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web UI on BTCEXP_HOST:BTCEXP_PORT (default 127.0.0.1:3002), including an RPC browser and terminal restricted by an RPC method blacklist.",
+        "authentication": "Optional HTTP Basic password (BTCEXP_BASIC_AUTH_PASSWORD, any user name) or SSO token file (BTCEXP_SSO_TOKEN_FILE, token passed once as ?token=, then a cookie). No authentication by default.",
+        "documentation": "https://github.com/janoside/btc-rpc-explorer/blob/master/README.md"
+      },
+      {
+        "type": "rest",
+        "description": "JSON REST API under /api (blocks, transactions, addresses, mempool, mining such as /api/mining/next-block, blockchain such as /api/blockchain/utxo-set) with its own changelog at /api/changelog.",
+        "authentication": "Same as the web UI; optional rate limiting (BTCEXP_RATE_LIMIT_WINDOW_MINUTES, BTCEXP_RATE_LIMIT_WINDOW_MAX_REQUESTS).",
+        "documentation": "https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md"
+      },
+      {
+        "type": "cli",
+        "description": "btc-rpc-explorer (bin/cli.js) with flags equivalent to the BTCEXP_* variables, for example --port, --bitcoind-port, --bitcoind-cookie; --help lists all options.",
+        "authentication": null,
+        "documentation": "https://github.com/janoside/btc-rpc-explorer/blob/master/README.md"
+      },
+      {
+        "type": "file",
+        "description": "Environment file ~/.config/btc-rpc-explorer.env or .env in the working directory (see .env-sample).",
+        "authentication": null,
+        "documentation": "https://github.com/janoside/btc-rpc-explorer/blob/master/.env-sample"
+      }
+    ],
+    "cli": "btc-rpc-explorer or node ./bin/www with BTCEXP_HOST, BTCEXP_PORT (3002), BTCEXP_BITCOIND_URI or BTCEXP_BITCOIND_HOST/PORT/USER/PASS or BTCEXP_BITCOIND_COOKIE, BTCEXP_BITCOIND_RPC_TIMEOUT, BTCEXP_ADDRESS_API=electrum with BTCEXP_ELECTRUM_SERVERS=tcp://127.0.0.1:50001 or tls://host:50002 (BTCEXP_ELECTRUM_TXINDEX), BTCEXP_PRIVACY_MODE, BTCEXP_NO_RATES (default true), BTCEXP_SLOW_DEVICE_MODE (default true), BTCEXP_RPC_ALLOWALL (default false), BTCEXP_RPC_BLACKLIST, BTCEXP_BASIC_AUTH_PASSWORD, BTCEXP_COOKIE_SECRET, BTCEXP_NOTXINDEX_SEARCH_DEPTH (3), BTCEXP_FILESYSTEM_CACHE_DIR, BTCEXP_UI_THEME.",
+    "remoteManagement": "None beyond its HTTP interface; on Linux it can be run as a systemd service (AUR package).",
+    "nodeCompatibility": "Bitcoin Core with server=1 (cookie or user/password). Works best with txindex=1 and an unpruned node, but on Core 0.21 or later it also runs with pruning and/or without txindex, with reduced functionality: only mempool, recently confirmed (within BTCEXP_NOTXINDEX_SEARCH_DEPTH blocks) and wallet transactions can be found by txid alone (otherwise the block height is needed); pruned blocks show header information only; previous-output addresses and amounts and confirmed-transaction fees are missing; block stats only for unpruned blocks. Address history requires an Electrum server (electrs, Fulcrum, ElectrumX) or an external API. 3.5.0 fixed the node details page for Core 28.0 and later; behaviour against 31.x was not verified.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "server=1; txindex optional; pruned nodes supported with reduced functionality."
+      },
+      {
+        "ids": ["fulcrum", "electrs", "electrumx"],
+        "relationship": "optional",
+        "notes": "Address and extended-public-key balance and history (BTCEXP_ADDRESS_API=electrum). The alternative external address APIs (blockchain.com, blockchair.com, blockcypher.com) must never be configured by BTCortex."
+      }
+    ],
+    "networking": "Listens on 127.0.0.1:3002 by default; connects to bitcoind RPC (127.0.0.1:8332) and optionally to Electrum servers (no ZMQ settings are documented although zeromq is a dependency). Optional outbound: exchange rates (off by default, BTCEXP_NO_RATES=true), IP geolocation (only with an ipstack API key), Mapbox, Sentry, Google Analytics or Plausible (only when configured), external address APIs (only when configured).",
+    "storage": "Small (application plus optional filesystem cache); uses the node's data.",
+    "resources": "Node.js process; BTCEXP_SLOW_DEVICE_MODE (default true) disables heavy features such as UTXO-set summaries. BTCEXP_OLD_SPACE_MAX_SIZE tunes the V8 heap (example 2048 MB).",
+    "security": "The RPC browser and terminal can call node RPCs: keep BTCEXP_RPC_ALLOWALL=false (default blacklist blocks dangerous methods), bind to 127.0.0.1, set a generated BTCEXP_BASIC_AUTH_PASSWORD or SSO token and BTCEXP_COOKIE_SECRET, and give it a dedicated rpcauth user restricted with rpcwhitelist where possible. Never enable external address APIs. Installing from GitHub without a lockfile means unpinned transitive dependencies: BTCortex should vendor a reviewed lockfile. Low maintenance activity increases dependency-vulnerability risk. No GitHub security advisories published as of 2026-10-21.",
+    "licence": "MIT",
+    "licenceNotes": "MIT; the 'BitcoinExplorer.org' name and demo site are the author's.",
+    "integrationMechanisms": [
+      "Install a pinned source snapshot (GitHub tag v3.5.1) with a BTCortex-reviewed lockfile into a per-user directory and run it with the Node.js runtime BTCortex already ships for its sidecar",
+      "Generate the environment (BTCEXP_HOST=127.0.0.1, BTCEXP_PORT, BTCEXP_BITCOIND_COOKIE=<Core network data directory>\\.cookie, BTCEXP_PRIVACY_MODE=true, BTCEXP_NO_RATES=true, BTCEXP_BASIC_AUTH_PASSWORD or SSO token, BTCEXP_ADDRESS_API=electrum when a managed Electrum server exists)",
+      "Supervise node ./bin/www as a child process; health check with an HTTP GET on / or an /api endpoint",
+      "Open in the user's browser or a BTCortex web view",
+      "Connect to existing instances on node platforms (Umbrel app port 3002)"
+    ],
+    "supportLevels": ["fully-managed", "connected-application", "external-launcher", "managed-docker", "managed-wsl2"],
+    "recommendedSupportLevel": "fully-managed",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "The only maintained explorer that runs natively on Windows (Node.js, prebuilt ZeroMQ addon) and works with a pruned node, which makes it the explorer for the test machine. Caveats: low maintenance, the npm registry is two releases behind, GitHub-hosted dependencies, no lockfile, and pruned or no-txindex mode lacks many details."
+    },
+    "priority": "P1",
+    "implementationStatus": "researched",
+    "notes": "BTCortex's own native explorer area can cover much of the same ground directly over Bitcoin Core RPC; BTC RPC Explorer remains useful as an optional, separately installed explorer.",
+    "sources": [
+      { "title": "BTC RPC Explorer v3.5.1 release", "url": "https://github.com/janoside/btc-rpc-explorer/releases/tag/v3.5.1", "accessed": "2026-10-21" },
+      { "title": "BTC RPC Explorer releases feed", "url": "https://github.com/janoside/btc-rpc-explorer/releases.atom", "accessed": "2026-10-21" },
+      { "title": "BTC RPC Explorer commit feed", "url": "https://github.com/janoside/btc-rpc-explorer/commits.atom", "accessed": "2026-10-21" },
+      { "title": "BTC RPC Explorer README", "url": "https://github.com/janoside/btc-rpc-explorer/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "BTC RPC Explorer CHANGELOG", "url": "https://github.com/janoside/btc-rpc-explorer/blob/master/CHANGELOG.md", "accessed": "2026-10-21" },
+      { "title": "BTC RPC Explorer .env-sample", "url": "https://github.com/janoside/btc-rpc-explorer/blob/master/.env-sample", "accessed": "2026-10-21" },
+      { "title": "BTC RPC Explorer package.json", "url": "https://github.com/janoside/btc-rpc-explorer/blob/master/package.json", "accessed": "2026-10-21" },
+      { "title": "npm registry btc-rpc-explorer", "url": "https://registry.npmjs.org/btc-rpc-explorer", "accessed": "2026-10-21" },
+      { "title": "zeromq 6.5.0 package contents (prebuilt addons)", "url": "https://unpkg.com/zeromq@6.5.0/?meta", "accessed": "2026-10-21" },
+      { "title": "Docker Hub getumbrel/btc-rpc-explorer", "url": "https://hub.docker.com/r/getumbrel/btc-rpc-explorer", "accessed": "2026-10-21" },
+      { "title": "Umbrel BTC RPC Explorer app manifest", "url": "https://github.com/getumbrel/umbrel-apps/blob/master/btc-rpc-explorer/umbrel-app.yml", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Running 3.5.1 natively on Windows with Node.js was not tested.",
+      "Whether npm can fetch the github: dependencies without git installed (tarball download) was not tested.",
+      "Behaviour against Bitcoin Core 31.x (RPC field changes) was not tested."
+    ]
+  },
+  {
+    "id": "nbxplorer",
+    "name": "NBXplorer",
+    "category": "indexer",
+    "catalogueEligible": true,
+    "website": "https://btcpayserver.github.io/NBXplorer/",
+    "repository": "https://github.com/btcpayserver/NBXplorer",
+    "purpose": "Minimalist UTXO tracker for HD wallets used by BTCPay Server: it watches only registered derivation schemes, wallet policies and addresses on a trusted full node, stores them in PostgreSQL and exposes transactions, UTXOs, balances, events and PSBT creation through a REST API.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v2.6.19 released 2026-09-30 (v2.6.18 on 2026-09-25, v2.6.17 on 2026-09-19); client library Client/v5.0.11 on 2026-09-30; latest commit 2026-10-19 ('Bump NBitcoin dependencies'). The repository moved from dgarage/NBXplorer to btcpayserver/NBXplorer. Docker image nicolasdorier/nbxplorer:2.6.19 (linux/amd64, arm64, arm) pushed 2026-09-30.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.6.19",
+      "date": "2026-09-30",
+      "source": "https://github.com/btcpayserver/NBXplorer/releases/tag/v2.6.19"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "No binary release assets (source archives only). Build from source with the .NET 10 SDK (build.ps1 and run.ps1 for PowerShell; net10.0 target); Windows paths are documented (%APPDATA%\\NBXplorer\\<Network>\\settings.config and .cookie).",
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Cross-platform .NET 10 (Linux, macOS); Docker image nicolasdorier/nbxplorer built from mcr.microsoft.com/dotnet/aspnet:10.0; deployed by btcpayserver-docker."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "REST API on 127.0.0.1:24444 by default (/v1/cryptos/btc/...): track derivation schemes, groups and standalone addresses, get unused addresses, balances, UTXOs and transactions, create PSBTs, broadcast, fee estimates (for example /v1/cryptos/btc/fees/3), rescans.",
+        "authentication": "HTTP Basic with the credential in the .cookie file regenerated at every start (%APPDATA%\\NBXplorer\\<Network>\\.cookie on Windows; reload after a 401). --noauth / NBXPLORER_NOAUTH=1 disables authentication and must only be used in isolated development environments.",
+        "documentation": "https://github.com/btcpayserver/NBXplorer/blob/master/docs/API.md"
+      },
+      {
+        "type": "websocket",
+        "description": "Event stream over WebSockets, in addition to polling and long polling of the events endpoint.",
+        "authentication": "Same cookie credential.",
+        "documentation": "https://github.com/btcpayserver/NBXplorer/blob/master/docs/API.md"
+      },
+      {
+        "type": "library-api",
+        "description": "Official .NET client NBXplorer.Client (NuGet); community Node.js client NBXplorer.NodeJS (not maintained by the project).",
+        "authentication": null,
+        "documentation": "https://github.com/btcpayserver/NBXplorer/blob/master/docs/API.md"
+      },
+      {
+        "type": "file",
+        "description": "settings.config ('key=value', for example chains=btc, btc.rpc.url, btc.rpc.user, btc.rpc.password, btc.node.endpoint, postgres=<Npgsql connection string>); every setting also exists as a command-line flag and an NBXPLORER_ environment variable.",
+        "authentication": null,
+        "documentation": "https://github.com/btcpayserver/NBXplorer/blob/master/docs/Operator.md"
+      }
+    ],
+    "cli": "dotnet NBXplorer.dll --help; --network mainnet|testnet|regtest, --chains btc[,ltc...], --bind, --postgres, --btcrpcurl, --btcrpcuser, --btcrpcpassword, --btcnodeendpoint, --btcstartheight, --btcrescan, --conf, --datadir, --noauth.",
+    "remoteManagement": "REST API only (loopback by default); not intended for internet exposure. Remote deployments are managed with BTCPay Server's tooling (btcpayserver-docker) over SSH.",
+    "nodeCompatibility": "Bitcoin Core 24.0 or later; pruned nodes are supported because only registered wallets are indexed (rescans can only cover retained blocks). Uses JSON-RPC for queries and broadcasting and a P2P connection (btc.node.endpoint, default 127.0.0.1:8333) for block and transaction announcements, so the node must accept local P2P connections: a node configured with listen=0 cannot serve NBXplorer. RPC authentication defaults to the node's cookie in its standard data directory, otherwise btc.rpc.user/password. The first run starts scanning at the current height (startheight -1); older history needs --btcrescan with --btcstartheight.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "24.0 or later; RPC plus local P2P (listen=1 with bind=127.0.0.1 if inbound peers are not wanted); pruning allowed."
+      },
+      {
+        "ids": ["postgresql"],
+        "relationship": "requires",
+        "notes": "PostgreSQL 13 or later is mandatory; NBXplorer creates the database and applies migrations at start-up."
+      },
+      {
+        "ids": ["btcpay-server"],
+        "relationship": "enhances",
+        "notes": "NBXplorer is BTCPay Server's on-chain wallet back end (spec 17.2: Bitcoin Core, NBXplorer, BTCPay Server). The BTCPay deployment decision belongs to the btcpay-server entry."
+      }
+    ],
+    "networking": "Listens on 127.0.0.1:24444 by default (the Docker example binds 0.0.0.0:24444 inside the container network); connects to bitcoind RPC 8332, bitcoind P2P 8333 and PostgreSQL 5432.",
+    "storage": "Grows with the number of tracked wallets and transactions, not with the chain (PostgreSQL); no upstream figure.",
+    "resources": "Not documented; .NET 10 runtime plus PostgreSQL.",
+    "security": "Upstream warns: 'Do not expose NBXplorer directly to the internet'; keep it on loopback or a trusted container network and keep cookie authentication on. The PostgreSQL connection string contains a password and belongs in protected configuration. Registered xpubs reveal the merchant's full wallet history to anyone with database or API access.",
+    "licence": "MIT",
+    "licenceNotes": "MIT (Copyright Digital Garage).",
+    "integrationMechanisms": [
+      "Deploy the official nicolasdorier/nbxplorer image with a PostgreSQL container as part of a BTCPay Server stack",
+      "Alternatively publish NBXplorer (dotnet publish) in BTCortex CI as a self-contained win-x64 build and run it natively against a native PostgreSQL",
+      "Generate settings.config or NBXPLORER_ environment variables (network, chains, bind 127.0.0.1:24444, postgres, btc.rpc.*, btc.node.endpoint)",
+      "Adjust bitcoin.conf for the local P2P endpoint (listen=1, bind=127.0.0.1) when the node profile used listen=0",
+      "Health check: authenticated GET /v1/cryptos/btc/status with the cookie credential"
+    ],
+    "supportLevels": ["managed-docker", "fully-managed", "connected-application", "remote-managed"],
+    "recommendedSupportLevel": "managed-docker",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Official image and clear configuration; works with pruned nodes. Native Windows hosting is possible in principle (.NET 10 and PostgreSQL both run on Windows) but has no upstream binaries and would make BTCortex responsible for builds. It only makes sense together with BTCPay Server."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": "Cross-scope conflict: the bitcoin-core zero-touch profile recommends listen=0; NBXplorer (and electrs 0.11 or earlier) need the node's P2P port on loopback, so the node profile must switch to listen=1 with bind=127.0.0.1 (natpmp=0, discover=0) when NBXplorer is installed.",
+    "sources": [
+      { "title": "NBXplorer v2.6.19 release", "url": "https://github.com/btcpayserver/NBXplorer/releases/tag/v2.6.19", "accessed": "2026-10-21" },
+      { "title": "NBXplorer releases feed", "url": "https://github.com/dgarage/NBXplorer/releases.atom", "accessed": "2026-10-21" },
+      { "title": "NBXplorer README", "url": "https://github.com/btcpayserver/NBXplorer/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "NBXplorer operator guide", "url": "https://github.com/btcpayserver/NBXplorer/blob/master/docs/Operator.md", "accessed": "2026-10-21" },
+      { "title": "NBXplorer API integrator guide", "url": "https://github.com/btcpayserver/NBXplorer/blob/master/docs/API.md", "accessed": "2026-10-21" },
+      { "title": "NBXplorer Dockerfile", "url": "https://github.com/btcpayserver/NBXplorer/blob/master/Dockerfile", "accessed": "2026-10-21" },
+      { "title": "NBXplorer global.json (.NET 10 SDK)", "url": "https://github.com/btcpayserver/NBXplorer/blob/master/global.json", "accessed": "2026-10-21" },
+      { "title": "Docker Hub nicolasdorier/nbxplorer", "url": "https://hub.docker.com/r/nicolasdorier/nbxplorer", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The status endpoint path used for health checks (/v1/cryptos/btc/status) was taken from the API reference structure and not exercised.",
+      "A native Windows build and run was not attempted.",
+      "Storage and RAM needs were not measured."
+    ]
+  },
+  {
+    "id": "blockbook",
+    "name": "Blockbook",
+    "category": "indexer",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/trezor/blockbook",
+    "purpose": "Trezor's back-end indexer for Trezor Suite: address and balance index, fast search, a simple explorer, REST API v2, WebSocket API and a legacy Bitcore Insight-compatible API for Bitcoin and over 30 other coins.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.6.0 released 2026-07-16 (v0.5.0 on 2025-04-25, v0.4.0 on 2023-02-01); latest commit 2026-10-19. The Bitcoin back-end package definition pins Bitcoin Core 31.1.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.6.0",
+      "date": "2026-07-16",
+      "source": "https://github.com/trezor/blockbook/releases/tag/v0.6.0"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "'Officially supported platform is Debian Linux and AMD64 architecture' (Debian packages backend-bitcoin and blockbook-bitcoin built with Docker); Ubuntu works per community issue #45. No published image found under trezor/blockbook on Docker Hub."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "API v2 (new integrations) and legacy API v1 (Bitcoin-type compatibility only) on the public port (9130 for Bitcoin), described by an OpenAPI specification served at /openapi.yaml with a read-only Swagger UI at /api-docs/.",
+        "authentication": "None; optional TLS with -certfile.",
+        "documentation": "https://github.com/trezor/blockbook/blob/master/docs/api.md"
+      },
+      {
+        "type": "websocket",
+        "description": "WebSocket API on the public port (envelope documented in the OpenAPI file). Origin checks are not enforced by default.",
+        "authentication": "None; configure the origin allowlist (docs/env.md) before exposing it.",
+        "documentation": "https://github.com/trezor/blockbook/blob/master/docs/api.md"
+      },
+      {
+        "type": "http",
+        "description": "Built-in simple explorer UI on the public port; internal port (9030 for Bitcoin) for metrics collection and debugging.",
+        "authentication": "None.",
+        "documentation": "https://github.com/trezor/blockbook/blob/master/docs/config.md"
+      }
+    ],
+    "cli": "blockbook -sync -blockchaincfg=<json> -internal=:9030 -public=:9130 [-certfile=...] [-dbcache=0] [-workers=1] [-extendedindex] [-enablesubnewtx] -logtostderr.",
+    "remoteManagement": "systemd services from the Debian packages, managed over SSH.",
+    "nodeCompatibility": "The generated back-end bitcoin.conf sets txindex=1, nolisten=1, disablewallet=1, zmqpubhashtx and zmqpubhashblock (back-end ZMQ port 38330 for Bitcoin), rpcworkqueue=1100, maxmempool=4096, an rpcauth user and RPC on port 8030; an unpruned node is implied by txindex. Blockbook normally manages its own backend-bitcoin package (Bitcoin Core 31.1 in the current definition).",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "txindex=1, ZMQ hashtx/hashblock, RPC (normally the bundled backend-bitcoin package)."
+      },
+      {
+        "ids": ["trezor-suite"],
+        "relationship": "enhances",
+        "notes": "Trezor Suite can use a custom Blockbook back end instead of Trezor's servers."
+      }
+    ],
+    "networking": "Bitcoin: public 9130 (HTTP, API, WebSocket), internal 9030, back-end RPC 8030, back-end ZMQ 38330 (registry in docs/ports.md).",
+    "storage": "README: 'over 180 GB of disk space' for the Bitcoin mainnet index during initial synchronisation, in addition to the node (undated, current master).",
+    "resources": "README: about 32 GB RAM for the initial Bitcoin mainnet sync and about 10 GB once synchronised; -dbcache=0 and -workers=1 reduce memory at about half the speed. If killed during bulk import, the database becomes inconsistent and must be deleted and re-imported.",
+    "security": "WebSocket origin checks are off by default. Do not expose it without a reverse proxy enforcing origins and authentication. v0.6.0 includes security hardening (see release notes).",
+    "licence": "AGPL-3.0",
+    "licenceNotes": "The COPYING file contains the GNU AGPL v3 text without a project notice choosing 'only' or 'or later'. Network use of a modified version triggers AGPL source obligations.",
+    "integrationMechanisms": [
+      "Connect BTCortex or Trezor Suite to an existing Blockbook API (local network or remote Debian server)",
+      "Provision the Debian packages on a remote Linux machine over SSH (remote-managed)"
+    ],
+    "supportLevels": ["connected-application", "remote-managed", "managed-wsl2"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Linux-only, 32 GB RAM for the initial sync, txindex and more than 180 GB of index; unsuitable for typical Windows desktops. Relevant mainly to users who already run Blockbook for Trezor Suite."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "v0.6.0 is dominated by non-Bitcoin features (Tron, ERC-4626, ENS).",
+    "sources": [
+      { "title": "Blockbook v0.6.0 release", "url": "https://github.com/trezor/blockbook/releases/tag/v0.6.0", "accessed": "2026-10-21" },
+      { "title": "Blockbook README", "url": "https://github.com/trezor/blockbook/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "Blockbook ports registry", "url": "https://github.com/trezor/blockbook/blob/master/docs/ports.md", "accessed": "2026-10-21" },
+      { "title": "Blockbook configuration docs", "url": "https://github.com/trezor/blockbook/blob/master/docs/config.md", "accessed": "2026-10-21" },
+      { "title": "Blockbook build docs", "url": "https://github.com/trezor/blockbook/blob/master/docs/build.md", "accessed": "2026-10-21" },
+      { "title": "Blockbook API docs", "url": "https://github.com/trezor/blockbook/blob/master/docs/api.md", "accessed": "2026-10-21" },
+      { "title": "Blockbook Bitcoin coin definition", "url": "https://github.com/trezor/blockbook/blob/master/configs/coins/bitcoin.json", "accessed": "2026-10-21" },
+      { "title": "Blockbook back-end bitcoin.conf template", "url": "https://github.com/trezor/blockbook/blob/master/build/templates/backend/config/bitcoin.conf", "accessed": "2026-10-21" },
+      { "title": "Blockbook COPYING", "url": "https://github.com/trezor/blockbook/blob/master/COPYING", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The README resource figures (32 GB RAM, more than 180 GB disk) are undated.",
+      "Community Docker images were not searched for.",
+      "That Trezor Suite accepts a custom Blockbook back end was not verified in this session (belongs to the trezor-suite entry)."
+    ]
+  },
+  {
+    "id": "mempool-space-api",
+    "name": "mempool.space public API",
+    "category": "data-service",
+    "catalogueEligible": false,
+    "website": "https://mempool.space/",
+    "repository": "https://github.com/mempool/mempool",
+    "purpose": "Public hosted REST, WebSocket and (for test networks) Electrum endpoints operated by Mempool Holdings for Bitcoin mainnet, testnet4, signet, Liquid and Lightning data: fee recommendations, projected mempool blocks, blocks, transactions, addresses, mining statistics and prices.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Runs the mempool software (v3.3.1 released 2026-04-21; master active 2026-10-15). Availability could not be checked from the research network: HTTPS connections to mempool.space were reset on 2026-10-21 (the research machine routes through a VPN).",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Hosted service; reachable over HTTPS and a Tor onion service."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "https://mempool.space/api/ (networks under /testnet4/api, /signet/api; Liquid at liquid.network): for example GET /api/v1/fees/recommended, /api/v1/fees/mempool-blocks, /api/blocks/tip/height, /api/tx/:txid, /api/address/:address, POST /api/tx. The documentation data lists 99 GET/POST entries across General, Addresses, Assets, Blocks, Mining, Fees, Mempool, Transactions, Lightning and Accelerator categories.",
+        "authentication": "None for public endpoints; higher limits with Mempool Enterprise sponsorship.",
+        "documentation": "https://mempool.space/docs/api/rest"
+      },
+      {
+        "type": "websocket",
+        "description": "wss://mempool.space/api/v1/ws; usage limits apply (for example address-tracking limits).",
+        "authentication": "None.",
+        "documentation": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs.component.html"
+      },
+      {
+        "type": "electrum-protocol",
+        "description": "Public Electrum servers for test networks used by Sparrow: ssl://mempool.space:60602 (signet) and ssl://mempool.space:40002 (testnet4).",
+        "authentication": "None.",
+        "documentation": "https://github.com/sparrowwallet/sparrow/blob/master/src/main/java/com/sparrowwallet/sparrow/net/PublicElectrumServer.java"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Independent of the user's node. Data reflect mempool.space's own Bitcoin Core-based infrastructure and its mempool policy, which may differ from the user's node.",
+    "dependencies": [
+      {
+        "ids": ["tor"],
+        "relationship": "optional",
+        "notes": "Onion endpoint http://mempoolhqx4isw62xs7abwphsq7ldayuidyx2v2oethdhhj6mlo2r6ad.onion/api/v1 (from the official back-end config sample) hides the user's IP."
+      }
+    ],
+    "networking": "Outbound HTTPS (443) to mempool.space or Tor to the onion service. Rate limits are enforced (HTTP 429 when exceeded; repeated violations 'may be banned'), with no published numbers.",
+    "storage": null,
+    "resources": null,
+    "security": "Every request reveals the queried txids, addresses or blocks and the client's IP address (or Tor exit) to a third party, and address lookups link wallet addresses to the user. BTCortex must prefer local providers, never send wallet addresses or xpubs here by default, label every value from it as external, prefer the onion endpoint, and use it only for non-identifying data such as fee estimates and tip height after explicit opt-in. Results are not verified against the user's node.",
+    "licence": null,
+    "licenceNotes": "Hosted service; terms of service were not reviewed. mempool.space® and the mempool logos are trademarks of Mempool Holdings S.A. de C.V.: name the provider factually, without logos.",
+    "integrationMechanisms": [
+      "Optional, clearly labelled external fee-estimate and chain-tip provider over Tor or HTTPS, disabled by default when a local node is available",
+      "Fallback explorer links for users without a local explorer (opened in the browser, labelled external)"
+    ],
+    "supportLevels": ["connected-application"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Simple unauthenticated REST/WebSocket API; the constraints are privacy, unpublished rate limits and availability (connection resets were observed from a VPN)."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": "Sparrow uses mempool.space (and its onion when Tor is on) as a fee-rate source; BTCortex should present the same choice explicitly.",
+    "sources": [
+      { "title": "mempool API docs component (rate limits, FAQ)", "url": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs.component.html", "accessed": "2026-10-21" },
+      { "title": "mempool API docs component (WebSocket URL)", "url": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs.component.ts", "accessed": "2026-10-21" },
+      { "title": "mempool API docs data (endpoint catalogue)", "url": "https://github.com/mempool/mempool/blob/master/frontend/src/app/docs/api-docs/api-docs-data.ts", "accessed": "2026-10-21" },
+      { "title": "mempool back-end config sample (onion endpoint)", "url": "https://github.com/mempool/mempool/blob/master/backend/mempool-config.sample.json", "accessed": "2026-10-21" },
+      { "title": "Sparrow FeeRatesSource.java", "url": "https://github.com/sparrowwallet/sparrow/blob/master/src/main/java/com/sparrowwallet/sparrow/net/FeeRatesSource.java", "accessed": "2026-10-21" },
+      { "title": "Sparrow PublicElectrumServer.java", "url": "https://github.com/sparrowwallet/sparrow/blob/master/src/main/java/com/sparrowwallet/sparrow/net/PublicElectrumServer.java", "accessed": "2026-10-21" },
+      { "title": "mempool LICENSE (trademarks)", "url": "https://github.com/mempool/mempool/blob/master/LICENSE", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The live service could not be reached from the research network on 2026-10-21 (connection reset), so endpoint behaviour and headers were not observed directly.",
+      "The terms of service were not reviewed.",
+      "Exact rate limits are not published."
+    ]
+  },
+  {
+    "id": "blockstream-info-api",
+    "name": "blockstream.info Esplora API",
+    "category": "data-service",
+    "catalogueEligible": false,
+    "website": "https://blockstream.info/",
+    "repository": "https://github.com/Blockstream/esplora",
+    "purpose": "Blockstream's public Esplora REST API and Electrum servers for Bitcoin mainnet, testnet, signet, Liquid and Liquid testnet, plus a paid Explorer API (Enterprise) with authenticated, higher-limit access.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "https://blockstream.info/api/blocks/tip/height answered 972403 on 2026-10-21; the site sends an Onion-Location header. Blockstream announced free-tier rate limits and paid tiers on 2026-04-22.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Hosted service; HTTPS and Tor onion service."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "Esplora HTTP API at https://blockstream.info/api/ (testnet /testnet/api/, signet /signet/api/, Liquid /liquid/api/, Liquid testnet /liquidtestnet/api/): transactions (including outspends, merkle proofs, POST /tx, POST /txs/package), addresses and script hashes, blocks, mempool, /fee-estimates.",
+        "authentication": "None for the free public endpoints; the Enterprise Explorer API uses client_id and client_secret pairs to obtain access tokens (default lifetime 5 minutes, maximum 300 minutes).",
+        "documentation": "https://github.com/Blockstream/esplora/blob/master/API.md"
+      },
+      {
+        "type": "electrum-protocol",
+        "description": "Public Electrum servers electrum.blockstream.info (SSL 50002, TCP 50001) and blockstream.info (SSL 700, TCP 110), listed in Electrum's bundled server list with protocol 1.4.",
+        "authentication": "None.",
+        "documentation": "https://github.com/spesmilo/electrum/blob/master/electrum/chains/mainnet/servers.json"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Independent of the user's node.",
+    "dependencies": [
+      {
+        "ids": ["tor"],
+        "relationship": "optional",
+        "notes": "Onion service http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/ (Onion-Location header observed on 2026-10-21)."
+      }
+    ],
+    "networking": "Outbound HTTPS 443 (or Tor). Free-tier rate limits on both the REST API and Electrum RPC since the 2026-04-22 announcement; numbers not published.",
+    "storage": null,
+    "resources": null,
+    "security": "Same privacy model as any hosted explorer: queried addresses, txids and the client IP are visible to Blockstream, and Electrum connections to its public servers reveal the wallet's addresses. Use only after explicit opt-in, prefer the onion address, never for wallet synchronisation by default, and always label results as external. Enterprise credentials (client secret) must go into the protected credential store.",
+    "licence": null,
+    "licenceNotes": "Hosted service; terms of service not reviewed. The Esplora software is MIT.",
+    "integrationMechanisms": [
+      "Optional, labelled external Esplora data source for BTCortex's explorer and fee estimates, implemented with the same client used for a local Esplora-compatible API",
+      "Optional Enterprise API with credentials stored by BTCortex's credential manager"
+    ],
+    "supportLevels": ["connected-application"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Stable, documented API compatible with self-hosted Esplora back ends; constrained by privacy and unpublished free-tier limits."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "API.md lists mainnet, testnet, signet, Liquid and Liquid testnet but no testnet4 endpoint.",
+    "sources": [
+      { "title": "Esplora HTTP API (public endpoints)", "url": "https://github.com/Blockstream/esplora/blob/master/API.md", "accessed": "2026-10-21" },
+      { "title": "blockstream.info (Onion-Location header)", "url": "https://blockstream.info/", "accessed": "2026-10-21" },
+      { "title": "blockstream.info tip height endpoint", "url": "https://blockstream.info/api/blocks/tip/height", "accessed": "2026-10-21" },
+      { "title": "Blockstream blog: Explorer API improvements (2026-04-22)", "url": "https://blog.blockstream.com/enhanced-analytics-and-infrastructure-improvements-for-the-blockstream-explorer-api/", "accessed": "2026-10-21" },
+      { "title": "Blockstream help: Create and manage your API keys", "url": "https://help.blockstream.com/hc/en-us/articles/52415124540569-Create-and-manage-your-API-keys", "accessed": "2026-10-21" },
+      { "title": "Electrum bundled mainnet server list", "url": "https://github.com/spesmilo/electrum/blob/master/electrum/chains/mainnet/servers.json", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Free-tier rate-limit numbers, the Enterprise token endpoint and base URL were not published in the pages read.",
+      "Third-party figures (about 50 requests per second, 500 000 requests per month free) were found only on non-official comparison sites and are not used.",
+      "Terms of service not reviewed."
+    ]
+  },
+  {
+    "id": "bitfeed",
+    "name": "Bitfeed",
+    "category": "block-explorer",
+    "catalogueEligible": true,
+    "website": "https://bits.monospace.live/",
+    "repository": "https://github.com/bitfeed-project/bitfeed",
+    "purpose": "Live visualisation of Bitcoin network activity (transactions moving from the mempool into blocks) with an Elixir API server and a web client.",
+    "maintenance": {
+      "status": "stale",
+      "evidence": "Last release v2.3.4 on 2022-06-13 and last commit the same day; repository not archived. The hosted instances (bits.monospace.live, bitfeed.live) still served the app on 2026-10-21. The author (mononaut) later contributed heavily to mempool.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.3.4",
+      "date": "2022-06-13",
+      "source": "https://github.com/bitfeed-project/bitfeed/releases/tag/v2.3.4"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Client and server images on the GitHub Container Registry (ghcr.io/bitfeed-project/bitfeed-client and bitfeed-server) for tagged releases; one-click apps on Umbrel and Citadel (historical); build from source with Elixir."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Web client (the example compose file exposes it on port 3000) and an API/WebSocket server on PORT.",
+        "authentication": "None.",
+        "documentation": "https://github.com/bitfeed-project/bitfeed/blob/master/DOCKER.md"
+      }
+    ],
+    "cli": "Server configured with environment variables PORT, BITCOIN_HOST, BITCOIN_RPC_PORT, BITCOIN_RPC_USER/PASS or BITCOIN_RPC_COOKIE, BITCOIN_ZMQ_RAWBLOCK_PORT, BITCOIN_ZMQ_RAWTX_PORT, BITCOIN_ZMQ_SEQUENCE_PORT, RPC_POOLS, RPC_POOL_SIZE; MIX_TARGET personal or public.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Requires an unpruned, indexed (txindex) Bitcoin full node in server mode with ZMQ rawblock, rawtx and sequence publishers.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Unpruned, txindex, ZMQ rawblock/rawtx/sequence."
+      }
+    ],
+    "networking": "Web client port (3000 in the example) and API port; connects to bitcoind RPC and ZMQ.",
+    "storage": "Uses the node's data.",
+    "resources": "Not documented.",
+    "security": "Unmaintained since 2022 (dependency vulnerabilities likely); unauthenticated UI.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Open the hosted visualisation as an external link (labelled external)"
+    ],
+    "supportLevels": ["research-only", "external-launcher"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Stale for four years and needs an unpruned txindex node; mempool covers the same visualisation needs and is maintained."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "Bitfeed v2.3.4 release", "url": "https://github.com/bitfeed-project/bitfeed/releases/tag/v2.3.4", "accessed": "2026-10-21" },
+      { "title": "Bitfeed README", "url": "https://github.com/bitfeed-project/bitfeed/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "Bitfeed server README", "url": "https://github.com/bitfeed-project/bitfeed/blob/master/server/README.md", "accessed": "2026-10-21" },
+      { "title": "Bitfeed Docker instructions", "url": "https://github.com/bitfeed-project/bitfeed/blob/master/DOCKER.md", "accessed": "2026-10-21" },
+      { "title": "Bitfeed hosted instance", "url": "https://bits.monospace.live/", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether v2.3.4 still works against Bitcoin Core 31.x was not tested."
+    ]
+  },
+  {
+    "id": "bitcore-node",
+    "name": "Bitcore Node and Insight (BitPay Bitcore)",
+    "category": "indexer",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/bitpay/bitcore",
+    "purpose": "BitPay's multi-chain indexer and API server (Bitcore Node, backed by MongoDB) with the Insight blockchain explorer web interface; part of the Bitcore monorepo that also contains wallet libraries.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Monorepo release v11.10.14 on 2026-10-19 (v11.10.13 the same day); latest commit 2026-10-20.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "11.10.14",
+      "date": "2026-10-19",
+      "source": "https://github.com/bitpay/bitcore/releases/tag/v11.10.14"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Node.js monorepo (npm install; make, g++ and gcc required) with MongoDB 3.4 or later; supports Bitcoin, Bitcoin Cash, Litecoin, Dogecoin, Ripple, Ethereum and Polygon."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "Bitcore Node standardised REST API per chain and network.",
+        "authentication": null,
+        "documentation": "https://github.com/bitpay/bitcore/blob/master/packages/bitcore-node/README.md"
+      },
+      {
+        "type": "http",
+        "description": "Insight explorer web UI (packages/insight).",
+        "authentication": null,
+        "documentation": "https://github.com/bitpay/bitcore/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Needs a trusted node with open RPC and a P2P endpoint (chainSource p2p with trustedPeers and rpc settings in bitcore.config.json).",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "Trusted P2P peer and RPC endpoint."
+      },
+      {
+        "ids": ["mongodb"],
+        "relationship": "requires",
+        "notes": "MongoDB server 3.4 or later."
+      }
+    ],
+    "networking": "Configured per chain (example uses custom node ports 20008/20009); API port not reviewed.",
+    "storage": "Not documented in the pages reviewed (MongoDB index of the full chain).",
+    "resources": "Not documented in the pages reviewed.",
+    "security": "Not reviewed in depth; multi-chain scope increases attack surface.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Connect to an existing Bitcore Node API (research only)"
+    ],
+    "supportLevels": ["research-only", "connected-application"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Heavy multi-chain stack (Node.js plus MongoDB full-chain index) with little advantage over Electrum servers and mempool for a Bitcoin-only command centre."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Insight was historically a common self-hosted explorer; BTCortex should not prioritise it.",
+    "sources": [
+      { "title": "Bitcore v11.10.14 release", "url": "https://github.com/bitpay/bitcore/releases/tag/v11.10.14", "accessed": "2026-10-21" },
+      { "title": "Bitcore README", "url": "https://github.com/bitpay/bitcore/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "Bitcore Node README", "url": "https://github.com/bitpay/bitcore/blob/master/packages/bitcore-node/README.md", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Disk, RAM, port and pruning behaviour were not researched in depth.",
+      "Windows support was not investigated."
+    ]
+  },
+  {
+    "id": "ord",
+    "name": "ord",
+    "category": "indexer",
+    "catalogueEligible": true,
+    "website": "https://docs.ordinals.com/",
+    "repository": "https://github.com/ordinals/ord",
+    "purpose": "Index, block explorer and command-line wallet for ordinal theory (satoshi tracking and inscriptions). The explorer and JSON API are served by 'ord server'; the wallet relies on Bitcoin Core.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "0.29.1 released 2026-10-19 (0.29.0 on 2026-08-05); latest commit 2026-10-19.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.29.1",
+      "date": "2026-10-19",
+      "source": "https://github.com/ordinals/ord/releases/tag/0.29.1"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64"],
+      "windowsDistribution": "ord-0.29.1-x86_64-pc-windows-msvc.zip (portable) on the GitHub release.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux x86_64 and macOS (x86_64, aarch64) archives, Homebrew, crates.io, install script."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "'ord server' block explorer with JSON API enabled by default (--disable-json-api to turn it off); port chosen with --http-port.",
+        "authentication": "None.",
+        "documentation": "https://github.com/ordinals/ord/blob/master/docs/src/guides/explorer.md"
+      },
+      {
+        "type": "cli",
+        "description": "ord index, ord server, ord wallet ... (the wallet needs ord server running since 0.16.0).",
+        "authentication": "Reads bitcoind's .cookie automatically when run by the same user with default paths, or explicit RPC credentials.",
+        "documentation": "https://github.com/ordinals/ord/blob/master/README.md"
+      }
+    ],
+    "cli": "ord [--bitcoin-data-dir ...] server --http-port <port>; ord wallet ...",
+    "remoteManagement": null,
+    "nodeCompatibility": "Requires a synced bitcoind with -txindex (checked through getindexinfo); communicates over RPC; therefore not usable with a pruned node.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "txindex=1, unpruned; ord wallets are Bitcoin Core descriptor wallets."
+      }
+    ],
+    "networking": "Explorer on the configured HTTP port; RPC to bitcoind.",
+    "storage": "Own index on top of the node (size not researched); the wallet guide mentions about 600 GB for the blockchain (undated).",
+    "resources": "Not researched.",
+    "security": "Upstream warns that 'ord server' hosts untrusted HTML and JavaScript (cross-site scripting and spoofing risks), and that ord wallets must not hold material funds and must be kept separate from ordinary wallets because Bitcoin Core does not do sat control.",
+    "licence": "CC0-1.0",
+    "licenceNotes": "Public-domain dedication (CC0 1.0 Universal).",
+    "integrationMechanisms": [
+      "Discovery and launching of an existing ord installation (external launcher), with the security warnings shown"
+    ],
+    "supportLevels": ["research-only", "external-launcher", "fully-managed"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Technically easy (native Windows binary, cookie authentication), but txindex, an unpruned node, untrusted web content and a wallet that can lose inscriptions make it unsuitable for default profiles."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Listed for completeness as a maintained self-hosted indexer and explorer; its inclusion in the catalogue is a product decision.",
+    "sources": [
+      { "title": "ord 0.29.1 release", "url": "https://github.com/ordinals/ord/releases/tag/0.29.1", "accessed": "2026-10-21" },
+      { "title": "ord README", "url": "https://github.com/ordinals/ord/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "ord explorer guide", "url": "https://github.com/ordinals/ord/blob/master/docs/src/guides/explorer.md", "accessed": "2026-10-21" },
+      { "title": "ord wallet guide", "url": "https://github.com/ordinals/ord/blob/master/docs/src/guides/wallet.md", "accessed": "2026-10-21" },
+      { "title": "ord LICENSE", "url": "https://github.com/ordinals/ord/blob/master/LICENSE", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Default HTTP port of ord server, index size and RAM needs were not verified."
+    ]
+  },
+  {
+    "id": "bitcoin-research-kit",
+    "name": "Bitcoin Research Kit (BRK) and Bitview",
+    "category": "indexer",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/bitcoinresearchkit/mono",
+    "purpose": "Rust monorepo of primitives for reading Bitcoin Core data (BRK) and Bitview, a self-hostable app with a typed indexer and analytics plug-in graph, REST API (OpenAPI), query layer and website for chain exploration, mempool data and on-chain research.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.12.2 released 2026-09-01 (v0.12.1 on 2026-08-31); latest commit 2026-09-22.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.12.2",
+      "date": "2026-09-01",
+      "source": "https://github.com/bitcoinresearchkit/mono/releases/tag/v0.12.2"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "'The default composition requires Linux or macOS'; a docker directory exists in the repository without README instructions."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Website and REST API (OpenAPI specification, interactive API and an MCP endpoint) on localhost:3110.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoinresearchkit/mono"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Needs a Bitcoin Core node with RPC and readable blk*.dat files (reads block files directly); pruned-node support not stated.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "RPC plus read access to blk*.dat."
+      }
+    ],
+    "networking": "localhost:3110.",
+    "storage": "About 290 GiB for Bitview plus Bitcoin Core storage and headroom (sparse files; check actual use with du).",
+    "resources": "16 GB RAM recommended for a full sync.",
+    "security": "Not reviewed in depth.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Connect to an existing instance's API or website (research only)"
+    ],
+    "supportLevels": ["research-only", "connected-application", "managed-wsl2"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Linux/macOS only, 290 GiB index and 16 GB RAM; interesting analytics but outside the essential scope."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "The repository URL github.com/bitcoinresearchkit/brk now redirects to bitcoinresearchkit/mono.",
+    "sources": [
+      { "title": "Bitcoin Research Kit repository", "url": "https://github.com/bitcoinresearchkit/mono", "accessed": "2026-10-21" },
+      { "title": "BRK v0.12.2 release", "url": "https://github.com/bitcoinresearchkit/mono/releases/tag/v0.12.2", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Repository details were obtained through a page summary rather than raw files (the README was not available at the expected raw path)."
+    ]
+  },
+  {
+    "id": "waterfalls",
+    "name": "Waterfalls",
+    "category": "indexer",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://github.com/Blockstream/waterfalls",
+    "purpose": "Blockstream's descriptor-based scanning server for web light-client wallets on Bitcoin and Liquid: the client sends a descriptor and receives the whole wallet history in one round trip (also a UTXO-only mode). The README says it is used at liquidwebwallet.org and benchmarks it against Esplora scans with LWK.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "0.10.0 released 2026-01-15 (0.9.8 on 2025-09-16); latest commit 2026-10-20.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.10.0",
+      "date": "2026-01-15",
+      "source": "https://github.com/Blockstream/waterfalls/releases/tag/0.10.0"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Rust; Nix build instructions in the README."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "Waterfalls HTTP endpoint (descriptor scan, UTXO-only mode); see docs/API.md.",
+        "authentication": null,
+        "documentation": "https://github.com/Blockstream/waterfalls/blob/master/README.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Indexes Bitcoin or Elements from a full node (details in its docs, not reviewed).",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core", "elements"],
+        "relationship": "requires",
+        "notes": "Bitcoin or Liquid node."
+      }
+    ],
+    "networking": null,
+    "storage": "README table: Bitcoin blocks 724 GB, Waterfalls DB 245 GB at height 911k; Liquid 876 MB.",
+    "resources": null,
+    "security": "Clients send whole descriptors to the server, revealing future addresses too; only a self-hosted server avoids that leak (as the README itself notes).",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": [],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Specialised back end for web wallets; no BTCortex use case in the current profiles."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Recorded as an emerging indexer architecture (spec section 39).",
+    "sources": [
+      { "title": "Waterfalls 0.10.0 release", "url": "https://github.com/Blockstream/waterfalls/releases/tag/0.10.0", "accessed": "2026-10-21" },
+      { "title": "Waterfalls README", "url": "https://github.com/Blockstream/waterfalls/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "Waterfalls LICENSE", "url": "https://github.com/Blockstream/waterfalls/blob/master/LICENSE", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Node requirements, ports and platform support were not reviewed."
+    ]
+  },
+  {
+    "id": "btc-rpc-proxy",
+    "name": "Bitcoin RPC Proxy (btc-rpc-proxy)",
+    "category": "other",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/Kixunil/btc-rpc-proxy",
+    "purpose": "Rust proxy in front of bitcoind that gives each client its own credentials with an allow-list of RPC methods (and an optional forced wallet), and performs on-demand block fetching from peers so that applications see a pruned node as unpruned.",
+    "maintenance": {
+      "status": "maintenance-only",
+      "evidence": "Last release v0.4.0 on 2024-07-13; master Cargo.toml is at 0.4.1 with the latest commit 2026-08-18 ('Bump version'), not yet released.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.4.0",
+      "date": "2024-07-13",
+      "source": "https://github.com/Kixunil/btc-rpc-proxy/releases/tag/v0.4.0"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Rust, built from source; systemd socket activation on Linux; used in StartOS and the cryptoanarchy Debian repository."
+    },
+    "interfaces": [
+      {
+        "type": "json-rpc",
+        "description": "Bitcoin Core-compatible JSON-RPC endpoint with per-user method allow-lists and override_wallet.",
+        "authentication": "Per-user passwords in TOML configuration files.",
+        "documentation": "https://github.com/Kixunil/btc-rpc-proxy/blob/master/README.md"
+      }
+    ],
+    "cli": "btc_rpc_proxy --conf <file.toml> [--conf-dir <dir>].",
+    "remoteManagement": null,
+    "nodeCompatibility": "Sits in front of Bitcoin Core; with a pruned node it fetches pruned blocks over P2P and verifies their hash against the node.",
+    "dependencies": [
+      {
+        "ids": ["bitcoin-core"],
+        "relationship": "requires",
+        "notes": "RPC; P2P access for on-demand block fetching."
+      }
+    ],
+    "networking": "Listens on a configured address; outbound to bitcoind RPC and to P2P peers for missing blocks.",
+    "storage": "None.",
+    "resources": "Low; every pruned block fetch costs bandwidth and latency.",
+    "security": "Finer-grained permissions than Bitcoin Core's rpcwhitelist per application; configuration files hold passwords (permissions 600 per upstream). Does not help tools that need txindex (Fulcrum, ElectrumX, mempool) or that read REST or block files directly (electrs 0.12, Esplora electrs).",
+    "licence": "MITNFA",
+    "licenceNotes": "MIT +no-false-attribs.",
+    "integrationMechanisms": [
+      "Research: per-application RPC credentials and pruned-node block fetching for RPC-only consumers such as BTC RPC Explorer's getblock calls"
+    ],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No Windows builds and limited benefit: the indexers BTCortex cares about need txindex, REST or block files, which the proxy cannot emulate."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Recorded under this scope as the main 'Bitcoin API gateway' found during gap analysis; may belong to another scope.",
+    "sources": [
+      { "title": "btc-rpc-proxy v0.4.0 release", "url": "https://github.com/Kixunil/btc-rpc-proxy/releases/tag/v0.4.0", "accessed": "2026-10-21" },
+      { "title": "btc-rpc-proxy README", "url": "https://github.com/Kixunil/btc-rpc-proxy/blob/master/README.md", "accessed": "2026-10-21" },
+      { "title": "btc-rpc-proxy Cargo.toml", "url": "https://github.com/Kixunil/btc-rpc-proxy/blob/master/Cargo.toml", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Windows buildability and default listening port were not verified."
+    ]
+  }
+]

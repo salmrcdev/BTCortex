@@ -1,0 +1,21 @@
+{
+  "name": "@btcortex/integration-fulcrum",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fulcrum, the Electrum server: verified installation, managed configuration, process control, the /stats and admin interfaces, and an Electrum protocol probe.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "update-key": "node scripts/update-signing-key.mjs"
+  },
+  "dependencies": {
+    "@btcortex/installation-manager": "0.1.0"
+  },
+  "devDependencies": {
+    "openpgp": "^6.3.2"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@btcortex/bitcoin-rpc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Typed JSON-RPC client for Bitcoin Core-compatible nodes.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

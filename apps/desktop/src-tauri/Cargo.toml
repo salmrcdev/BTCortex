@@ -1,0 +1,47 @@
+[package]
+name = "btcortex"
+version = "0.1.0"
+description = "BTCortex — Bitcoin ecosystem command centre"
+authors = ["BTCortex"]
+edition = "2024"
+rust-version = "1.88"
+publish = false
+
+# The native shell is deliberately small: window, notification-area icon,
+# starting with Windows, sidecar lifecycle, the IPC relay and Windows DPAPI.
+# Application logic lives in the TypeScript orchestrator (docs/ARCHITECTURE.md).
+
+[lib]
+name = "btcortex_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.3", features = [] }
+
+[dependencies]
+tauri = { version = "2.12.4", features = ["tray-icon"] }
+tauri-plugin-dialog = "2.8.3"
+tauri-plugin-log = "2.10.1"
+tauri-plugin-notification = "2.7.0"
+tauri-plugin-opener = "2.7.2"
+tauri-plugin-shell = "2.5.0"
+tauri-plugin-single-instance = "2.5.4"
+tauri-plugin-window-state = "2.5.0"
+base64 = "0.23.1"
+log = "0.4.34"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+thiserror = "2.0.21"
+tokio = { version = "1.54.0", features = ["sync", "time", "macros"] }
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62.2", features = [
+  "Win32_Foundation",
+  "Win32_Security_Cryptography",
+  "Win32_System_Registry",
+] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true

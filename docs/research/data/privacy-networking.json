@@ -1,0 +1,2394 @@
+[
+  {
+    "id": "tor",
+    "name": "Tor (C tor daemon, Tor Expert Bundle)",
+    "category": "privacy-network",
+    "catalogueEligible": true,
+    "website": "https://www.torproject.org/",
+    "repository": "https://gitlab.torproject.org/tpo/core/tor",
+    "purpose": "Reference C implementation of the Tor anonymity network (client, onion-service host and relay). On Windows the Tor Project ships it as the Tor Expert Bundle (tor.exe, pluggable transports, GeoIP data), which BTCortex runs per user as the SOCKS proxy and onion-service host for Bitcoin Core, Electrum servers, Lightning nodes and wallets.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "tor 0.4.9.14 was released on 2026-10-07 as a security release ('Another week, another security release'; fixes tracked as TROVE-2026-062 and TROVE-2026-067 among others). The 0.4.9 series became stable on 2026-02-12, 0.4.8 reached end of life on 2026-06-01 and the 0.5.0 merge window opened on 2026-03-25 (CoreTorReleases wiki). Tor Expert Bundle 15.0.25 (tor 0.4.9.14) was published on dist.torproject.org on 2026-10-12 together with Tor Browser 15.0.25.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.4.9.14 (Tor Expert Bundle 15.0.25)",
+      "date": "2026-10-07",
+      "source": "https://gitlab.torproject.org/tpo/core/tor/-/raw/tor-0.4.9.14/ChangeLog"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "Not stated for the Expert Bundle. Tor Browser dropped Windows 7, 8 and 8.1 with Tor Browser 14 and the Tor Project recommends Windows 10 or 11.",
+      "windowsArchitectures": ["x64", "x86"],
+      "windowsDistribution": "Tor Expert Bundle tar.gz archives without an installer: tor-expert-bundle-windows-x86_64-<Tor Browser version>.tar.gz and tor-expert-bundle-windows-i686-<version>.tar.gz, each with a detached OpenPGP signature (.asc) made with the Tor Browser Developers signing key, plus a signed sha256sums-signed-build.txt. tor.exe in 15.0.25 has no Authenticode signature (empty PE certificate table). No Windows ARM64 build. The Tor Project states that Tor Browser 16.0 drops 32-bit x86 platforms.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Expert Bundles for Linux (x86_64, i686; aarch64 only in the 16.0 alpha), macOS (x86_64, aarch64) and Android; source tarball for Unix-like systems; distribution packages."
+    },
+    "interfaces": [
+      {
+        "type": "socks",
+        "description": "SOCKS4/4a/5 listener (SocksPort, default 9050; BTCortex binds 127.0.0.1 only). Separate SocksPort lines are isolated from each other by default, and IsolateSOCKSAuth (on by default) puts streams with different SOCKS5 username/password on different circuits, which Bitcoin Core's proxyrandomize uses. Tor's SOCKS extensions add RESOLVE/RESOLVE_PTR and extended onion-service error codes.",
+        "authentication": "None (loopback only). SOCKS5 username/password is used for stream isolation, not access control.",
+        "documentation": "https://spec.torproject.org/socks-extensions.html"
+      },
+      {
+        "type": "control-protocol",
+        "description": "Tor control protocol on ControlPort over TCP (ControlSocket Unix sockets are not available on Windows). Line-based with SMTP-style reply codes (250 OK, 514 authentication required, 515 bad authentication, 552 unrecognised entity, 650 asynchronous event). BTCortex uses PROTOCOLINFO, AUTHCHALLENGE, AUTHENTICATE, GETINFO (version, status/bootstrap-phase, status/circuit-established, status/enough-dir-info, network-liveness, net/listeners/socks, onions/current, status/version/current), SETEVENTS (STATUS_CLIENT, STATUS_GENERAL, HS_DESC, NETWORK_LIVENESS), ADD_ONION, DEL_ONION, SIGNAL (SHUTDOWN, HALT, NEWNYM, RELOAD) and TAKEOWNERSHIP.",
+        "authentication": "SAFECOOKIE (HMAC-SHA256 challenge-response over the 32-byte control_auth_cookie; recommended), COOKIE (deprecated by the specification), HASHEDPASSWORD (HashedControlPassword) or NULL (must never be used).",
+        "documentation": "https://spec.torproject.org/control-spec/"
+      },
+      {
+        "type": "cli",
+        "description": "tor.exe -f <torrc>, --defaults-torrc <file>, --verify-config, --dump-config short|full, --hash-password <password>, --version, --list-modules and --service install|remove|start|stop (administrator only). Any torrc option can also be given on the command line ('--SocksPort 9050' or 'SocksPort 9050'); a '+' prefix appends to and a '/' prefix removes options from the configuration file.",
+        "authentication": null,
+        "documentation": "https://gitlab.torproject.org/tpo/core/tor/-/raw/tor-0.4.9.14/doc/man/tor.1.txt"
+      },
+      {
+        "type": "file",
+        "description": "torrc and a defaults file; DataDirectory (state, cached consensus and microdescriptors, lock, control_auth_cookie); one HiddenServiceDir per onion service containing hostname, hs_ed25519_secret_key, hs_ed25519_public_key and authorized_clients/*.auth; ClientOnionAuthDir containing <name>.auth_private files; log files.",
+        "authentication": "NTFS permissions of the per-user directories",
+        "documentation": "https://spec.torproject.org/rend-spec/"
+      },
+      {
+        "type": "http",
+        "description": "Optional MetricsPort answering HTTP GET /metrics in Prometheus format. MetricsPortPolicy must be set (reject-all by default). The manual warns that exposing metrics publicly endangers Tor users; keep it on loopback if it is enabled at all.",
+        "authentication": "None; MetricsPortPolicy address filter only",
+        "documentation": "https://gitlab.torproject.org/tpo/core/tor/-/raw/tor-0.4.9.14/doc/man/tor.1.txt"
+      }
+    ],
+    "cli": "tor.exe -f <torrc> --defaults-torrc <defaults> __OwningControllerProcess <pid>; tor.exe --verify-config -f <torrc>; tor.exe --hash-password <password> (for HashedControlPassword); tor.exe --version. tor --service install [--options ...] creates the Windows service 'tor' (display name 'Tor Win32 Service', auto-start, account NT AUTHORITY\\LocalService) and needs administrator rights, as do --service start|stop|remove.",
+    "remoteManagement": "Only through the control protocol. The ControlPort grants full control (configuration, onion-service keys, shutdown) and must never leave loopback; tor instances on remote machines or node platforms can be monitored through an SSH tunnel to their ControlPort with that machine's own authentication.",
+    "nodeCompatibility": "Bitcoin Core: proxy=127.0.0.1:9050 (or proxy=<addr>=tor / onion=<addr> for onion-only routing; DNS lookups only use the generic or IPv4/IPv6 proxy), torcontrol=127.0.0.1:9051 with SAFECOOKIE (Core reads COOKIEFILE from PROTOCOLINFO, so it must run as the same Windows user) or torpassword with HashedControlPassword; when listening, Core creates an ephemeral v3 onion service with ADD_ONION and stores its key in onion_v3_private_key; onlynet=onion (the alias 'tor' was removed in 31.0); privatebroadcast (31.0+, use 31.1 or later); 32.0 enables proof-of-work defences for its onion service. Fulcrum: tor_proxy (default 127.0.0.1:9050) for .onion peer discovery, tor_hostname and tor_*_port to announce an onion endpoint, inbound via HiddenServicePort. Sparrow: useProxy/proxyServer or its internal Tor. Electrum: proxy socks5:127.0.0.1:9050. Wasabi bundles its own tor on 37150/37151.",
+    "dependencies": [
+      {
+        "ids": ["lyrebird"],
+        "relationship": "optional",
+        "notes": "Pluggable transports (obfs4, Snowflake, WebTunnel, meek) for bridges; lyrebird.exe ships in the Expert Bundle."
+      },
+      {
+        "ids": ["conjure"],
+        "relationship": "optional",
+        "notes": "Experimental Conjure transport; conjure-client.exe ships in the Expert Bundle."
+      }
+    ],
+    "networking": "Outbound TCP to guard relays, fallback directories or bridges (any port). No inbound port is needed for client use or for onion services, which work behind NAT and firewalls. Local listeners: SocksPort 9050 and ControlPort 9051 by default (Tor Browser uses 9150/9151, Wasabi's bundled tor 37150/37151); BTCortex binds both to 127.0.0.1 and checks for conflicts first. DisableNetwork 1 allows a configured but offline start. Bootstrap requires a correct system clock (CLOCK_SKEW status event).",
+    "storage": "Expert Bundle 15.0.25 for Windows x86_64: 21 MB archive; tor.exe 10.2 MB, tor-gencert.exe 6.2 MB, lyrebird.exe 18.0 MB, conjure-client.exe 13.1 MB, geoip 9.8 MB and geoip6 16.6 MB extracted (measured from the archive listing on 2026-10-21). The DataDirectory caches the consensus and microdescriptors; its size was not measured.",
+    "resources": "No official RAM or CPU figures for a client; not measured on the test machine.",
+    "security": "Verify the archive's OpenPGP signature against the Tor Browser Developers key (primary fingerprint EF6E 286D DA85 EA2A 4BA7 DE68 4E2C 6E87 9329 8290; 15.0.25 was signed with subkey 022D A248 432D 2A0E 0F54 E65E 316C 1FAC D62D 07D9) and the SHA-256 in the signed sha256sums-signed-build.txt; Authenticode cannot be used because tor.exe is unsigned. Releases are frequent and often security-relevant (0.4.9.14 fixed several high-severity bugs), so the update channel matters. The ControlPort is equivalent to full control of tor and its onion-service keys; use SAFECOOKIE, keep the DataDirectory and cookie readable only by the user (HiddenServiceDirGroupReadable has no effect on Windows) and never expose SocksPort or ControlPort beyond loopback (the manual warns that a non-local SocksPort leaks traffic and creates an open proxy). hs_ed25519_secret_key is the onion identity and must be protected and backed up like a credential. Log at notice level or below (the manual warns that more verbose logs may provide sensitive information). Tor does not start from paths containing non-ASCII characters (issue #10416 open; the proposed fix MR !357 was closed unmerged). A Tor-only node is exposed to Sybil and eclipse risks on a smaller address set.",
+    "licence": "BSD-3-Clause",
+    "licenceNotes": "The Expert Bundle also contains libevent, OpenSSL, zlib, lyrebird and Conjure under their own licences (docs/*.txt in the archive). Redistribution of the unmodified bundle is permitted; 'Tor' and the onion logo are trademarks of The Tor Project, whose trademark guidelines were not reviewed here.",
+    "integrationMechanisms": [
+      "Resolve the current stable version (download.torproject.org/tor/ or the Tor Browser downloads.json) and download the Expert Bundle for the machine's architecture from dist.torproject.org (archive.torproject.org/tor-package-archive as fallback)",
+      "Verify the detached .asc against a pinned Tor Browser Developers key with OpenPGP.js, cross-check the SHA-256 in the signed sha256sums-signed-build.txt, then extract with path validation to %LOCALAPPDATA%\\BTCortex\\runtimes\\tor\\<version>",
+      "Generate torrc and an explicit defaults file; launch tor.exe as a per-user child process with __OwningControllerProcess, then TAKEOWNERSHIP over an authenticated control connection",
+      "Authenticate with SAFECOOKIE, subscribe to STATUS_CLIENT, STATUS_GENERAL, HS_DESC and NETWORK_LIVENESS events and track bootstrap through status/bootstrap-phase",
+      "Create onion services with HiddenServiceDir/HiddenServicePort or ADD_ONION (Detach, PoWDefensesEnabled) and display hostnames; monitor HS_DESC UPLOADED events",
+      "Write bitcoin.conf (proxy, torcontrol, onlynet), Fulcrum, Sparrow, Electrum and Lightning proxy settings that point at dedicated SocksPorts",
+      "Detect external tor installations (listening 9050/9051, 9150/9151, 37150/37151; tor.exe processes; Windows service 'tor') with PROTOCOLINFO probes only",
+      "Stop with SIGNAL SHUTDOWN and wait, falling back to SIGNAL HALT and then process termination"
+    ],
+    "supportLevels": ["fully-managed", "connected-application", "remote-managed", "managed-wsl2"],
+    "recommendedSupportLevel": "fully-managed",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Official signed Windows archive, no installer and no administrator rights, a complete documented control protocol and a reference launcher (Tor Browser's tor-launcher) to copy. Open work: non-ASCII profile paths, port conflicts with other tor instances, antivirus or application-control policies against unsigned executables in user-writable folders, and bridges for censored networks."
+    },
+    "priority": "P1",
+    "implementationStatus": "researched",
+    "notes": "The Expert Bundle version number follows Tor Browser (15.0.25 contains tor 0.4.9.14); its data/torrc-defaults is Tor Browser's file and refers to TorBrowser\\Tor\\PluggableTransports paths that do not exist in the bundle, so BTCortex must write its own ClientTransportPlugin lines. Arti (arti) is the long-term successor but cannot yet replace C tor for BTCortex (no official binaries, no control port, onion-service hosting still documented as experimental). Do not depend on Tor Browser's tor (tor-browser).",
+    "sources": [
+      { "title": "Tor Project: download tor (redirects to download.torproject.org/tor/)", "url": "https://download.torproject.org/tor/", "accessed": "2026-10-21" },
+      { "title": "dist.torproject.org: Tor Browser 15.0.25 directory listing", "url": "https://dist.torproject.org/torbrowser/15.0.25/", "accessed": "2026-10-21" },
+      { "title": "sha256sums-signed-build.txt for 15.0.25", "url": "https://dist.torproject.org/torbrowser/15.0.25/sha256sums-signed-build.txt", "accessed": "2026-10-21" },
+      { "title": "Expert Bundle signature (Windows x86_64, 15.0.25)", "url": "https://dist.torproject.org/torbrowser/15.0.25/tor-expert-bundle-windows-x86_64-15.0.25.tar.gz.asc", "accessed": "2026-10-21" },
+      { "title": "Tor Support: How can I verify Tor Browser's signature?", "url": "https://support.torproject.org/tbb/how-to-verify-signature/", "accessed": "2026-10-21" },
+      { "title": "keys.openpgp.org: Tor Browser Developers signing key", "url": "https://keys.openpgp.org/vks/v1/by-fingerprint/EF6E286DDA85EA2A4BA7DE684E2C6E8793298290", "accessed": "2026-10-21" },
+      { "title": "tor 0.4.9.14 ChangeLog", "url": "https://gitlab.torproject.org/tpo/core/tor/-/raw/tor-0.4.9.14/ChangeLog", "accessed": "2026-10-21" },
+      { "title": "Network team wiki: CoreTorReleases", "url": "https://gitlab.torproject.org/tpo/core/team/-/wikis/NetworkTeam/CoreTorReleases", "accessed": "2026-10-21" },
+      { "title": "tor manual page (tor.1.txt) at tor-0.4.9.14", "url": "https://gitlab.torproject.org/tpo/core/tor/-/raw/tor-0.4.9.14/doc/man/tor.1.txt", "accessed": "2026-10-21" },
+      { "title": "tor source: src/app/main/ntmain.c (Windows service)", "url": "https://gitlab.torproject.org/tpo/core/tor/-/blob/tor-0.4.9.14/src/app/main/ntmain.c", "accessed": "2026-10-21" },
+      { "title": "tor source: src/app/main/main.c (signal and console-control handling)", "url": "https://gitlab.torproject.org/tpo/core/tor/-/blob/tor-0.4.9.14/src/app/main/main.c", "accessed": "2026-10-21" },
+      { "title": "Tor control protocol specification", "url": "https://spec.torproject.org/control-spec/", "accessed": "2026-10-21" },
+      { "title": "Tor Rendezvous Specification - Version 3", "url": "https://spec.torproject.org/rend-spec/", "accessed": "2026-10-21" },
+      { "title": "tor issue #10416: Tor won't start on Windows when path contains non-ascii characters", "url": "https://gitlab.torproject.org/tpo/core/tor/-/issues/10416", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 doc/tor.md", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/tor.md", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 src/torcontrol.cpp", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/src/torcontrol.cpp", "accessed": "2026-10-21" },
+      { "title": "Microsoft Learn: Service Security and Access Rights", "url": "https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "No official Docker image or documented WSL2 use was checked; the Linux Expert Bundle is expected to run under WSL2.",
+      "The Tor Project's trademark guidelines were not reviewed for BTCortex's use of the name and logo.",
+      "RAM and CPU use of a client with a few onion services were not measured.",
+      "Antivirus or Smart App Control reactions to the unsigned tor.exe, lyrebird.exe and conjure-client.exe were not tested."
+    ]
+  },
+  {
+    "id": "tor-browser",
+    "name": "Tor Browser",
+    "category": "privacy-network",
+    "catalogueEligible": true,
+    "website": "https://www.torproject.org/download/",
+    "repository": "https://gitlab.torproject.org/tpo/applications/tor-browser",
+    "purpose": "Hardened Firefox ESR-based browser bundled with its own tor process, for browsing the web and onion services anonymously. Useful to BTCortex users for opening onion block explorers and web interfaces, but it is not a general-purpose managed Tor daemon.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Tor Browser 15.0.25 published 2026-10-12 (Firefox ESR security updates, tor 0.4.9.14, OpenSSL 3.5.9); 15.0 was released on 2025-10-28 on Firefox ESR 140; 16.0 is in alpha (16.0a14 directory dated 2026-10-16).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "15.0.25",
+      "date": "2026-10-12",
+      "source": "https://blog.torproject.org/new-release-tor-browser-15025/"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "Windows 10 or 11 recommended; support for Windows 7, 8 and 8.1 ended with Tor Browser 14 and the 13.5 legacy line ended with 13.5.29 in March 2026.",
+      "windowsArchitectures": ["x64", "x86"],
+      "windowsDistribution": "tor-browser-windows-x86_64-portable-15.0.25.exe and tor-browser-windows-i686-portable-15.0.25.exe (per-user portable installers) with detached .asc signatures by the Tor Browser Developers key; incremental and full .mar updates. Tor Browser 16.0 drops 32-bit x86.",
+      "wsl2": "not-applicable",
+      "docker": "no",
+      "other": "Linux (x86_64, i686), macOS, Android."
+    },
+    "interfaces": [
+      {
+        "type": "gui",
+        "description": "Browser user interface with connection assistance and bridge settings.",
+        "authentication": null,
+        "documentation": "https://tb-manual.torproject.org/"
+      },
+      {
+        "type": "socks",
+        "description": "The bundled tor listens on 127.0.0.1:9150 (default of the tor-launcher code) with flags 'ExtendedErrors IPv6Traffic PreferIPv6 KeepAliveIsolateSOCKSAuth', only while the browser is running.",
+        "authentication": "None (loopback)",
+        "documentation": "https://gitlab.torproject.org/tpo/applications/tor-browser/-/blob/tor-browser-140.7.0esr-15.0-1/toolkit/components/tor-launcher/TorProcess.sys.mjs"
+      },
+      {
+        "type": "control-protocol",
+        "description": "ControlPort 9151 (preference extensions.torlauncher.control_port) with cookie authentication; the browser owns the process through __OwningControllerProcess.",
+        "authentication": "Cookie authentication; the cookie file lives in the browser's data directory",
+        "documentation": "https://gitlab.torproject.org/tpo/applications/tor-browser/-/blob/tor-browser-140.7.0esr-15.0-1/browser/app/profile/000-tor-browser.js"
+      }
+    ],
+    "cli": "firefox.exe from the Tor Browser folder; launching with a URL argument opens it in Tor Browser. Environment variables such as TOR_SKIP_LAUNCH and TOR_SOCKS_PORT change how it starts tor (documented in Arti's README for use with Arti).",
+    "remoteManagement": null,
+    "nodeCompatibility": "None directly. Bitcoin Core's tor.md notes that Tor Browser's proxy listens on 9150; using it for a node only works while the browser is open.",
+    "dependencies": [],
+    "networking": "Outbound Tor connections from its bundled tor; local SOCKS 9150 and control 9151 on loopback while running.",
+    "storage": "Windows x86_64 portable installer 108 MB (15.0.25).",
+    "resources": "Similar to Firefox ESR; not measured.",
+    "security": "Downloads are signed with the same Tor Browser Developers key as the Expert Bundle. Tor Browser updates itself, changes its tor version without notice to other programs, and its tor exits when the browser closes, so services that depend on it break and onion services disappear. Routing other applications through Tor Browser's SOCKS port mixes their circuits with browsing. BTCortex must only launch it (for example to open an onion explorer URL) and must never read its cookie or control its tor.",
+    "licence": "MPL-2.0",
+    "licenceNotes": "Based on Firefox ESR (MPL-2.0) with additional components under their own licences; Tor Project trademarks apply.",
+    "integrationMechanisms": [
+      "Detect an installation (default per-user folder 'Tor Browser' on the desktop or chosen path) and the running tor on 9150/9151",
+      "Launch firefox.exe with an onion URL chosen by the user, for example a local block explorer's onion address",
+      "Warn when an application is configured to use 9150 instead of BTCortex's managed tor"
+    ],
+    "supportLevels": ["external-launcher", "research-only"],
+    "recommendedSupportLevel": "external-launcher",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Launching is simple; managing it as a daemon is inappropriate by design."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": "Tor Browser's launcher is the reference for how a controller should start tor: '-f torrc', DataDirectory, ClientOnionAuthDir, '--defaults-torrc', GeoIPFile and GeoIPv6File next to torrc-defaults, '+__ControlPort', CookieAuthentication 1 with an explicit CookieAuthFile, '+__SocksPort' and '__OwningControllerProcess <pid>', with DisableNetwork 1 while the network settings are shown.",
+    "sources": [
+      { "title": "Tor Blog: New Release: Tor Browser 15.0.25", "url": "https://blog.torproject.org/new-release-tor-browser-15025/", "accessed": "2026-10-21" },
+      { "title": "Tor Blog: New Release: Tor Browser 15.0", "url": "https://blog.torproject.org/new-release-tor-browser-150/", "accessed": "2026-10-21" },
+      { "title": "Tor Support: Why did Tor Browser drop support for legacy operating systems?", "url": "https://support.torproject.org/tor-browser/security/legacy-os", "accessed": "2026-10-21" },
+      { "title": "Tor Browser release downloads.json", "url": "https://aus1.torproject.org/torbrowser/update_3/release/downloads.json", "accessed": "2026-10-21" },
+      { "title": "dist.torproject.org: Tor Browser 15.0.25 directory listing", "url": "https://dist.torproject.org/torbrowser/15.0.25/", "accessed": "2026-10-21" },
+      { "title": "tor-browser source: TorProcess.sys.mjs (tor launch arguments)", "url": "https://gitlab.torproject.org/tpo/applications/tor-browser/-/blob/tor-browser-140.7.0esr-15.0-1/toolkit/components/tor-launcher/TorProcess.sys.mjs", "accessed": "2026-10-21" },
+      { "title": "tor-browser source: TorLauncherUtil.sys.mjs (default SOCKS port 9150)", "url": "https://gitlab.torproject.org/tpo/applications/tor-browser/-/blob/tor-browser-140.7.0esr-15.0-1/toolkit/components/tor-launcher/TorLauncherUtil.sys.mjs", "accessed": "2026-10-21" },
+      { "title": "tor-browser source: 000-tor-browser.js (control_port 9151)", "url": "https://gitlab.torproject.org/tpo/applications/tor-browser/-/blob/tor-browser-140.7.0esr-15.0-1/browser/app/profile/000-tor-browser.js", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The tor-launcher files were read on the 15.0 branch for Firefox 140.7.0esr, not on the exact 15.0.25 tag.",
+      "The default installation folder and Authenticode status of the 15.0.25 Windows installer were not checked."
+    ]
+  },
+  {
+    "id": "arti",
+    "name": "Arti",
+    "category": "privacy-network",
+    "catalogueEligible": true,
+    "website": "https://arti.torproject.org/",
+    "repository": "https://gitlab.torproject.org/tpo/core/arti",
+    "purpose": "The Tor Project's Rust reimplementation of Tor, designed as an embeddable library (arti-client) and a SOCKS proxy binary; intended long-term successor of C tor.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Monthly releases: 2.7.0 on 2026-10-01, 2.6.0 on 2026-09-01, 2.5.1 on 2026-08-03 (tags arti-v2.7.0 etc.). 2.7.0 contained several low- and medium-severity security fixes. The README (status as of August 2026) says work is focused on relay and directory-authority support.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.7.0",
+      "date": "2026-10-01",
+      "source": "https://gitlab.torproject.org/tpo/core/arti/-/blob/main/CHANGELOG.md"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "No official binaries ('We expect to be providing official binaries soon'); build from source with 'cargo build -p arti --locked --release' (MSRV Rust 1.92). The support policy lists Windows as a target with automated builds but no automated tests.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux (target, tested), macOS and iOS (targets), Android."
+    },
+    "interfaces": [
+      {
+        "type": "socks",
+        "description": "SOCKS proxy started with 'arti proxy', default port 9150; supports Tor's SOCKS extensions and HTTP CONNECT extensions.",
+        "authentication": "None (loopback)",
+        "documentation": "https://gitlab.torproject.org/tpo/core/arti/-/blob/main/crates/arti/README.md"
+      },
+      {
+        "type": "other",
+        "description": "Arti RPC (JSON-based, declared stable in 1.4.2 on 2025-03-31; 'rpc' feature in the 'full' feature set). It is not compatible with C tor's control protocol.",
+        "authentication": "RPC connect-point authentication (details not reviewed)",
+        "documentation": "https://gitlab.torproject.org/tpo/core/arti/-/blob/main/CHANGELOG.md"
+      },
+      {
+        "type": "library-api",
+        "description": "arti-client Rust crate for embedding Tor connections in applications.",
+        "authentication": null,
+        "documentation": "https://tpo.pages.torproject.net/core/doc/rust/arti_client/index.html"
+      }
+    ],
+    "cli": "arti proxy [-p <socks port>] [-c <config>]; configuration file on Windows: %APPDATA%\\torproject\\Arti\\config\\arti.toml. Onion-service hosting needs a build with the 'onion-service-service' feature, which is not in the default feature set.",
+    "remoteManagement": null,
+    "nodeCompatibility": "Can serve as a SOCKS proxy for Bitcoin Core's outbound connections and for wallets. Bitcoin Core's automatic onion service (and any tool that uses ADD_ONION, GETINFO or SETEVENTS) needs C tor's control port, which Arti does not implement.",
+    "dependencies": [],
+    "networking": "Outbound Tor connections; local SOCKS port 9150 by default (same as Tor Browser).",
+    "storage": null,
+    "resources": null,
+    "security": "Rust memory safety removes a class of bugs. Arti's own onion-service document at tag arti-v2.7.0 still says hosting is 'suitable for testing and experimentation only' and 'may even compromise the privacy of your other uses of the same Arti instance', while the README and Compatibility.md (February 2026) say Arti supports running onion services; BTCortex must treat hosting as not production-ready. The arti.torproject.org limitations page is marked as not updated since 2023.",
+    "licence": "MIT OR Apache-2.0",
+    "licenceNotes": "The equix and hashx crates (onion-service proof-of-work) are LGPL-3.0; the project documents the implications for binary redistribution in doc/LGPL-and-rust.md.",
+    "integrationMechanisms": [
+      "Track releases and official-binary availability",
+      "Allow the user to point applications at an existing Arti SOCKS port as a connected application, with the limitation that onion services and control-port features are unavailable"
+    ],
+    "supportLevels": ["research-only", "connected-application"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No official Windows binaries, no C-tor control protocol and onion-service hosting not yet production-ready; BTCortex would have to build and ship Arti itself. Re-evaluate when official binaries exist and hosting is declared stable."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Compatibility.md: 'Going forward, Arti is the preferred Tor client for new feature development.' Recommendation for BTCortex today: C tor from the Expert Bundle.",
+    "sources": [
+      { "title": "Arti README", "url": "https://gitlab.torproject.org/tpo/core/arti/-/blob/main/README.md", "accessed": "2026-10-21" },
+      { "title": "Arti CHANGELOG", "url": "https://gitlab.torproject.org/tpo/core/arti/-/blob/main/CHANGELOG.md", "accessed": "2026-10-21" },
+      { "title": "Arti doc/Compatibility.md", "url": "https://gitlab.torproject.org/tpo/core/arti/-/blob/main/doc/Compatibility.md", "accessed": "2026-10-21" },
+      { "title": "Arti doc/OnionService.md at arti-v2.7.0", "url": "https://gitlab.torproject.org/tpo/core/arti/-/blob/arti-v2.7.0/doc/OnionService.md", "accessed": "2026-10-21" },
+      { "title": "Arti doc/SupportPolicy.md at arti-v2.7.0", "url": "https://gitlab.torproject.org/tpo/core/arti/-/blob/arti-v2.7.0/doc/SupportPolicy.md", "accessed": "2026-10-21" },
+      { "title": "arti crate README (features, Windows configuration path)", "url": "https://gitlab.torproject.org/tpo/core/arti/-/blob/main/crates/arti/README.md", "accessed": "2026-10-21" },
+      { "title": "Arti guide: capability limitations", "url": "https://arti.torproject.org/guides/capability-limitations", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The Arti RPC method set (for example whether it can create onion services or report bootstrap state) was not reviewed.",
+      "No Windows build of Arti was attempted."
+    ]
+  },
+  {
+    "id": "lyrebird",
+    "name": "lyrebird (Tor pluggable transports)",
+    "category": "privacy-network",
+    "catalogueEligible": false,
+    "website": "https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird",
+    "repository": "https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird",
+    "purpose": "The Tor Project's pluggable-transport binary (fork of obfs4proxy) implementing obfs4, meek_lite, WebTunnel, Snowflake (since 0.5.0) and the legacy obfs2, obfs3 and ScrambleSuit transports, used by tor to reach bridges on censored networks.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "0.9.0 on 2026-09-21 (goreleaser packages, Snowflake proxy fix); 0.8.1 on 2026-01-14; 0.7.0 on 2025-11-19 (WebTunnel certificate pinning, uTLS by default).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.9.0",
+      "date": "2026-09-21",
+      "source": "https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/blob/main/ChangeLog"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64", "x86"],
+      "windowsDistribution": "lyrebird.exe inside the Tor Expert Bundle (tor\\pluggable_transports\\), covered by the bundle's signature.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS, Android (in the respective Expert Bundles)."
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Pluggable Transport protocol v1 child process launched by tor through 'ClientTransportPlugin <transports> exec <path>\\lyrebird.exe'.",
+        "authentication": null,
+        "documentation": "https://spec.torproject.org/pt-spec/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [
+      { "ids": ["tor"], "relationship": "requires", "notes": "Launched and managed by tor." }
+    ],
+    "networking": "Outbound only, to bridges, domain fronts (meek, Snowflake broker) or WebRTC peers (Snowflake, STUN servers listed in the bridge lines).",
+    "storage": "lyrebird.exe 18.0 MB in Expert Bundle 15.0.25.",
+    "resources": null,
+    "security": "Bridges hide the fact of Tor use from a local observer but do not add anonymity; built-in bridge lines are public and may be blocked. Snowflake and meek depend on third-party CDNs and domain fronting.",
+    "licence": "BSD-2-Clause",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Generate ClientTransportPlugin lines with absolute paths from pt_config.json in the bundle",
+      "Offer built-in obfs4, Snowflake and meek bridge lines from pt_config.json and user-supplied bridge lines (for example WebTunnel from BridgeDB)"
+    ],
+    "supportLevels": ["fully-managed"],
+    "recommendedSupportLevel": "fully-managed",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Shipped and verified with tor; only configuration is needed."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": "The version of lyrebird inside Expert Bundle 15.0.25 was not determined.",
+    "sources": [
+      { "title": "lyrebird ChangeLog", "url": "https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/blob/main/ChangeLog", "accessed": "2026-10-21" },
+      { "title": "lyrebird LICENSE", "url": "https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/blob/main/LICENSE", "accessed": "2026-10-21" },
+      { "title": "Pluggable Transport Specification (Version 1)", "url": "https://spec.torproject.org/pt-spec/", "accessed": "2026-10-21" },
+      { "title": "dist.torproject.org: Expert Bundle 15.0.25 (archive listing and pt_config.json read from the archive)", "url": "https://dist.torproject.org/torbrowser/15.0.25/tor-expert-bundle-windows-x86_64-15.0.25.tar.gz", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The lyrebird version bundled in 15.0.25 was not read from the binary."
+    ]
+  },
+  {
+    "id": "conjure",
+    "name": "Conjure pluggable transport (conjure-client)",
+    "category": "privacy-network",
+    "catalogueEligible": false,
+    "website": "https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/conjure",
+    "repository": "https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/conjure",
+    "purpose": "Refraction-networking (decoy routing) pluggable transport that reaches a Tor bridge through phantom addresses in deploying ISPs' unused address space.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Repository last activity 2026-09-01 (GitLab API); no tags. conjure-client.exe ships in Expert Bundle 15.0.25.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64", "x86"],
+      "windowsDistribution": "conjure-client.exe inside the Tor Expert Bundle.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Pluggable transport launched by tor: 'ClientTransportPlugin conjure exec conjure-client.exe -registerURL https://registration.refraction.network/api'.",
+        "authentication": null,
+        "documentation": "https://spec.torproject.org/pt-spec/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [
+      { "ids": ["tor"], "relationship": "requires", "notes": null }
+    ],
+    "networking": "Registration over HTTPS to registration.refraction.network, then connections to phantom proxies.",
+    "storage": "conjure-client.exe 13.1 MB in Expert Bundle 15.0.25.",
+    "resources": null,
+    "security": "The bundled README warns: 'This tool and the deployment is still under active development' and 'Do not expect this to work out of the box in all areas'; the station is sometimes overloaded.",
+    "licence": null,
+    "licenceNotes": "Licence text ships as docs/conjure.txt in the Expert Bundle; not read.",
+    "integrationMechanisms": ["Offer as an experimental bridge option only"],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Technically configurable like other transports, but upstream describes it as experimental and capacity-limited."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "Conjure repository", "url": "https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/conjure", "accessed": "2026-10-21" },
+      { "title": "dist.torproject.org: Expert Bundle 15.0.25 (README.CONJURE.md and pt_config.json read from the archive)", "url": "https://dist.torproject.org/torbrowser/15.0.25/tor-expert-bundle-windows-x86_64-15.0.25.tar.gz", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Licence not determined."
+    ]
+  },
+  {
+    "id": "obfs4proxy",
+    "name": "obfs4proxy (Yawning Angel)",
+    "category": "privacy-network",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": "https://gitlab.com/yawning/obfs4",
+    "purpose": "Original obfs4 pluggable-transport proxy, forked and renamed lyrebird by the Tor Project.",
+    "maintenance": {
+      "status": "superseded",
+      "evidence": "Last tag obfs4proxy-0.0.14 on 2022-09-04; repository last active 2024-12-11 (GitLab API). The Expert Bundle ships lyrebird.exe instead of obfs4proxy.exe.",
+      "supersededBy": "lyrebird"
+    },
+    "latestStableRelease": {
+      "version": "0.0.14",
+      "date": "2022-09-04",
+      "source": "https://gitlab.com/yawning/obfs4/-/tags"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Pluggable transport protocol child process.",
+        "authentication": null,
+        "documentation": "https://spec.torproject.org/pt-spec/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Unmaintained since 2022; old torrc files that reference obfs4proxy.exe must be migrated to lyrebird.exe.",
+    "licence": null,
+    "licenceNotes": null,
+    "integrationMechanisms": ["Detect obfs4proxy.exe references in imported torrc files and rewrite them to the bundled lyrebird.exe"],
+    "supportLevels": ["unsupported"],
+    "recommendedSupportLevel": "unsupported",
+    "feasibility": {
+      "rating": "none",
+      "notes": "Superseded by lyrebird, which ships with the Expert Bundle."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "yawning/obfs4 on GitLab", "url": "https://gitlab.com/yawning/obfs4", "accessed": "2026-10-21" },
+      { "title": "Tor community issue: Windows Expert Bundle changed obfs4proxy binary name to lyrebird.exe", "url": "https://gitlab.torproject.org/tpo/web/community/-/issues/357", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The community issue was seen only as a search-result title; its content was not read."
+    ]
+  },
+  {
+    "id": "i2pd",
+    "name": "i2pd (I2P daemon)",
+    "category": "privacy-network",
+    "catalogueEligible": true,
+    "website": "http://i2pd.website",
+    "repository": "https://github.com/PurpleI2P/i2pd",
+    "purpose": "Lightweight C++ router for the I2P anonymity network. It enables the SAM bridge by default, which Bitcoin Core uses through -i2psam to make and accept I2P peer connections.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "3.0.0 released 2026-10-20 (full SAM 3.3, I2PControl LocalDestinationInfo, keys files readable by owner only); 2.61.0 on 2026-07-20; 2.60.0 on 2026-04-25. Default branch 'openssl' pushed 2026-10-20.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "3.0.0",
+      "date": "2026-10-20",
+      "source": "https://github.com/PurpleI2P/i2pd/releases/tag/3.0.0"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "A separate Windows XP-compatible build is offered; the minimum for the main builds is not stated.",
+      "windowsArchitectures": ["x64", "x86"],
+      "windowsDistribution": "i2pd_<version>_win64_mingw.zip, i2pd_<version>_win32_mingw.zip, i2pd_<version>_winxp_mingw.zip and setup_i2pd_v<version>.exe on GitHub Releases. Release builds are Win32 tray applications. 2.61.0 has SHA512SUMS and SHA512SUMS.asc (issuer 9519 28BB 3170 24EF D053 D73C 66F6 C87B 98EB CFE2, R4SAS); the 3.0.0 release had no SHA512SUMS or signature on 2026-10-21.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux (deb, rpm for many distributions), macOS, Android, FreeBSD and others."
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "SAM application bridge (sam.enabled true by default, usually 127.0.0.1:7656; SAM UDP 7655). Bitcoin Core speaks SAM 3.1 to it.",
+        "authentication": "None (bind to loopback)",
+        "documentation": "https://i2p.net/en/docs/api/samv3/"
+      },
+      {
+        "type": "http",
+        "description": "Web console (http.enabled true, port 7070) and HTTP proxy (httpproxy, port 4444); both enabled by default.",
+        "authentication": "Optional HTTP basic authentication for the web console",
+        "documentation": "https://github.com/PurpleI2P/i2pd_docs_en/blob/master/docs/user-guide/configuration.md"
+      },
+      {
+        "type": "socks",
+        "description": "SOCKS proxy into I2P (socksproxy, port 4447, enabled by default).",
+        "authentication": null,
+        "documentation": "https://github.com/PurpleI2P/i2pd_docs_en/blob/master/docs/user-guide/configuration.md"
+      },
+      {
+        "type": "json-rpc",
+        "description": "I2PControl JSON-RPC over HTTPS (i2pcontrol.enabled false by default, port 7650): Authenticate, RouterInfo, RouterManager (Shutdown, ShutdownGraceful), plus the i2pd-specific LocalDestinationInfo.",
+        "authentication": "Password (default 'itoopie', must be changed) exchanged for a session token; self-signed TLS certificate i2pcontrol.crt.pem",
+        "documentation": "https://github.com/PurpleI2P/i2pd_docs_en/blob/master/docs/devs/api/I2PControl.md"
+      },
+      {
+        "type": "file",
+        "description": "i2pd.conf (INI) and tunnels.conf in the data directory; router keys, netDb and peer profiles.",
+        "authentication": null,
+        "documentation": "https://github.com/PurpleI2P/i2pd_docs_en/blob/master/docs/user-guide/configuration.md"
+      }
+    ],
+    "cli": "i2pd.exe --datadir=<dir> --conf=<dir>\\i2pd.conf --tunconf=<dir>\\tunnels.conf [--service] [--loglevel=warn]. datadir and service are command-line-only options. Without --datadir the data directory is the executable's folder if it contains i2pd.conf, otherwise %APPDATA%\\i2pd; --service uses C:\\ProgramData\\i2pd. The 'daemon' option defaults to false in the source (Config.cpp) although the documentation table says true.",
+    "remoteManagement": "I2PControl JSON-RPC (HTTPS, password) and the web console; both should stay on loopback.",
+    "nodeCompatibility": "Bitcoin Core (22.0+): i2psam=127.0.0.1:7656, i2pacceptincoming=1 (default; a persistent I2P address with its key in i2p_private_key in the data directory) or 0 (transient address per outbound connection), onlynet=i2p optional. Core uses SAM 3.1, so it listens and advertises with port 0 and only connects to I2P addresses with port 0. Core's I2P documentation recommends i2pd as the lighter alternative.",
+    "dependencies": [],
+    "networking": "NTCP2 and SSU2 transports on a random port (port option, default 'auto') on all interfaces; UPnP is false by default for the command-line build but true for the GUI builds (Windows, Android). Participates in transit tunnels by default, which Core's documentation asks users not to restrict. Local listeners: 7070 web console, 4444 HTTP proxy, 4447 SOCKS proxy, 7656 SAM, 7654 I2CP (enabled by default), 7650 I2PControl (disabled by default).",
+    "storage": "Windows x64 ZIP 4.9 MB (3.0.0); netDb and profiles are small.",
+    "resources": "Bandwidth limit configurable (bandwidth L=32 KB/s, O=256 KB/s, P=2048 KB/s, X=unlimited; share percentage for transit); RAM and CPU not measured.",
+    "security": "Unlike Tor, the receiver of an I2P connection sees the initiator's I2P address (Core's i2p.md), so transient addresses (i2pacceptincoming=0) are preferable when inbound is not needed. Disable UPnP for BTCortex-managed routers (Windows GUI builds enable it by default) and bind every local service to 127.0.0.1. Change the default I2PControl password. A non-administrator user who sees the Windows Firewall prompt for i2pd's transport listener gets block rules whatever they choose; I2P still works outbound but is reachability-limited. Verify the 2.61.0-style SHA512SUMS.asc when present; for 3.0.0 no signature was published at the time of checking.",
+    "licence": "BSD-3-Clause",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Download the win64 ZIP, verify SHA512SUMS and its OpenPGP signature (R4SAS key), extract per user",
+      "Generate i2pd.conf (SAM on 127.0.0.1:7656, web console on 127.0.0.1 with authentication or disabled, HTTP and SOCKS proxies disabled unless needed, upnp disabled, I2PControl on 127.0.0.1 with a random password) and launch with --datadir and --conf",
+      "Health: SAM 'HELLO VERSION' handshake on 7656 and I2PControl RouterInfo; Bitcoin Core getnetworkinfo shows the i2p network as reachable",
+      "Stop through I2PControl RouterManager Shutdown (immediate) or ShutdownGraceful (finishes transit tunnels, up to about ten minutes)",
+      "Write bitcoin.conf i2psam and i2pacceptincoming settings"
+    ],
+    "supportLevels": ["fully-managed", "connected-application", "managed-wsl2"],
+    "recommendedSupportLevel": "fully-managed",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Portable signed ZIP and simple INI configuration, but the Windows builds are tray applications, the newest release lacked checksums at the time of checking, UPnP is on by default in the GUI build, and the transport listener triggers a Windows Firewall prompt."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": "I2P's SAM v3 specification page (updated 2026-07) says i2pd did not support most SAM 3.2/3.3 features; i2pd 3.0.0 (2026-10-20) announces a full SAM 3.3 implementation. Bitcoin Core only needs SAM 3.1.",
+    "sources": [
+      { "title": "i2pd release 3.0.0", "url": "https://github.com/PurpleI2P/i2pd/releases/tag/3.0.0", "accessed": "2026-10-21" },
+      { "title": "i2pd release 2.61.0 (SHA512SUMS, SHA512SUMS.asc)", "url": "https://github.com/PurpleI2P/i2pd/releases/tag/2.61.0", "accessed": "2026-10-21" },
+      { "title": "i2pd documentation: configuration", "url": "https://github.com/PurpleI2P/i2pd_docs_en/blob/master/docs/user-guide/configuration.md", "accessed": "2026-10-21" },
+      { "title": "i2pd documentation: install (Windows builds)", "url": "https://github.com/PurpleI2P/i2pd_docs_en/blob/master/docs/user-guide/install.md", "accessed": "2026-10-21" },
+      { "title": "i2pd documentation: I2PControl", "url": "https://github.com/PurpleI2P/i2pd_docs_en/blob/master/docs/devs/api/I2PControl.md", "accessed": "2026-10-21" },
+      { "title": "i2pd source: libi2pd/FS.cpp (Windows data directory)", "url": "https://github.com/PurpleI2P/i2pd/blob/openssl/libi2pd/FS.cpp", "accessed": "2026-10-21" },
+      { "title": "i2pd source: libi2pd/Config.cpp (option defaults)", "url": "https://github.com/PurpleI2P/i2pd/blob/openssl/libi2pd/Config.cpp", "accessed": "2026-10-21" },
+      { "title": "i2pd source: Win32/DaemonWin32.cpp", "url": "https://github.com/PurpleI2P/i2pd/blob/openssl/Win32/DaemonWin32.cpp", "accessed": "2026-10-21" },
+      { "title": "keys.openpgp.org: R4SAS key", "url": "https://keys.openpgp.org/vks/v1/by-fingerprint/951928BB317024EFD053D73C66F6C87B98EBCFE2", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 doc/i2p.md", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/i2p.md", "accessed": "2026-10-21" },
+      { "title": "I2P: SAM V3 specification", "url": "https://i2p.net/en/docs/api/samv3/", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The signing key fingerprint was taken from the signature packet and matched on keys.openpgp.org; no fingerprint was found on i2pd's own pages.",
+      "Whether SHA512SUMS and a signature will be added to the 3.0.0 release later was not known on 2026-10-21.",
+      "The minimum Windows version of the main builds and the bind address defaults of the web console were not checked.",
+      "The exact INI section names for 'upnp.enabled' and the other dotted options were taken from the documentation table, not tested."
+    ]
+  },
+  {
+    "id": "i2p",
+    "name": "I2P (Java I2P router)",
+    "category": "privacy-network",
+    "catalogueEligible": true,
+    "website": "https://i2p.net/",
+    "repository": "https://github.com/i2p/i2p.i2p",
+    "purpose": "The reference Java implementation of the I2P anonymity network, with a router console, I2PTunnel, I2PSnark and a SAM bridge that is off by default.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "2.13.0 announced 2026-07-20 (post-quantum NTCP2, SSU1 removed). The GitHub mirror shows a tag 'i2p-2.14.0' on 2026-10-20 and 'i2p-2.13.0-9-rc' on 2026-10-16, but on 2026-10-21 the downloads page still listed 2.13.0 and files.i2p.net had no 2.14.0 files. geti2p.net now redirects to i2p.net.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.13.0",
+      "date": "2026-07-20",
+      "source": "https://i2p.net/en/blog/2026/07/20/i2p-2.13.0-release/"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "i2pinstall_2.13.0_windows.exe (about 27 MB, requires a Java runtime) and I2P-Windows-Easy-Install-Bundle.exe (beta, bundles a Java runtime, about 171 MB). The downloads page offers OpenPGP .sig files only for the .jar, the macOS .dmg and the source tarball (key 70D2 0607 38BE F805 23AC AFF7 D75C 03B3 9B5E 14E1, idk/eyedeekay); the release post's SHA-256 list names 'i2pinstall_2.13.0-0_windows.exe', which does not match the published file name, and lists no Easy-Install bundle.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Cross-platform installer .jar (Java 8 or later), macOS DMG (Apple Silicon, beta), Android APK."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Router console on http://127.0.0.1:7657 (clients page /configclients to start the SAM bridge).",
+        "authentication": "Optional console password",
+        "documentation": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/i2p.md"
+      },
+      {
+        "type": "other",
+        "description": "SAM v3 bridge, not enabled by default; usually 127.0.0.1:7656 once started (or configured to start in clients.config).",
+        "authentication": "None (loopback)",
+        "documentation": "https://i2p.net/en/docs/api/samv3/"
+      },
+      {
+        "type": "json-rpc",
+        "description": "I2PControl JSON-RPC over HTTPS on 127.0.0.1:7650 with Authenticate, RouterInfo, RouterManager (Shutdown, ShutdownGraceful) and NetworkSetting.",
+        "authentication": "Password (factory default 'itoopie') exchanged for a token",
+        "documentation": "https://i2p.net/en/docs/api/i2pcontrol/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Router console and I2PControl; keep on loopback.",
+    "nodeCompatibility": "Bitcoin Core i2psam=127.0.0.1:7656 after the SAM bridge has been started in the router console or in clients.config.",
+    "dependencies": [],
+    "networking": "NTCP2 and SSU2 transports; local console 7657, HTTP proxy 4444, SAM 7656 when enabled.",
+    "storage": null,
+    "resources": "Requires a Java runtime (bundled in the Easy-Install bundle); not measured.",
+    "security": "Weaker download verification for Windows than for i2pd: no signature for the Windows installers on the downloads page and a checksum list whose Windows file name does not match. The SAM bridge is off by default, so enabling it changes the router's configuration.",
+    "licence": null,
+    "licenceNotes": "LICENSE.txt: 'This product includes both public domain code and licensed code'; components use several licences (not enumerated here).",
+    "integrationMechanisms": [
+      "Detect an existing router (console on 7657, SAM on 7656) and tell the user how to enable SAM if it is off",
+      "Configure Bitcoin Core's i2psam to point at the detected SAM bridge"
+    ],
+    "supportLevels": ["connected-application", "external-launcher", "research-only"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Using an existing router is easy; unattended installation by BTCortex is not recommended because of the Java dependency, the installer-based distribution and the weak verification path. i2pd is the managed choice."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "I2P downloads", "url": "https://i2p.net/en/downloads", "accessed": "2026-10-21" },
+      { "title": "I2P blog: I2P 2.13.0 release", "url": "https://i2p.net/en/blog/2026/07/20/i2p-2.13.0-release/", "accessed": "2026-10-21" },
+      { "title": "I2P: release signing key", "url": "https://i2p.net/en/docs/development/release-signing-key/", "accessed": "2026-10-21" },
+      { "title": "keys.openpgp.org: idk (eyedeekay) key", "url": "https://keys.openpgp.org/vks/v1/by-fingerprint/70D2060738BEF80523ACAFF7D75C03B39B5E14E1", "accessed": "2026-10-21" },
+      { "title": "I2P: I2PControl API", "url": "https://i2p.net/en/docs/api/i2pcontrol/", "accessed": "2026-10-21" },
+      { "title": "i2p.i2p GitHub mirror (releases feed)", "url": "https://github.com/i2p/i2p.i2p/releases", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 doc/i2p.md", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/i2p.md", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether the Windows installers are Authenticode-signed was not checked.",
+      "Administrator requirements and silent-install switches of i2pinstall_2.13.0_windows.exe and the Easy-Install bundle are not documented on the pages read.",
+      "Whether the 2.14.0 tag is a final release was not determined."
+    ]
+  },
+  {
+    "id": "cjdns",
+    "name": "cjdns",
+    "category": "private-network",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/cjdelisle/cjdns",
+    "purpose": "Encrypted IPv6 mesh network (addresses in fc00::/8 derived from public keys, DHT routing). Bitcoin Core can use it as an additional network with -cjdnsreachable. It encrypts end to end but does not hide sender and recipient from intermediate routers.",
+    "maintenance": {
+      "status": "maintenance-only",
+      "evidence": "Tags cjdns-v22.1 to cjdns-v22.3; latest master commit 2025-12-10 ('Release 22.3 ThirtyTwo - Bug fix release which fixes 32bit'). The Windows installation document was last changed on 2017-01-18.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "22.3",
+      "date": "2025-12-10",
+      "source": "https://github.com/cjdelisle/cjdns/tags"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "No Windows binaries. doc/install/windows.md describes cross-compiling cjdroute.exe from Linux with mingw (SYSTEM=win32), installing the OpenVPN TAP-Windows driver and running cjdroute from an elevated command prompt; the README's installation instructions cover only Linux and macOS (pre-built binaries via cjdns.sh for Linux amd64).",
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Linux, macOS, OpenWrt and other Unix-like systems."
+    },
+    "interfaces": [
+      {
+        "type": "file",
+        "description": "cjdroute.conf (JSON) generated with 'cjdroute --genconf'; peers are added under connectTo.",
+        "authentication": null,
+        "documentation": "https://github.com/cjdelisle/cjdns/blob/master/README.md"
+      },
+      {
+        "type": "other",
+        "description": "Admin API (doc/admin-api.md) and a TUN/TAP network interface.",
+        "authentication": "Admin password in cjdroute.conf",
+        "documentation": "https://github.com/cjdelisle/cjdns/blob/master/doc/admin-api.md"
+      }
+    ],
+    "cli": "cjdroute --genconf > cjdroute.conf; cjdroute < cjdroute.conf (elevated on Windows).",
+    "remoteManagement": null,
+    "nodeCompatibility": "Bitcoin Core (23.0+): cjdnsreachable=1 tells Core that fc00::/8 addresses belong to CJDNS rather than a private IPv6 network; onlynet=cjdns optional; -proxy=<addr>=cjdns since 30.0. The host must already be connected to the CJDNS network (for example Hyperboria peers).",
+    "dependencies": [],
+    "networking": "UDP peering to manually configured peers; a virtual IPv6 interface in fc00::/8.",
+    "storage": null,
+    "resources": null,
+    "security": "Requires a kernel network driver and administrator rights on Windows. Bitcoin Core's documentation: 'CJDNS is fast but does not hide the sender and the recipient from intermediate routers', so it must not be presented as anonymity.",
+    "licence": "GPL-3.0",
+    "licenceNotes": "Licence as reported by the GitHub repository metadata.",
+    "integrationMechanisms": [
+      "Detect an fc00::/8 address on a local interface and offer cjdnsreachable for Bitcoin Core",
+      "Configure cjdnsreachable on remote Linux nodes that already run cjdns"
+    ],
+    "supportLevels": ["research-only", "remote-managed"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No Windows binaries, an outdated Windows procedure, a TAP driver and elevation are required."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "cjdns repository and README", "url": "https://github.com/cjdelisle/cjdns", "accessed": "2026-10-21" },
+      { "title": "cjdns doc/install/windows.md", "url": "https://github.com/cjdelisle/cjdns/blob/master/doc/install/windows.md", "accessed": "2026-10-21" },
+      { "title": "cjdns tags", "url": "https://github.com/cjdelisle/cjdns/tags", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Core 31.1 doc/cjdns.md", "url": "https://github.com/bitcoin/bitcoin/blob/v31.1/doc/cjdns.md", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether current cjdns still cross-compiles for Windows was not checked.",
+      "The admin API document was not read."
+    ]
+  },
+  {
+    "id": "wireguard",
+    "name": "WireGuard for Windows",
+    "category": "private-network",
+    "catalogueEligible": true,
+    "website": "https://www.wireguard.com/",
+    "repository": "https://git.zx2c4.com/wireguard-windows/",
+    "purpose": "Official WireGuard VPN client and tunnel service for Windows. Gives an encrypted point-to-point or hub tunnel, for example from a laptop to a home node; it is an encrypted tunnel, not an anonymity network.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v1.1.1 committed 2026-09-20 (MSIs dated 2026-09-20); v1.1 about five months earlier; v0.6 and v1.0 about six months earlier, after a long gap since v0.5.3 (about five years ago according to the tag list).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.1.1",
+      "date": "2026-09-20",
+      "source": "https://download.wireguard.com/windows-client/"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64", "arm64", "x86"],
+      "windowsDistribution": "wireguard-installer.exe (downloads, verifies and runs the right MSI) and per-architecture MSIs wireguard-amd64-1.1.1.msi, wireguard-arm64-1.1.1.msi and wireguard-x86-1.1.1.msi; latest.sig is a signify-format signature over the MSI SHA-256 list ('verify with wireguard-windows-release.pub'). MSI property DO_NOT_LAUNCH suppresses the UI after installation.",
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Linux kernel module and wg-quick, macOS, iOS, Android, BSDs."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "wireguard.exe /installtunnelservice <path\\name.conf> (creates service WireGuardTunnel$name), /uninstalltunnelservice <name>, /installmanagerservice, /uninstallmanagerservice, /dumplog [/tail], /update, /removedriver; wg.exe show/set for runtime inspection.",
+        "authentication": "Administrator rights for services; wg.exe on a .conf.dpapi tunnel needs Local System or Administrator",
+        "documentation": "https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md"
+      },
+      {
+        "type": "file",
+        "description": "wg-quick style .conf files ([Interface] PrivateKey, Address, DNS; [Peer] PublicKey, AllowedIPs, Endpoint, PersistentKeepalive); the manager service encrypts files dropped in %ProgramFiles%\\WireGuard\\Data\\Configurations\\ to .conf.dpapi.",
+        "authentication": null,
+        "documentation": "https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md"
+      },
+      {
+        "type": "gui",
+        "description": "Tray manager UI shown to built-in Administrators (a limited UI for Network Configuration Operators when enabled by registry).",
+        "authentication": null,
+        "documentation": "https://git.zx2c4.com/wireguard-windows/about/docs/adminregistry.md"
+      }
+    ],
+    "cli": "wireguard /installtunnelservice C:\\path\\to\\btcortex.conf; wireguard /uninstalltunnelservice btcortex; wg show btcortex; wireguard /dumplog",
+    "remoteManagement": "None on Windows beyond standard service management; the remote peer is typically a router or Linux server configured separately.",
+    "nodeCompatibility": "Transparent to Bitcoin Core and Electrum clients: once the tunnel is up the remote node's RPC or Electrum port is reachable on its tunnel address. Core must then bind or allow that tunnel address explicitly (rpcbind/rpcallowip), which BTCortex should only do with explicit consent.",
+    "dependencies": [],
+    "networking": "UDP to the peer's Endpoint (default listen port chosen per configuration); creates a Wintun network adapter; AllowedIPs decides routing (0.0.0.0/0 routes all traffic through the peer).",
+    "storage": null,
+    "resources": null,
+    "security": "Installation, tunnel services and driver need administrator rights, so the zero-touch rule cannot be met without one UAC approval. Private keys live in .conf or DPAPI-protected .conf.dpapi files. The peer operator (or VPN provider) sees all traffic metadata and, for full-tunnel configurations, all destinations: never label a WireGuard connection as anonymous. PreUp/PostUp scripts run only when an administrator enables a registry key.",
+    "licence": "MIT",
+    "licenceNotes": "wireguard-windows is MIT-licensed (Copyright WireGuard LLC). The website states that 'WireGuard' and the WireGuard logo are registered trademarks of Jason A. Donenfeld, so BTCortex should not ship modified builds under that name and should link to the official installer.",
+    "integrationMechanisms": [
+      "Generate X25519 key pairs and wg-quick configurations for a remote-node tunnel and show them for import, or install them with one explicit UAC elevation through /installtunnelservice",
+      "Detect installed tunnels (services named WireGuardTunnel$*) and the tunnel adapter's addresses to offer remote endpoints",
+      "Never present the tunnel as anonymous; mark connections as 'encrypted tunnel'"
+    ],
+    "supportLevels": ["connected-application", "fully-managed", "external-launcher"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Well-documented CLI and service model, but every lifecycle step needs administrator rights."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "WireGuard for Windows downloads (MSIs and latest.sig)", "url": "https://download.wireguard.com/windows-client/", "accessed": "2026-10-21" },
+      { "title": "wireguard-windows docs/enterprise.md", "url": "https://git.zx2c4.com/wireguard-windows/about/docs/enterprise.md", "accessed": "2026-10-21" },
+      { "title": "wireguard-windows tags", "url": "https://git.zx2c4.com/wireguard-windows/refs/tags", "accessed": "2026-10-21" },
+      { "title": "wireguard-windows commit for v1.1.1", "url": "https://git.zx2c4.com/wireguard-windows/commit/?h=v1.1.1", "accessed": "2026-10-21" },
+      { "title": "wireguard-windows COPYING and README", "url": "https://git.zx2c4.com/wireguard-windows/about/", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The minimum Windows version for 1.1.1 was not checked.",
+      "Changes between 0.5.3 and 1.1.1 (for example in CLI switches) were not reviewed beyond the current enterprise documentation.",
+      "The full WireGuard trademark policy was not read."
+    ]
+  },
+  {
+    "id": "tailscale",
+    "name": "Tailscale",
+    "category": "private-network",
+    "catalogueEligible": true,
+    "website": "https://tailscale.com/",
+    "repository": "https://github.com/tailscale/tailscale",
+    "purpose": "WireGuard-based mesh VPN ('tailnet') with a hosted coordination server, NAT traversal and DERP relays; Serve publishes a local service inside the tailnet and Funnel publishes it on the public internet.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v1.104.2 published 2026-10-21; v1.104.1 on 2026-10-07; repository pushed 2026-10-21.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.104.2",
+      "date": "2026-10-21",
+      "source": "https://github.com/tailscale/tailscale/releases/tag/v1.104.2"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "Windows 10 or later, Windows Server 2016 or later",
+      "windowsArchitectures": ["x64", "arm64", "x86"],
+      "windowsDistribution": "tailscale-setup-1.104.2.exe, tailscale-setup-full-1.104.2.exe and per-architecture MSIs (tailscale-setup-1.104.2-amd64.msi, -arm64.msi, -x86.msi); default INSTALLDIR C:\\Program Files\\Tailscale; MSI properties include TS_UNATTENDEDMODE, TS_LOGINURL and TS_NOLAUNCH.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS, iOS, Android, Synology, BSDs."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "tailscale.exe up, status [--json], ip, ping, serve <port> (tailnet-only HTTPS proxy), funnel <port> (public internet), cert, login --login-server <url>.",
+        "authentication": "Tailnet identity of the logged-in user or device",
+        "documentation": "https://tailscale.com/kb/1312/serve"
+      },
+      {
+        "type": "gui",
+        "description": "Tray client; by default it runs only while the user is logged in unless 'Run unattended' is enabled.",
+        "authentication": null,
+        "documentation": "https://tailscale.com/kb/1189/install-windows-msi"
+      }
+    ],
+    "cli": "tailscale status --json; tailscale serve 3000; tailscale funnel 3000; tailscale cert <machine>.<tailnet>.ts.net; tailscale login --login-server https://headscale.example",
+    "remoteManagement": "Hosted admin console and API (Tailscale) or a self-hosted Headscale server; BTCortex only reads local state through the CLI.",
+    "nodeCompatibility": "Transparent: a remote node's RPC, Electrum or web ports become reachable on its tailnet address or MagicDNS name; Bitcoin Core must allow that address explicitly. Tailscale Serve can expose a loopback-bound web UI to the tailnet without changing its bind address.",
+    "dependencies": [
+      { "ids": ["headscale"], "relationship": "optional", "notes": "Self-hosted replacement for Tailscale's coordination server." }
+    ],
+    "networking": "Outbound UDP (WireGuard) with NAT traversal; falls back to DERP relays over HTTPS; Funnel only on ports 443, 8443 and 10000 through Funnel relay servers, which proxy TCP without decrypting; HTTPS certificates from Let's Encrypt for <machine>.<tailnet>.ts.net.",
+    "storage": null,
+    "resources": null,
+    "security": "Encrypted private network, not anonymity: the coordination server (Tailscale Inc. or Headscale) knows the devices, their keys and public IP addresses. Enabling HTTPS publishes machine names and the tailnet DNS name in Certificate Transparency logs ('Do not enable the HTTPS feature if any of your machine names contain sensitive information'). Serve is tailnet-only and adds identity headers, so the backend must listen on localhost. Funnel makes a service reachable by anyone with the URL; BTCortex must never use Funnel for node RPC, Electrum or Lightning management interfaces.",
+    "licence": "BSD-3-Clause",
+    "licenceNotes": "tailscaled and the CLI are open source; the Windows GUI wrapper is not ('The GUI wrappers on non-open source platforms are themselves not open source').",
+    "integrationMechanisms": [
+      "Detect the client (C:\\Program Files\\Tailscale\\tailscale.exe) and read 'tailscale status --json' to list peers and addresses",
+      "Offer remote node endpoints on tailnet addresses",
+      "With explicit consent, run 'tailscale serve' for a loopback-bound BTCortex-managed web UI; never Funnel by default"
+    ],
+    "supportLevels": ["connected-application", "external-launcher"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Installation is a per-machine MSI and login is interactive; BTCortex should detect and use an existing installation rather than install it."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "Tailscale stable packages", "url": "https://pkgs.tailscale.com/stable/", "accessed": "2026-10-21" },
+      { "title": "Tailscale release v1.104.2", "url": "https://github.com/tailscale/tailscale/releases/tag/v1.104.2", "accessed": "2026-10-21" },
+      { "title": "Tailscale README", "url": "https://github.com/tailscale/tailscale/blob/main/README.md", "accessed": "2026-10-21" },
+      { "title": "Tailscale KB: Funnel", "url": "https://tailscale.com/kb/1223/funnel", "accessed": "2026-10-21" },
+      { "title": "Tailscale KB: Serve", "url": "https://tailscale.com/kb/1312/serve", "accessed": "2026-10-21" },
+      { "title": "Tailscale KB: Enabling HTTPS", "url": "https://tailscale.com/kb/1153/enabling-https", "accessed": "2026-10-21" },
+      { "title": "Tailscale KB: Install Tailscale on Windows with MSI", "url": "https://tailscale.com/kb/1189/install-windows-msi", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Administrator rights for installation are implied by the per-machine Program Files location but not stated on the pages read.",
+      "WSL2 and Docker support were not checked on the pages read (Linux tarballs are published on pkgs.tailscale.com; a container image was not verified).",
+      "Whether a standard (non-administrator) user can run 'tailscale status --json' was not tested."
+    ]
+  },
+  {
+    "id": "headscale",
+    "name": "Headscale",
+    "category": "private-network",
+    "catalogueEligible": true,
+    "website": "https://headscale.net/",
+    "repository": "https://github.com/juanfont/headscale",
+    "purpose": "Self-hosted, open-source implementation of the Tailscale coordination server, so that official Tailscale clients form a private network without Tailscale's hosted control plane.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.29.5 on 2026-10-13, v0.29.4 on 2026-09-23, v0.29.3 on 2026-07-29.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.29.5",
+      "date": "2026-10-13",
+      "source": "https://github.com/juanfont/headscale/releases/tag/v0.29.5"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "no",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "No Windows server build (release assets for Linux amd64/arm64, macOS and FreeBSD). Windows machines join as clients with the official Tailscale client and 'tailscale login --login-server <url>'.",
+      "wsl2": "likely",
+      "docker": "official-image",
+      "other": "Linux (binaries and .deb), macOS, FreeBSD; container images docker.io/headscale/headscale and ghcr.io/juanfont/headscale."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "headscale server CLI (users, nodes, pre-auth keys, policies).",
+        "authentication": "Local access to the server",
+        "documentation": "https://headscale.net/stable/"
+      },
+      {
+        "type": "other",
+        "description": "Tailscale control protocol for clients; the server's instance also serves Windows connection instructions at /windows.",
+        "authentication": "Node keys and pre-auth keys",
+        "documentation": "https://headscale.net/stable/usage/connect/windows/"
+      }
+    ],
+    "cli": "On Windows clients: tailscale login --login-server https://<headscale host>",
+    "remoteManagement": "Over SSH to the Linux host running it; its remote API was not reviewed.",
+    "nodeCompatibility": "Same as Tailscale for node access.",
+    "dependencies": [
+      { "ids": ["tailscale"], "relationship": "requires", "notes": "Clients are the official Tailscale clients." }
+    ],
+    "networking": "Needs a publicly reachable HTTPS endpoint for clients; optional embedded DERP relay.",
+    "storage": null,
+    "resources": null,
+    "security": "Removes the third-party coordination server but makes the operator responsible for an internet-facing control plane. The Windows client runs only while the user is logged in unless 'Run unattended' is enabled.",
+    "licence": "BSD-3-Clause",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Configure an existing Tailscale client to use a user-provided Headscale URL",
+      "Manage a Headscale server on a remote Linux host over SSH (later phase)"
+    ],
+    "supportLevels": ["research-only", "remote-managed", "managed-docker"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Server software for Linux; useful for advanced users with their own server, not for a single Windows machine."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "The container installation page is community documentation 'not actively maintained by the headscale authors'.",
+    "sources": [
+      { "title": "Headscale release v0.29.5", "url": "https://github.com/juanfont/headscale/releases/tag/v0.29.5", "accessed": "2026-10-21" },
+      { "title": "Headscale: connect Windows clients", "url": "https://headscale.net/stable/usage/connect/windows/", "accessed": "2026-10-21" },
+      { "title": "Headscale: container installation (community documentation)", "url": "https://headscale.net/stable/setup/install/container/", "accessed": "2026-10-21" },
+      { "title": "Headscale LICENSE", "url": "https://github.com/juanfont/headscale/blob/main/LICENSE", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Headscale's remote API (gRPC/HTTP with API keys) was not reviewed."
+    ]
+  },
+  {
+    "id": "zerotier",
+    "name": "ZeroTier One",
+    "category": "private-network",
+    "catalogueEligible": true,
+    "website": "https://www.zerotier.com/",
+    "repository": "https://github.com/zerotier/ZeroTierOne",
+    "purpose": "Peer-to-peer virtual Ethernet network managed through ZeroTier's hosted network controllers or a self-hosted controller.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "1.16.2 published on GitHub 2026-05-28 (Windows MSI on download.zerotier.com dated 2026-05-27); repository pushed 2026-09-03.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.16.2",
+      "date": "2026-05-28",
+      "source": "https://github.com/zerotier/ZeroTierOne/releases/tag/1.16.2"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "ZeroTier One.msi / ZeroTierOne.msi (12 MB, dated 2026-05-27) on download.zerotier.com/dist; installs a service, a virtual network adapter and a tray UI.",
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Linux, macOS, FreeBSD, iOS, Android."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "zerotier-cli (join, leave, info, listnetworks).",
+        "authentication": "authtoken.secret",
+        "documentation": "https://github.com/zerotier/ZeroTierOne/blob/main/service/README.md"
+      },
+      {
+        "type": "rest",
+        "description": "Local service JSON API (default port 9993): /status, /network, /network/<id> (POST joins, DELETE leaves).",
+        "authentication": "X-ZT1-Auth header or auth URL parameter with the token from authtoken.secret in the service's working directory",
+        "documentation": "https://github.com/zerotier/ZeroTierOne/blob/main/service/README.md"
+      }
+    ],
+    "cli": "zerotier-cli info; zerotier-cli listnetworks; zerotier-cli join <network id>",
+    "remoteManagement": "Hosted ZeroTier Central or a self-hosted controller.",
+    "nodeCompatibility": "Transparent IP connectivity to a remote node on the virtual network.",
+    "dependencies": [],
+    "networking": "UDP 9993 by default (primaryPort configurable); virtual L2 adapter.",
+    "storage": null,
+    "resources": null,
+    "security": "Encrypted private network, not anonymity; the network controller decides membership and sees member addresses. Installation adds a driver and a service (administrator rights). The local API token grants control of network membership.",
+    "licence": "MPL-2.0",
+    "licenceNotes": "LICENSE.txt: MPL-2.0 for node/, osdep/, service/ and other code except ext/ and nonfree/ (source-available, non-free). The README still states the project is under BSL 1.1 with commercial-use restrictions; the two statements conflict.",
+    "integrationMechanisms": [
+      "Detect the service and read /status and /network with the local token to show membership and addresses",
+      "Offer remote node endpoints on ZeroTier addresses"
+    ],
+    "supportLevels": ["connected-application", "external-launcher"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Documented local API, but installation and network membership approval are outside BTCortex's control."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "ZeroTierOne release 1.16.2", "url": "https://github.com/zerotier/ZeroTierOne/releases/tag/1.16.2", "accessed": "2026-10-21" },
+      { "title": "ZeroTier downloads directory", "url": "https://download.zerotier.com/dist/", "accessed": "2026-10-21" },
+      { "title": "ZeroTierOne LICENSE.txt", "url": "https://github.com/zerotier/ZeroTierOne/blob/main/LICENSE.txt", "accessed": "2026-10-21" },
+      { "title": "ZeroTierOne README", "url": "https://github.com/zerotier/ZeroTierOne/blob/main/README.md", "accessed": "2026-10-21" },
+      { "title": "ZeroTierOne service/README.md (local API)", "url": "https://github.com/zerotier/ZeroTierOne/blob/main/service/README.md", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The location of authtoken.secret on Windows (expected under C:\\ProgramData\\ZeroTier\\One) and the MSI's architectures were not verified.",
+      "The licence conflict between LICENSE.txt and the README was not resolved."
+    ]
+  },
+  {
+    "id": "netbird",
+    "name": "NetBird",
+    "category": "private-network",
+    "catalogueEligible": true,
+    "website": "https://netbird.io/",
+    "repository": "https://github.com/netbirdio/netbird",
+    "purpose": "WireGuard-based peer-to-peer private network with a self-hostable management, signal and relay stack.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.81.3 on 2026-10-19, v0.81.2 on 2026-10-16.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.81.3",
+      "date": "2026-10-19",
+      "source": "https://github.com/netbirdio/netbird/releases/tag/v0.81.3"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64", "arm64"],
+      "windowsDistribution": "netbird_installer_0.81.3_windows_amd64.msi/.exe and arm64 equivalents, plus netbird_<v>_windows_<arch>.tar.gz, '_signed' tar.gz variants and the netbird-ui tray client.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS, iOS, Android."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "netbird up/down/status; management server URL configurable for self-hosting.",
+        "authentication": "SSO or setup keys",
+        "documentation": "https://github.com/netbirdio/netbird"
+      },
+      {
+        "type": "gui",
+        "description": "Tray UI (netbird-ui).",
+        "authentication": null,
+        "documentation": "https://github.com/netbirdio/netbird"
+      }
+    ],
+    "cli": "netbird status; netbird up --management-url <url>",
+    "remoteManagement": "Hosted or self-hosted management service.",
+    "nodeCompatibility": "Transparent IP connectivity to a remote node.",
+    "dependencies": [],
+    "networking": "WireGuard UDP with NAT traversal and relays.",
+    "storage": null,
+    "resources": null,
+    "security": "Encrypted private network, not anonymity; the management service sees peers and their public addresses.",
+    "licence": "BSD-3-Clause",
+    "licenceNotes": "BSD-3-Clause except management/, signal/, relay/ and combined/, which are AGPL-3.0.",
+    "integrationMechanisms": ["Detect the client and read 'netbird status' to offer remote endpoints"],
+    "supportLevels": ["connected-application", "external-launcher"],
+    "recommendedSupportLevel": "connected-application",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Similar to Tailscale; enrolment is interactive."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "NetBird release v0.81.3", "url": "https://github.com/netbirdio/netbird/releases/tag/v0.81.3", "accessed": "2026-10-21" },
+      { "title": "NetBird LICENSE", "url": "https://github.com/netbirdio/netbird/blob/main/LICENSE", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "CLI flags and the meaning of the '_signed' assets were not read from documentation.",
+      "Administrator requirements of the installer were not checked."
+    ]
+  },
+  {
+    "id": "openssh",
+    "name": "OpenSSH for Windows (in-box client/server and Win32-OpenSSH)",
+    "category": "remote-access",
+    "catalogueEligible": true,
+    "website": "https://www.openssh.com/",
+    "repository": "https://github.com/PowerShell/openssh-portable",
+    "purpose": "SSH client and server for managing remote Linux nodes (commands, log viewing, SFTP) and for encrypted port forwarding of RPC, Electrum or control ports without exposing them.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Microsoft services the in-box Feature on Demand through Windows Update (the Windows 10 22H2 test machine has OpenSSH_for_Windows_9.5p1, LibreSSL 3.8.2). PowerShell/Win32-OpenSSH published 10.4.0.0p1-Preview on 2026-10-20 and 10.0.0.0p2-Preview on 2025-10-27.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "OpenSSH_for_Windows_9.5p1 (in-box client observed on the Windows 10 22H2 test machine)",
+      "date": null,
+      "source": "https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": "Windows 10 build 1809 or later, Windows Server 2019 or later (in-box Feature on Demand); installed by default on Windows Server 2025.",
+      "windowsArchitectures": ["x64", "arm64", "x86"],
+      "windowsDistribution": "Optional features OpenSSH.Client~~~~0.0.1.0 and OpenSSH.Server~~~~0.0.1.0 (Add-WindowsCapability, administrator); Win32-OpenSSH GitHub MSIs and ZIPs for Win64, Win32, ARM64 and ARM (releases labelled 'Preview').",
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Upstream OpenSSH on all Unix-like systems."
+    },
+    "interfaces": [
+      {
+        "type": "ssh",
+        "description": "ssh client: command execution, -L/-R/-D port forwarding, ProxyJump; sftp/scp; ssh-keygen and ssh-keyscan for keys and host keys. sshd (optional) creates firewall rule OpenSSH-Server-In-TCP for port 22.",
+        "authentication": "Public keys (preferred) or passwords; host keys verified against known_hosts",
+        "documentation": "https://man.openbsd.org/ssh_config.5"
+      },
+      {
+        "type": "cli",
+        "description": "C:\\Windows\\System32\\OpenSSH\\ssh.exe and companions.",
+        "authentication": null,
+        "documentation": "https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse"
+      }
+    ],
+    "cli": "ssh -N -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=<BTCortex known_hosts> -o ExitOnForwardFailure=yes -L 127.0.0.1:<local>:127.0.0.1:8332 user@host",
+    "remoteManagement": "The basis of BTCortex's remote management (specification section 26): command execution, service control, log retrieval and tunnels to remote RPC, Electrum and Tor control ports, with permissions separate from Bitcoin RPC credentials.",
+    "nodeCompatibility": "Port forwarding lets BTCortex reach a remote node's loopback-bound RPC (8332), Electrum (50001/50002) or REST ports without changing their bind addresses.",
+    "dependencies": [],
+    "networking": "Outbound TCP 22 (or the configured port) to the remote host; local forwarded ports bound to 127.0.0.1.",
+    "storage": null,
+    "resources": null,
+    "security": "Never accept unknown host keys silently: show the SHA-256 host-key fingerprint, require confirmation or out-of-band verification, pin it in a BTCortex-managed known_hosts file and use StrictHostKeyChecking=yes (which refuses changed keys). Use key-based authentication with keys protected by DPAPI or an agent. Installing or enabling sshd on the Windows machine needs administrator rights and opens port 22 through a firewall rule; BTCortex should not do this by default.",
+    "licence": null,
+    "licenceNotes": "OpenSSH uses a BSD-style licence; Microsoft's fork follows it (not verified in detail).",
+    "integrationMechanisms": [
+      "Use the in-box ssh.exe (or an embedded SSH library) for remote-host profiles with pinned host keys",
+      "Create local port forwards for remote RPC, Electrum and Tor control ports",
+      "Detect whether the client feature is present with Get-WindowsCapability or by probing the System32 path"
+    ],
+    "supportLevels": ["remote-managed", "connected-application"],
+    "recommendedSupportLevel": "remote-managed",
+    "feasibility": {
+      "rating": "high",
+      "notes": "The client is present by default on supported Windows 10/11 builds; no installation is needed for remote management."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "Microsoft Learn: Get started with OpenSSH Server for Windows", "url": "https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse", "accessed": "2026-10-21" },
+      { "title": "PowerShell/Win32-OpenSSH releases", "url": "https://github.com/PowerShell/Win32-OpenSSH/releases", "accessed": "2026-10-21" },
+      { "title": "OpenBSD manual: ssh_config(5)", "url": "https://man.openbsd.org/ssh_config.5", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The licence of Microsoft's fork was not read.",
+      "Whether the client feature is present by default on every Windows 10 edition and build was not checked beyond the test machine."
+    ]
+  },
+  {
+    "id": "cloudflared",
+    "name": "cloudflared (Cloudflare Tunnel)",
+    "category": "remote-access",
+    "catalogueEligible": true,
+    "website": "https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/",
+    "repository": "https://github.com/cloudflare/cloudflared",
+    "purpose": "Daemon that makes outbound-only connections to Cloudflare's network so that local services can be published or reached through Cloudflare without opening inbound ports (a hosted reverse tunnel).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "2026.10.2 on 2026-10-20, 2026.10.1 on 2026-10-15.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2026.10.2",
+      "date": "2026-10-20",
+      "source": "https://github.com/cloudflare/cloudflared/releases/tag/2026.10.2"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64", "x86"],
+      "windowsDistribution": "cloudflared-windows-amd64.exe/.msi and cloudflared-windows-386.exe/.msi on GitHub Releases.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "cloudflared tunnel commands; configuration through the Cloudflare dashboard or API.",
+        "authentication": "Cloudflare account credentials or tunnel token",
+        "documentation": "https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/"
+      }
+    ],
+    "cli": "cloudflared tunnel ...",
+    "remoteManagement": "Cloudflare dashboard and API.",
+    "nodeCompatibility": "Can publish a web interface; unsuitable for Bitcoin P2P or for exposing RPC.",
+    "dependencies": [],
+    "networking": "Outbound-only connections to Cloudflare; no inbound ports.",
+    "storage": null,
+    "resources": null,
+    "security": "All tunnelled traffic passes through a third party that the user must trust; it is not anonymity and creates an account-linked public endpoint. BTCortex must never publish node RPC, Electrum or Lightning management interfaces this way. Tor onion services provide inbound reachability without a third-party account.",
+    "licence": "Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": ["Detect an installation and warn about what is exposed"],
+    "supportLevels": ["research-only", "external-launcher"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Possible to integrate, but the privacy and exposure trade-offs conflict with BTCortex's defaults; onion services and private networks cover the use cases."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "cloudflared release 2026.10.2", "url": "https://github.com/cloudflare/cloudflared/releases/tag/2026.10.2", "accessed": "2026-10-21" },
+      { "title": "Cloudflare Tunnel documentation", "url": "https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/", "accessed": "2026-10-21" },
+      { "title": "cloudflared LICENSE", "url": "https://github.com/cloudflare/cloudflared/blob/master/LICENSE", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether TLS for published hostnames terminates at Cloudflare's edge, the account requirements and Quick Tunnels were not covered by the page read."
+    ]
+  },
+  {
+    "id": "frp",
+    "name": "frp (fast reverse proxy)",
+    "category": "remote-access",
+    "catalogueEligible": true,
+    "website": "https://github.com/fatedier/frp",
+    "repository": "https://github.com/fatedier/frp",
+    "purpose": "Self-hosted reverse proxy (frps server on a public host, frpc client behind NAT) that exposes local TCP, UDP or HTTP services through the server.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v0.71.1 on 2026-10-14.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.71.1",
+      "date": "2026-10-14",
+      "source": "https://github.com/fatedier/frp/releases/tag/v0.71.1"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64", "arm64"],
+      "windowsDistribution": "frp_0.71.1_windows_amd64.zip and frp_0.71.1_windows_arm64.zip; frp_sha256_checksums.txt (not signed).",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS, FreeBSD and others."
+    },
+    "interfaces": [
+      {
+        "type": "file",
+        "description": "frpc and frps configuration files.",
+        "authentication": "Token between client and server",
+        "documentation": "https://github.com/fatedier/frp"
+      }
+    ],
+    "cli": "frpc -c frpc.toml; frps -c frps.toml",
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": "frpc connects outbound to frps; frps listens publicly.",
+    "storage": null,
+    "resources": null,
+    "security": "Creates a public endpoint on the server and makes the server operator a trusted party; checksums are unsigned. Not appropriate for node RPC or management interfaces.",
+    "licence": "Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": ["Detect and warn only"],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Requires a separately operated public server; onion services or private networks are preferable."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "frp release v0.71.1", "url": "https://github.com/fatedier/frp/releases/tag/v0.71.1", "accessed": "2026-10-21" },
+      { "title": "frp LICENSE", "url": "https://github.com/fatedier/frp/blob/dev/LICENSE", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "frp's configuration format and options were not reviewed."
+    ]
+  },
+  {
+    "id": "caddy",
+    "name": "Caddy",
+    "category": "reverse-proxy",
+    "catalogueEligible": true,
+    "website": "https://caddyserver.com/",
+    "repository": "https://github.com/caddyserver/caddy",
+    "purpose": "Web server and HTTPS reverse proxy with automatic certificates and an internal local certificate authority, suitable for local or LAN TLS termination in front of BTCortex-managed web interfaces.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v2.11.7 on 2026-10-03 and v2.11.6 on 2026-10-01.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.11.7",
+      "date": "2026-10-03",
+      "source": "https://github.com/caddyserver/caddy/releases/tag/v2.11.7"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64", "arm64"],
+      "windowsDistribution": "caddy_2.11.7_windows_amd64.zip and caddy_2.11.7_windows_arm64.zip (single caddy.exe) with SBOMs; caddy_2.11.7_checksums.txt holds SHA-512 sums and is signed with Sigstore keyless signing (.sig and .pem; the certificate identity is the release workflow https://github.com/caddyserver/caddy/.github/workflows/release.yml@refs/tags/v2.11.7). Each archive also has its own .sig/.pem.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS, FreeBSD and others."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "Admin API, default address localhost:2019 (changeable with CADDY_ADMIN or the admin configuration): POST /load, GET /config/..., POST /stop.",
+        "authentication": "None by default; any local process can reconfigure Caddy unless the admin endpoint is disabled or restricted",
+        "documentation": "https://caddyserver.com/docs/api"
+      },
+      {
+        "type": "cli",
+        "description": "caddy run (foreground), start, stop, reload, trust and untrust (local CA root), hash-password, storage export.",
+        "authentication": null,
+        "documentation": "https://caddyserver.com/docs/command-line"
+      },
+      {
+        "type": "file",
+        "description": "Caddyfile or JSON configuration; data directory with pki/authorities/local for the internal CA.",
+        "authentication": null,
+        "documentation": "https://caddyserver.com/docs/automatic-https"
+      }
+    ],
+    "cli": "caddy run --config <Caddyfile> --adapter caddyfile; caddy stop (uses the admin API); caddy trust / caddy untrust",
+    "remoteManagement": "Admin API (keep on loopback or disable).",
+    "nodeCompatibility": "Fronts HTTP interfaces (block explorers, BTCPay Server, Lightning web UIs) with TLS; Electrum's TCP protocol and Bitcoin RPC are not its use case.",
+    "dependencies": [],
+    "networking": "Listens where configured (BTCortex: loopback by default, LAN only with consent and a firewall rule); obtains public ACME certificates only for public names, internal CA certificates for localhost, IP addresses and names such as .local, .internal and .home.arpa.",
+    "storage": "caddy_2.11.7_windows_amd64.zip is 18.5 MB (Content-Length on 2026-10-21).",
+    "resources": null,
+    "security": "The first use of the internal CA tries to install the 'Caddy Local Authority' root into the system trust store and prompts for permission; that root key can sign certificates trusted by the machine, so BTCortex should set skip_install_trust and distribute trust deliberately. The unauthenticated admin API on localhost:2019 lets any local process change the configuration; disable it or restrict it. Windows services must be created with sc.exe or WinSW (administrator) and cannot be reloaded through the service manager.",
+    "licence": "Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Download the ZIP, verify the Sigstore-signed checksum file (identity pinned to the release workflow) and the SHA-512, extract per user",
+      "Generate a Caddyfile that terminates TLS for loopback- or LAN-bound BTCortex web interfaces, with skip_install_trust",
+      "Run 'caddy run' as a child process; stop through the admin API or process termination"
+    ],
+    "supportLevels": ["fully-managed", "connected-application"],
+    "recommendedSupportLevel": "fully-managed",
+    "feasibility": {
+      "rating": "high",
+      "notes": "Single portable binary and documented configuration; trust-store installation is the only step that needs user interaction."
+    },
+    "priority": "P2",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "Caddy release v2.11.7", "url": "https://github.com/caddyserver/caddy/releases/tag/v2.11.7", "accessed": "2026-10-21" },
+      { "title": "Caddy docs: Automatic HTTPS (local HTTPS)", "url": "https://caddyserver.com/docs/automatic-https", "accessed": "2026-10-21" },
+      { "title": "Caddy docs: API", "url": "https://caddyserver.com/docs/api", "accessed": "2026-10-21" },
+      { "title": "Caddy docs: command line", "url": "https://caddyserver.com/docs/command-line", "accessed": "2026-10-21" },
+      { "title": "Caddy docs: keep Caddy running (Windows service)", "url": "https://caddyserver.com/docs/running", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether the standard Caddy build can proxy raw TCP (for example Electrum) without plug-ins was not checked.",
+      "The trust-store mechanism Caddy uses on Windows (current-user or machine store, prompt type) was not verified."
+    ]
+  },
+  {
+    "id": "nginx",
+    "name": "nginx (nginx/Windows)",
+    "category": "reverse-proxy",
+    "catalogueEligible": true,
+    "website": "https://nginx.org/",
+    "repository": "https://github.com/nginx/nginx",
+    "purpose": "Web server and reverse proxy; the official Windows build is a native Win32 port that upstream itself calls a beta.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Mainline 1.31.7 and stable 1.30.6 both dated 14 Oct 2026 in CHANGES; nginx/Windows ZIPs published for both.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.30.6 (stable; mainline 1.31.7)",
+      "date": "2026-10-14",
+      "source": "https://nginx.org/en/download.html"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "nginx-1.31.7.zip / nginx-1.30.6.zip (nginx/Windows) with PGP signatures. Upstream: only select() and poll() are used, 'high performance and scalability should not be expected', 'considered to be a beta version'; only one worker actually works; UDP and QUIC are unsupported; it runs as a console application, not a service.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, BSDs, macOS and others (primary platforms)."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "nginx -s stop (fast shutdown), -s quit (graceful), -s reload, -s reopen.",
+        "authentication": null,
+        "documentation": "https://nginx.org/en/docs/windows.html"
+      },
+      {
+        "type": "file",
+        "description": "nginx.conf; on Windows paths use forward slashes and are relative to the directory nginx was started from.",
+        "authentication": null,
+        "documentation": "https://nginx.org/en/docs/windows.html"
+      }
+    ],
+    "cli": "start nginx; nginx -s quit; nginx -s reload",
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": "Listens where configured.",
+    "storage": null,
+    "resources": null,
+    "security": "Upstream labels the Windows port as beta with known limitations; running it as a service needs a third-party wrapper.",
+    "licence": "BSD-2-Clause",
+    "licenceNotes": null,
+    "integrationMechanisms": ["Detect an existing installation; prefer Caddy for managed TLS termination"],
+    "supportLevels": ["research-only", "connected-application"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Technically manageable, but the beta status and missing service support make Caddy the better managed choice on Windows."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "nginx for Windows documentation", "url": "https://nginx.org/en/docs/windows.html", "accessed": "2026-10-21" },
+      { "title": "nginx download page", "url": "https://nginx.org/en/download.html", "accessed": "2026-10-21" },
+      { "title": "nginx CHANGES", "url": "https://nginx.org/en/CHANGES", "accessed": "2026-10-21" },
+      { "title": "nginx LICENSE", "url": "https://nginx.org/LICENSE", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether the nginx/Windows build includes the stream (TCP proxy) module was not checked.",
+      "The PGP signing keys for the Windows ZIPs were not inspected."
+    ]
+  },
+  {
+    "id": "mkcert",
+    "name": "mkcert",
+    "category": "security-tool",
+    "catalogueEligible": false,
+    "website": "https://github.com/FiloSottile/mkcert",
+    "repository": "https://github.com/FiloSottile/mkcert",
+    "purpose": "Creates a local certificate authority, installs it into system, Java and NSS trust stores and issues locally trusted development certificates.",
+    "maintenance": {
+      "status": "stale",
+      "evidence": "Latest release v1.4.4 on 2022-04-26; repository last pushed 2024-08-13.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.4.4",
+      "date": "2022-04-26",
+      "source": "https://github.com/FiloSottile/mkcert/releases/tag/v1.4.4"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64", "arm64"],
+      "windowsDistribution": "mkcert-v1.4.4-windows-amd64.exe and mkcert-v1.4.4-windows-arm64.exe (single executables).",
+      "wsl2": "likely",
+      "docker": "not-applicable",
+      "other": "Linux, macOS."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "mkcert -install, mkcert <names>, mkcert -CAROOT; TRUST_STORES selects system, java or nss.",
+        "authentication": null,
+        "documentation": "https://github.com/FiloSottile/mkcert"
+      }
+    ],
+    "cli": "mkcert -install; mkcert localhost 127.0.0.1",
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "The README warns that rootCA-key.pem 'gives complete power to intercept secure requests from your machine'; on Windows the README suggests running as Administrator if permission problems occur. Installing a private root is a trust decision for the user, not something BTCortex should do silently.",
+    "licence": "BSD-3-Clause",
+    "licenceNotes": null,
+    "integrationMechanisms": ["Detect an existing mkcert root (mkcert -CAROOT) and warn about it; use Caddy's internal CA or BTCortex-generated self-signed certificates with pinning instead"],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No release for four years and the trust-store side effects are not needed when clients pin certificates."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "mkcert README", "url": "https://github.com/FiloSottile/mkcert", "accessed": "2026-10-21" },
+      { "title": "mkcert release v1.4.4", "url": "https://github.com/FiloSottile/mkcert/releases/tag/v1.4.4", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "id": "stunnel",
+    "name": "stunnel",
+    "category": "reverse-proxy",
+    "catalogueEligible": true,
+    "website": "https://www.stunnel.org/",
+    "repository": null,
+    "purpose": "TLS wrapper that adds TLS to arbitrary TCP services (for example an Electrum server without native TLS) or tunnels TCP connections over TLS.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "5.82 on 2026-09-17 (urgency MEDIUM), 5.81 on 2026-09-16 and 5.80 on 2026-08-04 (urgency HIGH); 5.83 betas published.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "5.82",
+      "date": "2026-09-17",
+      "source": "https://www.stunnel.org/NEWS.html"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64"],
+      "windowsDistribution": "stunnel-5.82-win64-installer.exe with .asc and .sha256; the .asc is signed by subkey 2BC7 E4E6 7E3C C0C1 BEA7 2F8C 2EFC 7FF0 D416 E014 of Michał Trojnara's key (primary AC91 5EA3 0645 D9D3 D4DA E4FE B104 8932 DD3A AAA3, published at stunnel.org/pgp.asc).",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Unix-like systems, Android."
+    },
+    "interfaces": [
+      {
+        "type": "file",
+        "description": "stunnel.conf with service sections (accept, connect, cert, key, verify options).",
+        "authentication": "TLS certificates",
+        "documentation": "https://www.stunnel.org/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Can add TLS in front of electrs (TCP only) when Fulcrum's native TLS is not available.",
+    "dependencies": [],
+    "networking": "Listens where configured.",
+    "storage": null,
+    "resources": null,
+    "security": "Frequent security-relevant releases; the Windows package is an installer whose privileges and silent switches were not checked.",
+    "licence": "GPL-2.0-or-later",
+    "licenceNotes": "Upstream: 'GPL version 2 or later with an OpenSSL exception'.",
+    "integrationMechanisms": ["Optional TLS wrapper for TCP-only services; verify the .asc against the pinned stunnel key"],
+    "supportLevels": ["research-only", "fully-managed"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Only needed for TCP services without TLS; Fulcrum provides TLS natively and Tor onion services already encrypt."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "stunnel downloads", "url": "https://www.stunnel.org/downloads.html", "accessed": "2026-10-21" },
+      { "title": "stunnel NEWS", "url": "https://www.stunnel.org/NEWS.html", "accessed": "2026-10-21" },
+      { "title": "stunnel public PGP key", "url": "https://www.stunnel.org/pgp.asc", "accessed": "2026-10-21" },
+      { "title": "stunnel home page (licence statement)", "url": "https://www.stunnel.org/", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Administrator requirements, installation directory and silent-install options of the Windows installer were not checked.",
+      "No portable Windows build was found on the downloads page."
+    ]
+  },
+  {
+    "id": "payjoin-cli",
+    "name": "payjoin-cli",
+    "category": "transaction-privacy",
+    "catalogueEligible": true,
+    "website": "https://payjoindevkit.org/",
+    "repository": "https://github.com/payjoin/rust-payjoin",
+    "purpose": "Reference command-line Payjoin client built on the Payjoin Dev Kit; sends and receives BIP 78 (v1) and BIP 77 Async Payjoin (v2) transactions using a Bitcoin Core wallet.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "payjoin-cli 1.0.0 released 2026-10-05; payjoin 1.2.0 on 2026-10-02; payjoin-ffi 0.25.0 on 2026-10-16 (rust-payjoin releases feed).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.0.0",
+      "date": "2026-10-05",
+      "source": "https://github.com/payjoin/rust-payjoin/releases"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "No binaries; install from crates.io with 'cargo install payjoin-cli' (Rust 1.85 or later).",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Any platform with a Rust toolchain."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "payjoin-cli receive <amount_sats> (prints a BIP 21 URI with a pj= parameter), payjoin-cli send <BIP21> --fee-rate <sat/vB>, payjoin-cli resume; reads config.toml from the working directory ([bitcoind] rpcuser, rpcpassword, rpchost with /wallet/<name>; [v2] pj_directories, ohttp_relays).",
+        "authentication": "Bitcoin Core RPC user and password",
+        "documentation": "https://github.com/payjoin/rust-payjoin/blob/master/payjoin-cli/README.md"
+      }
+    ],
+    "cli": "payjoin-cli receive 10000; payjoin-cli send \"bitcoin:...&pj=...\" --fee-rate 1; payjoin-cli resume",
+    "remoteManagement": null,
+    "nodeCompatibility": "Bitcoin Core 29.0 or later with a wallet (it uses bitcoind-async-client). The README example uses rpcuser/rpcpassword; cookie authentication was not documented.",
+    "dependencies": [
+      { "ids": ["bitcoin-core"], "relationship": "requires", "notes": "Wallet RPC for funding, signing and broadcasting." },
+      { "ids": ["payjoin-dev-kit"], "relationship": "requires", "notes": "Built on the payjoin crate." },
+      { "ids": ["payjoin-mailroom"], "relationship": "requires", "notes": "BIP 77 needs a Payjoin Directory and OHTTP relays (public ones such as payjo.in by default in the README example)." }
+    ],
+    "networking": "HTTPS to a Payjoin Directory and through OHTTP relays for v2; BIP 78 v1 needs the receiver to run an HTTPS (or onion) endpoint.",
+    "storage": null,
+    "resources": null,
+    "security": "Upstream: 'alpha-quality experimental software. Use at your own risk.' It controls a hot Bitcoin Core wallet. Payjoin breaks the common-input-ownership heuristic and hides the payment amount, but the receiver learns some sender inputs; BIP 77 uses OHTTP so that the directory does not learn the sender's IP address.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": ["Document and detect only; BTCortex should not drive hot-wallet payments through an alpha tool"],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No Windows binaries, alpha status and hot-wallet operation; useful as a reference for testing other wallets' Payjoin support."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Wallet support for Payjoin is listed on the Bitcoin Wiki 'PayJoin adoption' page (secondary source, edited 2026-04-20): BTCPay Server sends and receives BIP 78; Cake Wallet supports v1 and v2 through PDK; Sparrow and Wasabi send; BlueWallet sends.",
+    "sources": [
+      { "title": "payjoin-cli README", "url": "https://github.com/payjoin/rust-payjoin/blob/master/payjoin-cli/README.md", "accessed": "2026-10-21" },
+      { "title": "rust-payjoin releases", "url": "https://github.com/payjoin/rust-payjoin/releases", "accessed": "2026-10-21" },
+      { "title": "rust-payjoin README", "url": "https://github.com/payjoin/rust-payjoin", "accessed": "2026-10-21" },
+      { "title": "Bitcoin Wiki: PayJoin adoption (secondary)", "url": "https://en.bitcoin.it/wiki/PayJoin_adoption", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Cookie authentication support in payjoin-cli's configuration was not checked.",
+      "The wallet-support list comes from a community wiki, not from each wallet's own documentation."
+    ]
+  },
+  {
+    "id": "payjoin-dev-kit",
+    "name": "Payjoin Dev Kit (rust-payjoin and payjoin-ffi)",
+    "category": "library",
+    "catalogueEligible": false,
+    "website": "https://payjoindevkit.org/",
+    "repository": "https://github.com/payjoin/rust-payjoin",
+    "purpose": "Library implementing BIP 77 Async Payjoin and BIP 78 Simple Payjoin (sender and receiver state machines, session persistence, OHTTP helpers), with language bindings for wallet developers.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "payjoin crate 1.2.0 on 2026-10-02 and 1.1.0 on 2026-09-24; payjoin-ffi 0.25.0 on 2026-10-16; payjoin-python, payjoin-javascript and payjoin-dart 0.3.0 and payjoin-csharp 0.2.0 (all '+payjoin-1.2.0') on 2026-10-05.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "payjoin 1.2.0",
+      "date": "2026-10-02",
+      "source": "https://github.com/payjoin/rust-payjoin/releases"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": "Rust crate; bindings for Python, JavaScript, Dart, C# and others through payjoin-ffi."
+    },
+    "interfaces": [
+      {
+        "type": "library-api",
+        "description": "payjoin Rust crate and payjoin-ffi bindings (including a JavaScript package).",
+        "authentication": null,
+        "documentation": "https://docs.rs/payjoin"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "The README states: 'This crate has not been reviewed by independent Rust and Bitcoin security professionals (yet). Use at your own risk.'",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": ["Possible future library for BTCortex-assisted Payjoin flows; not needed for orchestration"],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Active, multi-language library; BTCortex is not a wallet, so integration is optional."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "rust-payjoin README", "url": "https://github.com/payjoin/rust-payjoin", "accessed": "2026-10-21" },
+      { "title": "rust-payjoin releases", "url": "https://github.com/payjoin/rust-payjoin/releases", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The full list of payjoin-ffi target languages and the JavaScript package name were not checked."
+    ]
+  },
+  {
+    "id": "payjoin-mailroom",
+    "name": "payjoin-mailroom (OHTTP relay and Payjoin Directory)",
+    "category": "transaction-privacy",
+    "catalogueEligible": false,
+    "website": "https://payjoindevkit.org/",
+    "repository": "https://github.com/payjoin/rust-payjoin",
+    "purpose": "Combined Oblivious HTTP (RFC 9458) relay and BIP 77 Payjoin Directory in one binary, the store-and-forward infrastructure that Async Payjoin senders and receivers use.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "payjoin-mailroom 0.1.3 released 2026-10-05.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.1.3",
+      "date": "2026-10-05",
+      "source": "https://github.com/payjoin/rust-payjoin/releases"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "Not checked; built from the rust-payjoin workspace.",
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "BIP 77 directory mailboxes and OHTTP relay endpoints.",
+        "authentication": null,
+        "documentation": "https://github.com/bitcoin/bips/blob/master/bip-0077.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": "Public HTTPS service.",
+    "storage": null,
+    "resources": null,
+    "security": "Public infrastructure; the relay and the directory should be operated by different parties for OHTTP's privacy property to hold.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": ["None planned: BTCortex should use user-chosen public directories and relays rather than operate them"],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Server infrastructure for the Payjoin ecosystem, not a desktop component."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "rust-payjoin README (crate descriptions)", "url": "https://github.com/payjoin/rust-payjoin", "accessed": "2026-10-21" },
+      { "title": "rust-payjoin releases", "url": "https://github.com/payjoin/rust-payjoin/releases", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Platforms, ports and configuration of payjoin-mailroom were not checked."
+    ]
+  },
+  {
+    "id": "joinmarket",
+    "name": "JoinMarket (joinmarket-clientserver)",
+    "category": "transaction-privacy",
+    "catalogueEligible": true,
+    "website": null,
+    "repository": "https://github.com/JoinMarket-Org/joinmarket-clientserver",
+    "purpose": "Original Python implementation of the JoinMarket market-based CoinJoin protocol (makers offer liquidity for fees, takers coordinate their own CoinJoins), with Qt and command-line wallets and the jmwalletd API used by Jam.",
+    "maintenance": {
+      "status": "discontinued",
+      "evidence": "v0.9.12 published 2026-04-27 as the 'Final release of joinmarket-clientserver'; the repository was archived on 2026-04-27 ('the code and releases will remain in place, but there will be no further updates'). The previous release, v0.9.11, was on 2024-02-22.",
+      "supersededBy": "joinmarket-ng"
+    },
+    "latestStableRelease": {
+      "version": "0.9.12",
+      "date": "2026-04-27",
+      "source": "https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.12"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux and macOS (Python)."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "Python scripts and JoinMarket-Qt; jmwalletd REST API for Jam (until Jam 2.0 removed support).",
+        "authentication": null,
+        "documentation": "https://github.com/JoinMarket-Org/joinmarket-clientserver"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Used a Bitcoin Core wallet back end; compatibility with Core 30 and later was not checked.",
+    "dependencies": [
+      { "ids": ["tor"], "relationship": "requires", "notes": "Onion messaging between participants." }
+    ],
+    "networking": "Tor onion message channels and directory nodes.",
+    "storage": null,
+    "resources": null,
+    "security": "The final release notes say: 'Do not continue to use the code without having independent confidence that it is not exploitable'; 0.9.12 contained an important fix to commitment checking. Existing users should migrate wallets (JoinMarket NG documents a recovery and migration path).",
+    "licence": null,
+    "licenceNotes": null,
+    "integrationMechanisms": ["Detect old installations and show the archival notice and migration guidance"],
+    "supportLevels": ["unsupported"],
+    "recommendedSupportLevel": "unsupported",
+    "feasibility": {
+      "rating": "none",
+      "notes": "Archived upstream with an explicit warning against continued use."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "The final release notes mention joinmarket-ng as an actively developed alternative codebase, 'though this is not a recommendation, either'.",
+    "sources": [
+      { "title": "joinmarket-clientserver release v0.9.12 (final)", "url": "https://github.com/JoinMarket-Org/joinmarket-clientserver/releases/tag/v0.9.12", "accessed": "2026-10-21" },
+      { "title": "joinmarket-clientserver repository (archived 2026-04-27)", "url": "https://github.com/JoinMarket-Org/joinmarket-clientserver", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Windows support and the licence were not checked for the archived code."
+    ]
+  },
+  {
+    "id": "joinmarket-ng",
+    "name": "JoinMarket NG",
+    "category": "transaction-privacy",
+    "catalogueEligible": true,
+    "website": "https://joinmarket-ng.github.io/joinmarket-ng/",
+    "repository": "https://github.com/joinmarket-ng/joinmarket-ng",
+    "purpose": "Independent, wire-compatible reimplementation of the JoinMarket CoinJoin protocol in typed Python, with Bitcoin Core and Neutrino back ends, Tor throughout and a jmwalletd API used by Jam 2.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "0.42.1 on 2026-10-20, 0.42.0 on 2026-10-19, 0.41.0 on 2026-10-13; grants from OpenSats and the HRF Bitcoin Development Fund; an external audit is described as ongoing.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.42.1",
+      "date": "2026-10-20",
+      "source": "https://github.com/joinmarket-ng/joinmarket-ng/releases"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "The documented installer targets Linux and macOS; Windows is covered only by a 'Windows (Manual Install)' section of the advanced installation guide. Python 3.11 or later.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux, macOS; an experimental Jam NG Flatpak is listed in the documentation."
+    },
+    "interfaces": [
+      {
+        "type": "cli",
+        "description": "Command-line tools (recommended interface) and a terminal menu; wallet daemon jmwalletd (JAM API) for Jam.",
+        "authentication": null,
+        "documentation": "https://joinmarket-ng.github.io/joinmarket-ng/getting-started/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "Own synced, wallet-enabled Bitcoin Core node recommended, or a Neutrino service as the lightweight back end.",
+    "dependencies": [
+      { "ids": ["tor"], "relationship": "requires", "notes": "The installer tries cookie authentication on 127.0.0.1:9051 as the current user before configuring Tor." },
+      { "ids": ["bitcoin-core"], "relationship": "optional", "notes": "Alternatively a Neutrino back end." }
+    ],
+    "networking": "Tor; directory servers; peer-to-peer end-to-end-encrypted messaging.",
+    "storage": null,
+    "resources": null,
+    "security": "Young codebase under audit; CoinJoin 'does not guarantee anonymity' (README). Hot wallet operation; fidelity bonds and maker operation have financial risk. Legal treatment of CoinJoin participation varies by jurisdiction and is the user's decision.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": ["Detect and document; a future connected-application integration could provide Tor and Bitcoin Core connection settings"],
+    "supportLevels": ["research-only", "connected-application"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Native Windows is a manual install, the project is young and the integration would touch hot-wallet CoinJoin operations."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "JoinMarket has no central coordinator: each taker coordinates its own CoinJoin, so supporting it does not mean operating a coordinator.",
+    "sources": [
+      { "title": "JoinMarket NG README", "url": "https://github.com/joinmarket-ng/joinmarket-ng", "accessed": "2026-10-21" },
+      { "title": "JoinMarket NG releases", "url": "https://github.com/joinmarket-ng/joinmarket-ng/releases", "accessed": "2026-10-21" },
+      { "title": "JoinMarket NG documentation: getting started", "url": "https://joinmarket-ng.github.io/joinmarket-ng/getting-started/", "accessed": "2026-10-21" },
+      { "title": "JoinMarket NG documentation: install", "url": "https://joinmarket-ng.github.io/joinmarket-ng/install/", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The Windows manual-install section, the jmwalletd port and the Bitcoin Core version requirements were not read."
+    ]
+  },
+  {
+    "id": "jam",
+    "name": "Jam (JoinMarket web UI)",
+    "category": "transaction-privacy",
+    "catalogueEligible": true,
+    "website": "https://jamdocs.org/",
+    "repository": "https://github.com/joinmarket-webui/jam",
+    "purpose": "Web interface for JoinMarket focused on ease of use; version 2 targets JoinMarket NG.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "v2.0.0-beta.4 on 2026-09-30 ('requires a minimum version of v0.40.0 of joinmarket-ng. Support for joinmarket-clientserver has been removed'); last stable v0.4.1 on 2025-08-22 for joinmarket-clientserver.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.4.1",
+      "date": "2025-08-22",
+      "source": "https://github.com/joinmarket-webui/jam/releases"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "No release binaries; packaged for node platforms (RaspiBlitz, Umbrel, Citadel, myNode, Start9, RaspiBolt).",
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Node platforms listed in the README."
+    },
+    "interfaces": [
+      {
+        "type": "gui",
+        "description": "Browser UI talking to jmwalletd.",
+        "authentication": "Wallet password and API tokens",
+        "documentation": "https://jamdocs.org/"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": "Reached in a browser on a node platform.",
+    "nodeCompatibility": "Jam 2 requires joinmarket-ng 0.40.0 or later; Jam 0.4.x requires the archived joinmarket-clientserver.",
+    "dependencies": [
+      { "ids": ["joinmarket-ng"], "relationship": "requires", "notes": "Jam 2.x." }
+    ],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "'Jam is beta software. Use with caution.' The 2.0 betas warn that the joinmarket-ng back end is 'bleeding edge and things might break'.",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": ["Link to an instance on a node platform (external launcher); no Windows packaging to manage"],
+    "supportLevels": ["research-only", "external-launcher"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Beta, node-platform distribution only, depends on joinmarket-ng."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "Jam README", "url": "https://github.com/joinmarket-webui/jam", "accessed": "2026-10-21" },
+      { "title": "Jam releases (v2.0.0-beta.4 notes)", "url": "https://github.com/joinmarket-webui/jam/releases", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether Jam can be run on Windows from source or Docker was not checked."
+    ]
+  },
+  {
+    "id": "wabisabi-coordinator",
+    "name": "WabiSabi coordinator (WalletWasabi.Coordinator)",
+    "category": "transaction-privacy",
+    "catalogueEligible": false,
+    "website": "https://wasabiwallet.io/",
+    "repository": "https://github.com/WalletWasabi/WalletWasabi",
+    "purpose": "Open-source server that coordinates WabiSabi CoinJoin rounds for Wasabi Wallet clients (the WalletWasabi.Coordinator project in the Wasabi repository); operated by third parties since zkSNACKs closed its coordinator.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Part of the WalletWasabi repository; latest Wasabi release v2.8.4 on 2026-10-13. zkSNACKs' coordinator stopped on 2024-06-01; since v2.0.8 the coordinator is configurable and CoordinatorUri is empty by default.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "2.8.4 (WalletWasabi repository)",
+      "date": "2026-10-13",
+      "source": "https://github.com/WalletWasabi/WalletWasabi/releases/tag/v2.8.4"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "Source only (.NET project in the repository).",
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "WabiSabi coordination API used by Wasabi clients over Tor.",
+        "authentication": "Anonymous credentials (WabiSabi)",
+        "documentation": "https://github.com/WalletWasabi/WasabiDoc/blob/master/docs/using-wasabi/CoinJoin.md"
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": "A coordinator needs its own Bitcoin node; not relevant for BTCortex users.",
+    "dependencies": [],
+    "networking": "Public service reached by clients over Tor.",
+    "storage": null,
+    "resources": null,
+    "security": "The coordinator cannot link inputs to outputs but sees registered inputs and sets the mining fee rate; decomposition leftovers up to 10 000 sats go to the coordinator. Clients since 2.2.0 refuse rounds with coordination fees. Operating a coordinator carries legal risks that vary by jurisdiction (zkSNACKs cited the need for legal certainty; see the Samourai prosecutions under samourai-whirlpool).",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": ["None: BTCortex must never operate or choose a coordinator; it may show the user's configured CoordinatorUri read-only"],
+    "supportLevels": ["unsupported"],
+    "recommendedSupportLevel": "unsupported",
+    "feasibility": {
+      "rating": "none",
+      "notes": "Operating coordinator infrastructure is outside BTCortex's role and policy."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "The Wasabi client itself is recorded as wasabi-wallet by the wallets scope.",
+    "sources": [
+      { "title": "WalletWasabi repository (WalletWasabi.Coordinator project)", "url": "https://github.com/WalletWasabi/WalletWasabi/tree/master/WalletWasabi.Coordinator", "accessed": "2026-10-21" },
+      { "title": "Wasabi release v2.8.4", "url": "https://github.com/WalletWasabi/WalletWasabi/releases/tag/v2.8.4", "accessed": "2026-10-21" },
+      { "title": "WasabiDoc: CoinJoin", "url": "https://github.com/WalletWasabi/WasabiDoc/blob/master/docs/using-wasabi/CoinJoin.md", "accessed": "2026-10-21" },
+      { "title": "WasabiDoc FAQ: How do I change the coordinator?", "url": "https://github.com/WalletWasabi/WasabiDoc/blob/master/docs/FAQ/FAQ-UseWasabi.md", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The coordinator's deployment requirements and platforms were not reviewed."
+    ]
+  },
+  {
+    "id": "samourai-whirlpool",
+    "name": "Whirlpool (Samourai Wallet CoinJoin coordinator)",
+    "category": "transaction-privacy",
+    "catalogueEligible": false,
+    "website": null,
+    "repository": null,
+    "purpose": "Samourai Wallet's ZeroLink-style CoinJoin implementation and coordinator service, used by Samourai Wallet, Sparrow and Whirlpool GUI until its servers were seized.",
+    "maintenance": {
+      "status": "discontinued",
+      "evidence": "Samourai's coordinator and back-end servers were seized when the founders were charged on 2024-04-24 (SDNY); the founders were sentenced in November 2025. The independent Ashigaru project announced a new ZeroLink coordinator on 2025-06-23.",
+      "supersededBy": null
+    },
+    "latestStableRelease": null,
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "not-applicable",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": null,
+      "wsl2": "not-applicable",
+      "docker": "not-applicable",
+      "other": null
+    },
+    "interfaces": [
+      {
+        "type": "other",
+        "description": "Coordinator protocol over Tor (offline since the seizure).",
+        "authentication": null,
+        "documentation": null
+      }
+    ],
+    "cli": null,
+    "remoteManagement": null,
+    "nodeCompatibility": null,
+    "dependencies": [],
+    "networking": null,
+    "storage": null,
+    "resources": null,
+    "security": "Legal context, stated neutrally: the founders pleaded guilty to conspiracy to operate an unlicensed money transmitting business and were sentenced in the US District Court for the Southern District of New York (see whirlpool-gui and ashigaru-terminal). Former users were advised to migrate funds to a maintained wallet and a new seed because seized servers may hold their extended public keys.",
+    "licence": null,
+    "licenceNotes": null,
+    "integrationMechanisms": ["Show discontinuation and migration guidance when old Samourai or Whirlpool artefacts are detected"],
+    "supportLevels": ["unsupported"],
+    "recommendedSupportLevel": "unsupported",
+    "feasibility": {
+      "rating": "none",
+      "notes": "The coordinator no longer exists; successors are independent, anonymous and Tor-only."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Related records owned by the wallets scope: whirlpool-gui (discontinued client) and ashigaru-terminal (independent Whirlpool client, research-only).",
+    "sources": [
+      { "title": "US Attorney's Office SDNY: founders and CEO of cryptocurrency mixing service arrested and charged (2024-04-24)", "url": "https://www.justice.gov/usao-sdny/pr/founders-and-ceo-cryptocurrency-mixing-service-arrested-and-charged-money-laundering", "accessed": "2026-10-21" },
+      { "title": "NoBS Bitcoin: How to migrate Samourai Wallet and implications for Whirlpool users", "url": "https://nobsbitcoin.com/how-to-recover-samourai-wallet-and-implications-for-different-types-of-users", "accessed": "2026-10-21" },
+      { "title": "Ashigaru news: new Zerolink coinjoin coordinator (2025-06-23)", "url": "https://ashigaru.rs/news/", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "The SDNY press release returned HTTP 200 but its text could not be extracted; the charge date and the November 2025 sentencing come from the wallets-scope records (search-result extracts) verified the same day. The NoBS article was read and confirms the seizure of the coordinator and back-end servers and the migration advice.",
+      "The Ashigaru coordinator's terms, operators and fee structure were not checked."
+    ]
+  },
+  {
+    "id": "joinstr",
+    "name": "Joinstr",
+    "category": "transaction-privacy",
+    "catalogueEligible": true,
+    "website": "https://joinstr.xyz/",
+    "repository": "https://gitlab.com/invincible-privacy/joinstr",
+    "purpose": "CoinJoin implementation that uses Nostr relays for coordination instead of a central coordinator; available as an Electrum plugin, a daemon with REST API (joinstrd), a CLI, an Umbrel app, a Sparrow build with Joinstr, an Android app and a Rust library.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "GitLab project last active 2026-10-13 (tag web-v0.1.3, commits the same day).",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "web-v0.1.3",
+      "date": "2026-10-13",
+      "source": "https://gitlab.com/invincible-privacy/joinstr/-/tags"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "unknown",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "Electrum plugin builds and a Sparrow build are offered on the website; Windows packaging was not checked.",
+      "wsl2": "unknown",
+      "docker": "unknown",
+      "other": "Umbrel, Android."
+    },
+    "interfaces": [
+      {
+        "type": "rest",
+        "description": "joinstrd daemon exposing a REST API; joinstr-cli.",
+        "authentication": null,
+        "documentation": "https://joinstr.xyz/"
+      }
+    ],
+    "cli": "joinstr-cli",
+    "remoteManagement": null,
+    "nodeCompatibility": "The Electrum plugin does not require Bitcoin Core; the website warns that untrusted Electrum servers affect privacy.",
+    "dependencies": [],
+    "networking": "Nostr relays for coordination.",
+    "storage": null,
+    "resources": null,
+    "security": "Experimental; relies on Nostr relays for coordination messages. A third-party build of Sparrow is a separate supply-chain trust decision.",
+    "licence": null,
+    "licenceNotes": null,
+    "integrationMechanisms": ["Document only"],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "Young project; packaging and Windows support unverified."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "Joinstr website", "url": "https://joinstr.xyz/", "accessed": "2026-10-21" },
+      { "title": "Joinstr on GitLab", "url": "https://gitlab.com/invincible-privacy/joinstr", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Licence, Windows availability and security reviews were not checked."
+    ]
+  },
+  {
+    "id": "frigate",
+    "name": "Frigate Electrum Server",
+    "category": "indexer",
+    "catalogueEligible": true,
+    "website": "https://github.com/sparrowwallet/frigate",
+    "repository": "https://github.com/sparrowwallet/frigate",
+    "purpose": "Electrum server for BIP 352 silent payments by Sparrow's author: indexes Taproot-era transactions from Bitcoin Core into DuckDB and scans server-side with ephemeral client keys, optionally GPU-accelerated; can proxy ordinary Electrum requests to a co-located Fulcrum or electrs.",
+    "maintenance": {
+      "status": "active",
+      "evidence": "1.6.1 on 2026-10-05 (shutdown deadlock fix), 1.6.0 on 2026-10-02, 1.5.3 on 2026-05-30.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "1.6.1",
+      "date": "2026-10-05",
+      "source": "https://github.com/sparrowwallet/frigate/releases/tag/1.6.1"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "yes",
+      "windowsVersions": null,
+      "windowsArchitectures": ["x64"],
+      "windowsDistribution": "frigate-1.6.1-win-x86_64.zip; frigate-1.6.1-manifest.txt (SHA-256) signed in frigate-1.6.1-manifest.txt.asc by Craig Raw's key D4D0 D320 2FC0 6849 A257 B38D E946 1833 4C67 4B40 (the same key as Sparrow).",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Linux (.deb, .rpm, tar.gz for x86_64 and aarch64), macOS (.dmg for x86_64 and aarch64)."
+    },
+    "interfaces": [
+      {
+        "type": "electrum-protocol",
+        "description": "Electrum protocol 1.3 to 1.6 plus the silent-payments extension (blockchain.silentpayments.subscribe); listeners configured as tcp://, ssl:// URLs (default tcp://0.0.0.0:50001 when nothing is set).",
+        "authentication": null,
+        "documentation": "https://github.com/sparrowwallet/frigate"
+      },
+      {
+        "type": "json-rpc",
+        "description": "Loopback-only admin JSON-RPC port (adminPort, for example 50003) offering getinfo for health checks; frigate-cli.",
+        "authentication": "Loopback only",
+        "documentation": "https://github.com/sparrowwallet/frigate"
+      },
+      {
+        "type": "file",
+        "description": "%APPDATA%\\Frigate\\config.toml ([core] server, authType COOKIE or USERPASS, dataDir, zmqSequenceEndpoint; [index] startHeight, cacheSize; [scan] computeBackend, memoryLimit; [server] tcp, ssl, adminPort, backendElectrumServer; [limits]); DuckDB file db\\frigate.duckdb.",
+        "authentication": null,
+        "documentation": "https://github.com/sparrowwallet/frigate"
+      }
+    ],
+    "cli": "frigate [-n testnet|testnet4|signet|regtest] [-d <home directory>]; frigate-cli",
+    "remoteManagement": null,
+    "nodeCompatibility": "Bitcoin Core 28 or later (for Electrum protocol 1.6) with txindex=1, so it cannot run against a pruned node; cookie authentication by default; zmqpubsequence strongly recommended when a backend Electrum server is configured. Sparrow uses it for silent-payment wallets (Sparrow cannot scan silent payments through Bitcoin Core).",
+    "dependencies": [
+      { "ids": ["bitcoin-core"], "relationship": "requires", "notes": "Unpruned with txindex=1." },
+      { "ids": ["fulcrum", "electrs"], "relationship": "optional", "notes": "Backend Electrum server for non-silent-payment requests, on a different port." }
+    ],
+    "networking": "Occupies the canonical Electrum ports 50001/50002, so a co-located Fulcrum or electrs must move to another port; BTCortex must set tcp/ssl to 127.0.0.1 explicitly because the default listener binds all interfaces.",
+    "storage": "About 18 GB for the DuckDB index (README, 2026), growing slowly; indexing starts at block 709,632 on mainnet.",
+    "resources": "Indexing uses about 4 GB RAM for the default scriptPubKey cache (cacheSize 10M); DuckDB defaults to 80 % of system RAM; 16 GB is 'a comfortable baseline' and 8 GB works with a reduced cache and memoryLimit. Optional GPU (CUDA, Metal, OpenCL).",
+    "security": "Server-side scanning means the server receives the wallet's scan private key (kept only in RAM); this is acceptable for a self-hosted instance but a public Frigate learns which payments belong to the user, so BTCortex should only connect wallets to the user's own instance. Releases are signed with a known key.",
+    "licence": "Apache-2.0",
+    "licenceNotes": null,
+    "integrationMechanisms": [
+      "Download the Windows ZIP, verify the manifest signature (Craig Raw key) and SHA-256, extract per user",
+      "Generate config.toml (Core cookie path, tcp on 127.0.0.1, adminPort, memoryLimit and cacheSize sized to the machine, backendElectrumServer when Fulcrum is present)",
+      "Health through the admin getinfo call and the 'Electrum server listening' log line",
+      "Configure Sparrow silent-payment wallets to use the local Frigate"
+    ],
+    "supportLevels": ["fully-managed", "connected-application", "research-only"],
+    "recommendedSupportLevel": "fully-managed",
+    "feasibility": {
+      "rating": "medium",
+      "notes": "Native Windows build with signed releases and a documented configuration; gated on an unpruned node with txindex, at least 8 GB RAM and about 18 GB of disk, so it is not possible on the 5.9 GB-RAM pruned test machine."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": "Implements the 'Remote Scanner (Ephemeral)' model of the BIP352 Index Server Specification (work in progress).",
+    "sources": [
+      { "title": "Frigate README", "url": "https://github.com/sparrowwallet/frigate", "accessed": "2026-10-21" },
+      { "title": "Frigate release 1.6.1 (assets and manifest)", "url": "https://github.com/sparrowwallet/frigate/releases/tag/1.6.1", "accessed": "2026-10-21" },
+      { "title": "BIP352 Silent Payments Index Server Specification (WIP)", "url": "https://github.com/silent-payments/BIP0352-index-server-specification", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Whether the Windows ZIP bundles its own Java runtime and how it is started on Windows (launcher path) were not checked.",
+      "GPU acceleration on Windows was not tested."
+    ]
+  },
+  {
+    "id": "blindbit-oracle",
+    "name": "BlindBit Oracle",
+    "category": "indexer",
+    "catalogueEligible": true,
+    "website": "https://github.com/setavenger/blindbit-oracle",
+    "repository": "https://github.com/setavenger/blindbit-oracle",
+    "purpose": "Go implementation of a BIP 352 silent-payments indexing server that serves tweak data to light clients (BlindBit suite, Dana wallet, BDK with Kyoto).",
+    "maintenance": {
+      "status": "active",
+      "evidence": "Master commits on 2026-09-23 and 2026-09-01 for a v2 rewrite (PebbleDB, Bitcoin Core REST); the only tagged release is v0.1.0 from 2024-10-20.",
+      "supersededBy": null
+    },
+    "latestStableRelease": {
+      "version": "0.1.0",
+      "date": "2024-10-20",
+      "source": "https://github.com/setavenger/blindbit-oracle/releases"
+    },
+    "verifiedOn": "2026-10-21",
+    "platforms": {
+      "windowsNative": "partial",
+      "windowsVersions": null,
+      "windowsArchitectures": [],
+      "windowsDistribution": "No binaries; build with Go 1.24.1 or later.",
+      "wsl2": "likely",
+      "docker": "unknown",
+      "other": "Any Go platform."
+    },
+    "interfaces": [
+      {
+        "type": "http",
+        "description": "HTTP and gRPC APIs for tweak data (v2 endpoints incompatible with v1).",
+        "authentication": null,
+        "documentation": "https://github.com/setavenger/blindbit-oracle"
+      }
+    ],
+    "cli": "blindbit-oracle sync; server and indexing subcommands (Cobra CLI); blindbit.toml",
+    "remoteManagement": null,
+    "nodeCompatibility": "v2 requires an unpruned Bitcoin Core 30 or later with REST enabled (uses /rest/spenttxouts from PR #32540).",
+    "dependencies": [
+      { "ids": ["bitcoin-core"], "relationship": "requires", "notes": "Unpruned, REST enabled, version 30 or later." }
+    ],
+    "networking": null,
+    "storage": "Depends on storage flags; for example tweaks_full_basic about 1.7 GB (README).",
+    "resources": null,
+    "security": "Light clients download tweak data and scan locally, so the server does not learn scan keys (unlike Frigate's remote scanning).",
+    "licence": "MIT",
+    "licenceNotes": null,
+    "integrationMechanisms": ["Document only until tagged v2 releases exist"],
+    "supportLevels": ["research-only"],
+    "recommendedSupportLevel": "research-only",
+    "feasibility": {
+      "rating": "low",
+      "notes": "No releases of the current code and no Windows binaries."
+    },
+    "priority": "P3",
+    "implementationStatus": "researched",
+    "notes": null,
+    "sources": [
+      { "title": "BlindBit Oracle README", "url": "https://github.com/setavenger/blindbit-oracle", "accessed": "2026-10-21" },
+      { "title": "BlindBit Oracle releases", "url": "https://github.com/setavenger/blindbit-oracle/releases", "accessed": "2026-10-21" },
+      { "title": "BIP352 Silent Payments Index Server Specification (WIP)", "url": "https://github.com/silent-payments/BIP0352-index-server-specification", "accessed": "2026-10-21" }
+    ],
+    "unverifiedClaims": [
+      "Bitcoin Core PR #32540 and its inclusion in 30.0 were taken from the BlindBit README and not checked against Bitcoin Core release notes."
+    ]
+  }
+]

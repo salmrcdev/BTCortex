@@ -1,0 +1,482 @@
+{
+  "source": "https://github.com/bitcoin-core/guix.sigs/tree/d9ce4a51f2e72e3bdb59cf39d1de400d60ac05fa/builder-keys",
+  "commit": "d9ce4a51f2e72e3bdb59cf39d1de400d60ac05fa",
+  "retrievedOn": "2026-10-21",
+  "keys": [
+    {
+      "builder": "0xb10c",
+      "primaries": [
+        {
+          "fingerprint": "982A193E3CE0EED535E09023188CBB2648416AD5",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [".0xB10C <0xb10c@gmail.com>", ".0xB10C <b10c@b10c.me>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "achow101",
+      "primaries": [
+        {
+          "fingerprint": "152812300785C96444D3334D17565732E08E5E41",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Ava Chow <me@achow101.com>",
+            "Andrew Chow <github@achow101.com>",
+            "Andrew Chow <andrew@achow101.com>",
+            "Andrew Chow (Official New Key) <achow101@gmail.com>",
+            "Andrew Chow <achow101@yahoo.com>",
+            "Andrew Chow <achow101-lists@achow101.com>",
+            "Andrew Chow <achow101-github@achow101.com>",
+            "Andrew Chow <achow101@protonmail.com>",
+            "Andrew Chow <achow101@pm.me>",
+            "Ava Chow <github@achow101.com>",
+            "Ava Chow <achow101@pm.me>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "benthecarman",
+      "primaries": [
+        {
+          "fingerprint": "0AD83877C1F0CD1EE9BD660AD7CC770B81FD22A8",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Ben Carman <benthecarman@live.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "cfields",
+      "primaries": [
+        {
+          "fingerprint": "C060A6635913D98A3587D7DB1C2491FFEB0EF770",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Cory Fields <cfields@bitcoinfoundation.org>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "CoinForensics",
+      "primaries": [
+        {
+          "fingerprint": "101598DC823C1B5F9A6624ABA5E0907A0380E6C3",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["CoinForensics (SigningKey) <59567284+coinforensics@users.noreply.github.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "danielabrozzoni",
+      "primaries": [
+        {
+          "fingerprint": "D06C7DB566A0CA42271BB74EBB6735D6BF9E8E58",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Daniela Brozzoni <danielabrozzoni@protonmail.com>", "Daniela Brozzoni <daniela@revault.dev>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "darosior",
+      "primaries": [
+        {
+          "fingerprint": "590B7292695AFFA5B672CBB2E13FC145CD3F4304",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Antoine Poinsot <darosior@protonmail.com>",
+            "Antoine Poinsot <darosior@ln.dev>",
+            "Antoine Poinsot <antoine@revault.dev>",
+            "darosior <darosior@ln.dev>",
+            "darosior <darosior@protonmail.com>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "davidgumberg",
+      "primaries": [
+        {
+          "fingerprint": "8B612DE5D84D2683C5BF160410F2A3D26839321E",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["davidgumberg <davidzgumberg@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "dunxen",
+      "primaries": [
+        {
+          "fingerprint": "948444FCE03B05BA5AB0591EC37B1C1D44C786EE",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Duncan Dean <duncangleeddean@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "Emzy",
+      "primaries": [
+        {
+          "fingerprint": "9EDAFF80E080659604F4A76B2EBB056FD847F8A7",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Stephan Oeste (it) <it@oeste.de>",
+            "Stephan Oeste (Master-key) <stephan@oeste.de>",
+            "Emzy E. (emzy) <emzy@emzy.de>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "fanquake",
+      "primaries": [
+        {
+          "fingerprint": "E777299FC265DD04793070EB944D35F9AC3DB76A",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Michael Ford (bitcoin-otc) <fanquake@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "glozow",
+      "primaries": [
+        {
+          "fingerprint": "6B002C6EA3F91B1B0DF0C9BC8F617F1200A6D25C",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Gloria Zhao <gloriajzhao@gmail.com>", "Gloria Zhao <gloriazhao@berkeley.edu>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "guggero",
+      "primaries": [
+        {
+          "fingerprint": "F4FC70F07310028424EFC20A8E4256593F177720",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Oliver Gugger <gugger@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "hebasto",
+      "primaries": [
+        {
+          "fingerprint": "D1DBF2C4B96F2DEBF4C16654410108112E7EA81F",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Hennadii Stepanov (hebasto) <hebasto@gmail.com>",
+            "Hennadii Stepanov (GitHub key) <32963518+hebasto@users.noreply.github.com>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "ismaelsadeeq",
+      "primaries": [
+        {
+          "fingerprint": "E9F76FD7F0B66653A7D893990E3908F364989888",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["Abubakar Sadiq Ismail <abubakarsadiqismail@proton.me>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "jackielove4u",
+      "primaries": [
+        {
+          "fingerprint": "287AE4CA1187C68C08B49CB2D11BD4F33F1DB499",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["jackielove4u <jackielove4u@hotmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "josibake",
+      "primaries": [
+        {
+          "fingerprint": "616516B8EB6ED02882FC4A7A8ADCB558C4F33D65",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "josibake (i sign, therefore i am) <josibake@protonmail.com>",
+            "josibake@protonmail.com <josibake@protonmail.com>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "kvaciral",
+      "primaries": [
+        {
+          "fingerprint": "C388F6961FB972A95678E327F62711DBDCA8AE56",
+          "algorithm": "ecdsa",
+          "userIds": ["Dimitri <kvaciral@protonmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "laanwj",
+      "primaries": [
+        {
+          "fingerprint": "71A3B16735405025D447E8F274810B012346C9A6",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Wladimir J. van der Laan <laanwj@gmail.com>",
+            "Wladimir J. van der Laan <laanwj@visucore.com>",
+            "Wladimir J. van der Laan <laanwj@protonmail.com>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "luke-jr",
+      "primaries": [
+        {
+          "fingerprint": "1A3E761F19D2CC7785C5502EA291A2C45D0C504A",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["Luke Dashjr (Codesigning) <luke-jr+git@utopios.org>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "m3dwards",
+      "primaries": [
+        {
+          "fingerprint": "E86AE73439625BBEE306AAE6B66D427F873CB1A3",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["m3dwards <me@maxedwards.me>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "maflcko",
+      "primaries": [
+        {
+          "fingerprint": "A01783C082652969B9C492B5F9C5154E44D75DF8",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["maflcko <*~=`'#}+{/-|&$^_@721217.xyz>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "marcofleon",
+      "primaries": [
+        {
+          "fingerprint": "5B286407E1EA6FE01CF9AF48BF131C2D0536F8AC",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["marcofleon <marleo23@proton.me>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "nkatha23",
+      "primaries": [
+        {
+          "fingerprint": "AC5DDD2ED0068633D2223CFFD5DBABC9625AB5BE",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Nkatha <nkathakaburu0@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "pinheadmz",
+      "primaries": [
+        {
+          "fingerprint": "E61773CD6E01040E2F1BD78CE7E2984B6289C93A",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Matthew Zipkin (GitHub Signing Key) <pinheadmz@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "satsie",
+      "primaries": [
+        {
+          "fingerprint": "2F78ACF677029767C8736F13747A7AE2FB0FD25B",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["satsie <staciewaleyko@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "sedited",
+      "primaries": [
+        {
+          "fingerprint": "A8FC55F3B04BA3146F3492E79303B33A305224CB",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["sedited <seb.kung@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "sipa",
+      "primaries": [
+        {
+          "fingerprint": "133EAC179436F14A5CF1B794860FEB804E669320",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Pieter Wuille <pieter@wuille.net>", "Pieter Wuille <pieter.wuille@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "sipsorcery",
+      "primaries": [
+        {
+          "fingerprint": "9D3CC86A72F8494342EA5FD10A41BDC3F4FAFF1C",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Aaron Clauson (sipsorcery) <aaron@sipsorcery.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "Sjors",
+      "primaries": [
+        {
+          "fingerprint": "ED9BDF7AD6A55E232E84524257FF9BDBCC301009",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Sjors Provoost <sjors@sprovoost.nl>", "Sjors Provoost <sjors@freedom.nl>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "svanstaa",
+      "primaries": [
+        {
+          "fingerprint": "33C103B4B2794170546CCF7BCFB2C83C66CD792A",
+          "algorithm": "rsaEncryptSign",
+          "userIds": [
+            "Sebastian van Staa <svanstaa@protonmail.com>",
+            "Sebastian van Staa <sebastian.van.staa@gmail.com>"
+          ]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "tapcrafter",
+      "primaries": [
+        {
+          "fingerprint": "2197D5689DE3AF13B4FDABC47B18557E3AF1CDA5",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["tapcrafter <tapcrafter@proton.me>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "TheCharlatan",
+      "primaries": [
+        {
+          "fingerprint": "A8FC55F3B04BA3146F3492E79303B33A305224CB",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Sebastian Kung (TheCharlatan) <seb.kung@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "theStack",
+      "primaries": [
+        {
+          "fingerprint": "6A8F9C266528E25AEB1D7731C2371D91CB716EA7",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Sebastian Falbesoner (theStack) <sebastian.falbesoner@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "vertiond",
+      "primaries": [
+        {
+          "fingerprint": "28E72909F1717FE9607754F8A7BEB2621678D37D",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["vertiond <vertion@protonmail.com>", "vertion <vertion@protonmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "willcl-ark",
+      "primaries": [
+        {
+          "fingerprint": "67AA5B46E7AF78053167FE343B8F814A784218F8",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Will Clark <will@256k1.dev>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "willyko",
+      "primaries": [
+        {
+          "fingerprint": "79D00BAC68B56D422F945A8F8E3A8F3247DBCBBF",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["Willy Ko <willyk@syscoin.org>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "xyephy",
+      "primaries": [
+        {
+          "fingerprint": "C5A8B1394FC9188223F99E089F81364FD4AF0DF6",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["xyephy <ziphyr.xyeag@gmail.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "xyzconstant",
+      "primaries": [
+        {
+          "fingerprint": "21B0C796F747F2C7966B7A00EB562DE99F42B3D1",
+          "algorithm": "rsaEncryptSign",
+          "userIds": ["xyzconstant <263061129+xyzconstant@users.noreply.github.com>"]
+        }
+      ],
+      "note": null
+    },
+    {
+      "builder": "yuvicc",
+      "primaries": [
+        {
+          "fingerprint": "40D97A0E5A4F40B1CC582522CA247AC78DF0509C",
+          "algorithm": "eddsaLegacy",
+          "userIds": ["yuvicc (yuvicc-sign-release) <yuvichh01@gmail.com>"]
+        }
+      ],
+      "note": null
+    }
+  ]
+}

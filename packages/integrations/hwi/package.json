@@ -1,0 +1,21 @@
+{
+  "name": "@btcortex/integration-hwi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HWI (Hardware Wallet Interface): verified installation and a client limited to discovery, watch-only import, address display and explicit signing.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "update-key": "node scripts/update-signing-key.mjs"
+  },
+  "dependencies": {
+    "@btcortex/installation-manager": "0.1.0"
+  },
+  "devDependencies": {
+    "openpgp": "^6.3.2"
+  }
+}

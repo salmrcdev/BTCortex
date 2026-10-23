@@ -1,0 +1,22 @@
+{
+  "name": "@btcortex/integration-electrum-wallet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Electrum wallet integration: verified standalone installation, detection of an installed Electrum, and launching it with the user's own Electrum server.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "update-keys": "node scripts/update-signing-keys.mjs"
+  },
+  "dependencies": {
+    "@btcortex/contracts": "0.1.0",
+    "@btcortex/installation-manager": "0.1.0"
+  },
+  "devDependencies": {
+    "openpgp": "^6.3.2"
+  }
+}

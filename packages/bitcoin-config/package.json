@@ -1,0 +1,14 @@
+{
+  "name": "@btcortex/bitcoin-config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lossless bitcoin.conf parser, editor, validator and hardware-aware recommendations.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

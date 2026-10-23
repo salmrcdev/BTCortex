@@ -1,0 +1,578 @@
+[
+  {
+    "name": "react",
+    "ecosystem": "npm",
+    "latestVersion": "19.3.1",
+    "releaseDate": "2026-10-14",
+    "licence": "MIT",
+    "purpose": "The interface.",
+    "decision": "adopt",
+    "rationale": "Required by the specification; React 19 with function components and hooks.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "react on npm",
+        "url": "https://www.npmjs.com/package/react",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "react registry metadata",
+        "url": "https://registry.npmjs.org/react",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "react-dom",
+    "ecosystem": "npm",
+    "latestVersion": "19.3.1",
+    "releaseDate": "2026-10-14",
+    "licence": "MIT",
+    "purpose": "Renders React in WebView2.",
+    "decision": "adopt",
+    "rationale": "Pairs with react.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "react-dom on npm",
+        "url": "https://www.npmjs.com/package/react-dom",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "react-dom registry metadata",
+        "url": "https://registry.npmjs.org/react-dom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "vite",
+    "ecosystem": "npm",
+    "latestVersion": "8.3.5",
+    "releaseDate": "2026-10-21",
+    "licence": "MIT",
+    "purpose": "Development server and production build of the interface.",
+    "decision": "adopt",
+    "rationale": "Fast builds; the target is chrome120 because WebView2 is evergreen Chromium. BTCortex is on 8.3.4; 8.3.5 is a patch release.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "vite on npm",
+        "url": "https://www.npmjs.com/package/vite",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "vite registry metadata",
+        "url": "https://registry.npmjs.org/vite",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@vitejs/plugin-react",
+    "ecosystem": "npm",
+    "latestVersion": "6.1.2",
+    "releaseDate": "2026-10-05",
+    "licence": "MIT",
+    "purpose": "React support for Vite.",
+    "decision": "adopt",
+    "rationale": "JSX transform and fast refresh in development.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@vitejs/plugin-react on npm",
+        "url": "https://www.npmjs.com/package/@vitejs/plugin-react",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@vitejs/plugin-react registry metadata",
+        "url": "https://registry.npmjs.org/@vitejs%2Fplugin-react",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tailwindcss",
+    "ecosystem": "npm",
+    "latestVersion": "4.3.3",
+    "releaseDate": "2026-07-16",
+    "licence": "MIT",
+    "purpose": "Styling with design tokens from the design system.",
+    "decision": "adopt",
+    "rationale": "Utility classes keep components consistent with design-system/btcortex.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tailwindcss on npm",
+        "url": "https://www.npmjs.com/package/tailwindcss",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tailwindcss registry metadata",
+        "url": "https://registry.npmjs.org/tailwindcss",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@tailwindcss/vite",
+    "ecosystem": "npm",
+    "latestVersion": "4.3.3",
+    "releaseDate": "2026-07-16",
+    "licence": "MIT",
+    "purpose": "Tailwind CSS 4 integration for Vite.",
+    "decision": "adopt",
+    "rationale": "Tailwind 4 needs no PostCSS configuration with it.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@tailwindcss/vite on npm",
+        "url": "https://www.npmjs.com/package/@tailwindcss/vite",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@tailwindcss/vite registry metadata",
+        "url": "https://registry.npmjs.org/@tailwindcss%2Fvite",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tw-animate-css",
+    "ecosystem": "npm",
+    "latestVersion": "1.4.0",
+    "releaseDate": "2025-09-24",
+    "licence": "MIT",
+    "purpose": "Animation utilities for dialogs and menus.",
+    "decision": "adopt",
+    "rationale": "Replaces the Tailwind 3 animate plugin; animations respect reduced motion.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tw-animate-css on npm",
+        "url": "https://www.npmjs.com/package/tw-animate-css",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tw-animate-css registry metadata",
+        "url": "https://registry.npmjs.org/tw-animate-css",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "tailwind-merge",
+    "ecosystem": "npm",
+    "latestVersion": "3.7.0",
+    "releaseDate": "2026-09-12",
+    "licence": "MIT",
+    "purpose": "Merges class names without conflicts.",
+    "decision": "adopt",
+    "rationale": "Used by the component helpers.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "tailwind-merge on npm",
+        "url": "https://www.npmjs.com/package/tailwind-merge",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "tailwind-merge registry metadata",
+        "url": "https://registry.npmjs.org/tailwind-merge",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "clsx",
+    "ecosystem": "npm",
+    "latestVersion": "2.1.1",
+    "releaseDate": "2024-04-23",
+    "licence": "MIT",
+    "purpose": "Conditional class names.",
+    "decision": "adopt",
+    "rationale": "Tiny and dependency-free.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "clsx on npm",
+        "url": "https://www.npmjs.com/package/clsx",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "clsx registry metadata",
+        "url": "https://registry.npmjs.org/clsx",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "class-variance-authority",
+    "ecosystem": "npm",
+    "latestVersion": "0.7.1",
+    "releaseDate": "2024-11-26",
+    "licence": "Apache-2.0",
+    "purpose": "Component variants (buttons, badges).",
+    "decision": "adopt",
+    "rationale": "The pattern shadcn/ui components use; last released in 2024-11 and stable.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "class-variance-authority on npm",
+        "url": "https://www.npmjs.com/package/class-variance-authority",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "class-variance-authority registry metadata",
+        "url": "https://registry.npmjs.org/class-variance-authority",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "radix-ui",
+    "ecosystem": "npm",
+    "latestVersion": "1.8.1",
+    "releaseDate": "2026-10-12",
+    "licence": "MIT",
+    "purpose": "Accessible primitives: alert dialogs, tooltips, menus, tabs.",
+    "decision": "adopt",
+    "rationale": "Keyboard and screen-reader behaviour comes built in; dangerous actions use AlertDialog.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "radix-ui on npm",
+        "url": "https://www.npmjs.com/package/radix-ui",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "radix-ui registry metadata",
+        "url": "https://registry.npmjs.org/radix-ui",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "lucide-react",
+    "ecosystem": "npm",
+    "latestVersion": "1.61.0",
+    "releaseDate": "2026-10-21",
+    "licence": "ISC",
+    "purpose": "Icons.",
+    "decision": "adopt",
+    "rationale": "One consistent icon set, imported per icon. BTCortex is on 1.60.0; 1.61.0 is a minor release.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "lucide-react on npm",
+        "url": "https://www.npmjs.com/package/lucide-react",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "lucide-react registry metadata",
+        "url": "https://registry.npmjs.org/lucide-react",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@tanstack/react-query",
+    "ecosystem": "npm",
+    "latestVersion": "5.104.5",
+    "releaseDate": "2026-10-19",
+    "licence": "MIT",
+    "purpose": "Orchestrator data in the interface: queries, refetching and cache updates from live events.",
+    "decision": "adopt",
+    "rationale": "Polling intervals and event-driven updates in one cache.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@tanstack/react-query on npm",
+        "url": "https://www.npmjs.com/package/@tanstack/react-query",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@tanstack/react-query registry metadata",
+        "url": "https://registry.npmjs.org/@tanstack%2Freact-query",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@tanstack/react-router",
+    "ecosystem": "npm",
+    "latestVersion": "1.170.46",
+    "releaseDate": "2026-10-22",
+    "licence": "MIT",
+    "purpose": "Routing with hash history and code-split pages.",
+    "decision": "adopt",
+    "rationale": "Type-safe routes; hash history survives reloads under Tauri's custom protocol.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@tanstack/react-router on npm",
+        "url": "https://www.npmjs.com/package/@tanstack/react-router",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@tanstack/react-router registry metadata",
+        "url": "https://registry.npmjs.org/@tanstack%2Freact-router",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "zustand",
+    "ecosystem": "npm",
+    "latestVersion": "5.0.16",
+    "releaseDate": "2026-10-22",
+    "licence": "MIT",
+    "purpose": "Small pieces of interface state (sidebar, theme).",
+    "decision": "adopt",
+    "rationale": "Minimal API; only theme and sidebar preferences are stored in the WebView.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "zustand on npm",
+        "url": "https://www.npmjs.com/package/zustand",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "zustand registry metadata",
+        "url": "https://registry.npmjs.org/zustand",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "i18next",
+    "ecosystem": "npm",
+    "latestVersion": "26.5.6",
+    "releaseDate": "2026-10-22",
+    "licence": "MIT",
+    "purpose": "Text resources (en-GB) with typed keys and plurals.",
+    "decision": "adopt",
+    "rationale": "All application text lives in one British English resource, ready for other languages.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "i18next on npm",
+        "url": "https://www.npmjs.com/package/i18next",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "i18next registry metadata",
+        "url": "https://registry.npmjs.org/i18next",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "react-i18next",
+    "ecosystem": "npm",
+    "latestVersion": "17.1.4",
+    "releaseDate": "2026-10-23",
+    "licence": "MIT",
+    "purpose": "i18next bindings for React.",
+    "decision": "adopt",
+    "rationale": "useTranslation with typed keys.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "react-i18next on npm",
+        "url": "https://www.npmjs.com/package/react-i18next",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "react-i18next registry metadata",
+        "url": "https://registry.npmjs.org/react-i18next",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "sonner",
+    "ecosystem": "npm",
+    "latestVersion": "2.0.8",
+    "releaseDate": "2026-08-09",
+    "licence": "MIT",
+    "purpose": "Toast notifications in the window.",
+    "decision": "adopt",
+    "rationale": "Accessible toasts for short confirmations.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "sonner on npm",
+        "url": "https://www.npmjs.com/package/sonner",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "sonner registry metadata",
+        "url": "https://registry.npmjs.org/sonner",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@fontsource/fira-sans",
+    "ecosystem": "npm",
+    "latestVersion": "5.3.0",
+    "releaseDate": "2026-07-19",
+    "licence": "OFL-1.1",
+    "purpose": "The interface font, served from the application.",
+    "decision": "adopt",
+    "rationale": "Self-hosted fonts keep the content security policy at 'self' and send nothing to a font service.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@fontsource/fira-sans on npm",
+        "url": "https://www.npmjs.com/package/@fontsource/fira-sans",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@fontsource/fira-sans registry metadata",
+        "url": "https://registry.npmjs.org/@fontsource%2Ffira-sans",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@fontsource/fira-code",
+    "ecosystem": "npm",
+    "latestVersion": "5.3.0",
+    "releaseDate": "2026-07-19",
+    "licence": "OFL-1.1",
+    "purpose": "The monospace font for addresses, hashes and code.",
+    "decision": "adopt",
+    "rationale": "Self-hosted; ligatures are turned off so that, for example, 0x is not drawn as a multiplication sign.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@fontsource/fira-code on npm",
+        "url": "https://www.npmjs.com/package/@fontsource/fira-code",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@fontsource/fira-code registry metadata",
+        "url": "https://registry.npmjs.org/@fontsource%2Ffira-code",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "jsqr",
+    "ecosystem": "npm",
+    "latestVersion": "1.4.0",
+    "releaseDate": "2021-04-24",
+    "licence": "Apache-2.0",
+    "purpose": "Reads QR codes from the camera (PSBTs from air-gapped signers) and checks the QR codes BTCortex makes in tests.",
+    "decision": "adopt",
+    "rationale": "Pure JavaScript and dependable, although its last release dates from 2021-04.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "jsqr on npm",
+        "url": "https://www.npmjs.com/package/jsqr",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "jsqr registry metadata",
+        "url": "https://registry.npmjs.org/jsqr",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@testing-library/react",
+    "ecosystem": "npm",
+    "latestVersion": "16.3.3",
+    "releaseDate": "2026-08-27",
+    "licence": "MIT",
+    "purpose": "Component tests through the accessibility tree.",
+    "decision": "adopt",
+    "rationale": "Tests query by role and label, as users and assistive technology do.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@testing-library/react on npm",
+        "url": "https://www.npmjs.com/package/@testing-library/react",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@testing-library/react registry metadata",
+        "url": "https://registry.npmjs.org/@testing-library%2Freact",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "@testing-library/user-event",
+    "ecosystem": "npm",
+    "latestVersion": "14.6.8",
+    "releaseDate": "2026-10-13",
+    "licence": "MIT",
+    "purpose": "Simulated user input in component tests.",
+    "decision": "adopt",
+    "rationale": "Realistic typing and clicking.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "@testing-library/user-event on npm",
+        "url": "https://www.npmjs.com/package/@testing-library/user-event",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "@testing-library/user-event registry metadata",
+        "url": "https://registry.npmjs.org/@testing-library%2Fuser-event",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  },
+  {
+    "name": "jsdom",
+    "ecosystem": "npm",
+    "latestVersion": "30.1.3",
+    "releaseDate": "2026-10-15",
+    "licence": "MIT",
+    "purpose": "The DOM for component tests.",
+    "decision": "adopt",
+    "rationale": "Runs the desktop project of the test suite without a browser.",
+    "windowsNotes": null,
+    "sources": [
+      {
+        "title": "jsdom on npm",
+        "url": "https://www.npmjs.com/package/jsdom",
+        "accessed": "2026-10-23"
+      },
+      {
+        "title": "jsdom registry metadata",
+        "url": "https://registry.npmjs.org/jsdom",
+        "accessed": "2026-10-23"
+      }
+    ],
+    "unverifiedClaims": []
+  }
+]

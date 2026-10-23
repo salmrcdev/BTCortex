@@ -1,0 +1,54 @@
+{
+  "name": "btcortex",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BTCortex — the Bitcoin ecosystem command centre for Windows.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/salmrcdev/BTCortex.git"
+  },
+  "homepage": "https://github.com/salmrcdev/BTCortex#readme",
+  "bugs": {
+    "url": "https://github.com/salmrcdev/BTCortex/issues"
+  },
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=26.0.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "packages/integrations/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run build:orchestrator && npm run licences && npm run tauri -- dev",
+    "build": "npm run build:orchestrator && npm run licences && npm run tauri -- build",
+    "build:orchestrator": "npm run build:sea --workspace @btcortex/orchestrator",
+    "licences": "node scripts/release/third-party-licences.mjs",
+    "tauri": "npm exec --workspace @btcortex/desktop -- tauri",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "node --max-old-space-size=4096 node_modules/eslint/bin/eslint.js .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "research:validate": "node scripts/research/validate.mjs",
+    "research:docs": "node scripts/research/validate.mjs && node scripts/research/generate-docs.mjs && node scripts/research/build-catalogue.mjs",
+    "status:docs": "node scripts/status/generate-status.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
+  }
+}
