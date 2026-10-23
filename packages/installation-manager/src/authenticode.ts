@@ -26,10 +26,15 @@ const SCRIPT = [
 
 export async function checkAuthenticode(files: readonly string[]): Promise<AuthenticodeResult[]> {
   if (process.platform !== 'win32' || files.length === 0) return [];
+  // A PowerShell 7 parent passes incompatible module paths through Node.js.
+  // Let Windows PowerShell construct its own module search path instead.
+  const environment = Object.fromEntries(
+    Object.entries(process.env).filter(([name]) => name.toUpperCase() !== 'PSMODULEPATH'),
+  );
   const { stdout } = await execFileAsync(
     'powershell.exe',
     ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', SCRIPT],
-    { env: { ...process.env, BTCORTEX_AUTHENTICODE_FILES: JSON.stringify(files) }, windowsHide: true, timeout: 60_000 },
+    { env: { ...environment, BTCORTEX_AUTHENTICODE_FILES: JSON.stringify(files) }, windowsHide: true, timeout: 60_000 },
   );
   const parsed: unknown = JSON.parse(stdout.trim() || '[]');
   const list = Array.isArray(parsed) ? parsed : [parsed];
