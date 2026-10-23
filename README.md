@@ -6,15 +6,14 @@
 
 [![CI](https://github.com/salmrcdev/BTCortex/actions/workflows/ci.yml/badge.svg)](https://github.com/salmrcdev/BTCortex/actions/workflows/ci.yml)
 ![Platform: Windows 10 / 11](https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-0078D4)
-![Status: in development](https://img.shields.io/badge/status-in%20development-F7931A)
 
 [User guide](docs/USER_GUIDE.md) · [Development](docs/DEVELOPMENT.md) · [Architecture](docs/ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 **BTCortex — Bitcoin ecosystem command centre for Windows.** One desktop application that installs, configures, connects and monitors the self-hosted Bitcoin ecosystem: nodes, Electrum servers, wallets, hardware wallets, Lightning, Tor and more. Users launch it and approve one recommended plan; BTCortex verifies the official releases, sets everything up for their computer and keeps it healthy.
 
-> **Status:** in development, not yet released. What is listed below works and is tested, most of it against the real software on regtest; the exact state of every feature, with its evidence, is in [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md), and what is missing is in [`docs/KNOWN_LIMITATIONS.md`](docs/KNOWN_LIMITATIONS.md). Installers are not code-signed yet.
+Implementation coverage, verification evidence and operational constraints are documented in the [implementation status](docs/IMPLEMENTATION_STATUS.md) and [known limitations](docs/KNOWN_LIMITATIONS.md).
 
-## What works today
+## Capabilities
 
 - **Bitcoin Core, verified and managed.** Installation from bitcoincore.org after checking OpenPGP signatures from at least three pinned builders, the checksum and Windows' code signature; a hardware-aware set-up plan approved once; start, stop, restart and live monitoring (synchronisation, peers, mempool, storage); a configuration editor that explains every option; an RPC console with a read-only mode; Bitcoin Core already on the computer connected in one click, and nodes on other computers by RPC address. Bitcoin Knots can be set up the same way, after the user agrees that its current releases follow another chain.
 - **Explorer** of blocks, transactions and addresses, straight from the user's own node, plus mempool and Esplora explorers on other computers followed and opened from it.
